@@ -1,0 +1,28 @@
+version: '3.9'
+
+services:
+  jewelbox:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: jewelbox-app
+    ports:
+      - "3001:3001"
+    volumes:
+      - jewelbox_data:/app/data
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      DB_PATH: /app/data/jewelbox.db
+      UPLOADS_DIR: /app/data/uploads
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3001/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  jewelbox_data:
+    driver: local

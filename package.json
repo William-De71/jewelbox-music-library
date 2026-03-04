@@ -1,0 +1,20 @@
+{
+  "name": "jewelbox-music-library",
+  "version": "1.0.0",
+  "description": "JewelBox Music Library - Parce que vos albums méritent mieux qu'une simple étagère.",
+  "private": true,
+  "workspaces": [
+    "server",
+    "client"
+  ],
+  "scripts": {
+    "predev": "fuser -k 3001/tcp 2>/dev/null; true",
+    "dev": "node node_modules/concurrently/dist/bin/concurrently.js \"npm run dev --workspace=server\" \"npm run dev --workspace=client\"",
+    "build": "npm run build --workspace=client",
+    "start": "npm run start --workspace=server",
+    "test": "npm run test --workspace=server && npm run test --workspace=client"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

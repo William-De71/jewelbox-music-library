@@ -1,0 +1,31 @@
+{
+  "name": "JewelBox Music Library",
+  "short_name": "JewelBox",
+  "description": "Parce que vos albums méritent mieux qu'une simple étagère.",
+  "theme_color": "#206bc4",
+  "background_color": "#1a1a2e",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "start_url": "/",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["music", "entertainment", "lifestyle"],
+  "screenshots": []
+}

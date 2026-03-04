@@ -1,0 +1,49 @@
+const BASE = '/api';
+
+async function request(method, path, body) {
+  const opts = {
+    method,
+    headers: body ? { 'Content-Type': 'application/json' } : {},
+  };
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch(`${BASE}${path}`, opts);
+  if (res.status === 204) return null;
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.error || `HTTP ${res.status}`);
+  return json;
+}
+
+export const api = {
+  // Albums
+  getAlbums: (params = {}) => {
+    const qs = new URLSearchParams(
+      Object.entries(params).filter(([, v]) => v !== undefined && v !== '' && v !== null)
+    ).toString();
+    return request('GET', `/albums${qs ? `?${qs}` : ''}`);
+  },
+  getAlbum: (id) => request('GET', `/albums/${id}`),
+  createAlbum: (data) => request('POST', '/albums', data),
+  updateAlbum: (id, data) => request('PATCH', `/albums/${id}`, data),
+  deleteAlbum: (id) => request('DELETE', `/albums/${id}`),
+  lendAlbum: (id, is_lent, lent_to) => request('PATCH', `/albums/${id}/lend`, { is_lent, lent_to }),
+
+  // Metadata
+  getGenres: () => request('GET', '/albums/genres'),
+  getArtists: () => request('GET', '/artists'),
+  getLabels: () => request('GET', '/labels'),
+
+  // External search
+  search: (q) => request('GET', `/search?q=${encodeURIComponent(q)}`),
+  searchByEan: (ean) => request('GET', `/search?ean=${encodeURIComponent(ean)}`),
+  getRelease: (mbid) => request('GET', `/search/${mbid}`),
+
+  // Cover upload
+  uploadCover: async (file) => {
+    const fd = new FormData();
+    fd.append('file', file);
+    const res = await fetch(`${BASE}/upload/cover`, { method: 'POST', body: fd });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error || 'Upload failed');
+    return json;
+  },
+};
