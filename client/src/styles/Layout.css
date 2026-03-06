@@ -1,0 +1,32 @@
+/* Layout component styles */
+
+/* Logo */
+.logo-image {
+  height: 80px;
+  width: auto;
+  object-fit: contain;
+}
+
+.navbar-brand .brand-subtitle {
+  font-size: 0.65rem;
+  line-height: 1;
+}
+
+/* Language selector */
+.language-selector {
+  margin-top: 1rem;
+}
+
+.language-selector .w-100 {
+  width: 100%;
+}
+
+/* Footer */
+.footer {
+  margin-top: auto;
+}
+
+.footer .copyright {
+  font-size: 0.875rem;
+  color: var(--tblr-muted);
+}

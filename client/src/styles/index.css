@@ -1,0 +1,53 @@
+/* Main styles file - imports all component styles */
+
+/* Layout styles */
+@import './Layout.css';
+
+/* Component styles */
+
+/* Add more component imports here as needed:
+@import './AlbumForm.css';
+@import './AlbumDetail.css';
+@import './AlbumRow.css';
+@import './Pagination.css';
+@import './CoverImage.css';
+@import './LanguageSelector.css';
+*/
+
+/* Global custom styles */
+:root {
+  /* Custom CSS variables for consistent theming */
+  --jewelbox-primary: #206bc4;
+  --jewelbox-primary-hover: #1c5fa8;
+  --jewelbox-secondary: #6c757d;
+  --jewelbox-success: #2fb344;
+  --jewelbox-danger: #d63939;
+  --jewelbox-warning: #f59f00;
+  --jewelbox-info: #3c8dbc;
+  
+  /* Animation durations */
+  --transition-fast: 0.15s;
+  --transition-normal: 0.3s;
+  --transition-slow: 0.5s;
+}
+
+/* Utility classes */
+.text-truncate-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+/* Smooth transitions */
+.transition-all {
+  transition: all var(--transition-normal) ease;
+}
+
+.transition-transform {
+  transition: transform var(--transition-fast) ease;
+}

@@ -1,4 +1,8 @@
+import { useI18n } from '../config/i18n/index.js';
+import { LanguageSelector } from './LanguageSelector.jsx';
+
 export function Layout({ children, navigate, currentPage }) {
+  const { t } = useI18n();
   return (
     <div class="wrapper">
       <aside class="navbar navbar-vertical navbar-expand-lg navbar-dark" data-bs-theme="dark">
@@ -12,7 +16,7 @@ export function Layout({ children, navigate, currentPage }) {
                 <i class="ti ti-disc fs-2 text-primary"></i>
                 <span>
                   <span class="fw-bold">JewelBox</span>
-                  <span class="d-block text-muted small fw-normal" style="font-size:0.65rem;line-height:1">Music Library</span>
+                  <span class="d-block text-muted small fw-normal brand-subtitle">Music Library</span>
                 </span>
               </span>
             </a>
@@ -26,9 +30,9 @@ export function Layout({ children, navigate, currentPage }) {
                   onClick={(e) => { e.preventDefault(); navigate('dashboard'); }}
                 >
                   <span class="nav-link-icon d-md-none d-lg-inline-block">
-                    <i class="ti ti-layout-dashboard"></i>
+                    <i class="ti ti-home"></i>
                   </span>
-                  <span class="nav-link-title">Bibliothèque</span>
+                  <span class="nav-link-title">{t('nav.dashboard')}</span>
                 </a>
               </li>
               <li class="nav-item">
@@ -38,16 +42,34 @@ export function Layout({ children, navigate, currentPage }) {
                   onClick={(e) => { e.preventDefault(); navigate('add'); }}
                 >
                   <span class="nav-link-icon d-md-none d-lg-inline-block">
-                    <i class="ti ti-plus"></i>
+                    <i class="ti ti-disc-plus"></i>
                   </span>
-                  <span class="nav-link-title">Ajouter un CD</span>
+                  <span class="nav-link-title">{t('nav.addAlbum')}</span>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a
+                  class={`nav-link ${currentPage === 'settings' ? 'active' : ''}`}
+                  href="#"
+                  onClick={(e) => { e.preventDefault(); navigate('settings'); }}
+                >
+                  <span class="nav-link-icon d-md-none d-lg-inline-block">
+                    <i class="ti ti-settings"></i>
+                  </span>
+                  <span class="nav-link-title">{t('nav.settings')}</span>
                 </a>
               </li>
             </ul>
+            
+            {/* Language selector */}
+            <div class="language-selector px-3">
+              <LanguageSelector className="w-100" />
+            </div>
+            
             <div class="mt-auto pb-3">
               <div class="px-3 small text-muted">
                 <i class="ti ti-quote me-1"></i>
-                <em>Parce que vos albums méritent mieux qu'une simple étagère.</em>
+                <em>{t('dashboard.subtitle')}</em>
               </div>
             </div>
           </div>
@@ -55,15 +77,15 @@ export function Layout({ children, navigate, currentPage }) {
       </aside>
 
       <div class="page-wrapper">
-        <div class="page-body">
-          <div class="container-xl py-3">
-            {children}
-          </div>
-        </div>
+        {children}
         <footer class="footer footer-transparent d-print-none">
           <div class="container-xl">
-            <div class="row text-center align-items-center flex-row-reverse">
-              <div class="col-12 col-lg-auto mt-3 mt-lg-0 text-muted small">
+            <div class="row text-center align-items-center">
+              <div class="col-12 col-lg-6 mt-3 mt-lg-0 text-muted small">
+                <i class="ti ti-quote me-1"></i>
+                <em>{t('dashboard.subtitle')}</em>
+              </div>
+              <div class="col-12 col-lg-6 mt-3 mt-lg-0 text-muted small">
                 JewelBox Music Library &copy; {new Date().getFullYear()}
               </div>
             </div>

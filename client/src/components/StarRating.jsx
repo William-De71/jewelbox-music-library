@@ -5,8 +5,8 @@ export function StarRating({ value, onChange, readOnly = false }) {
         <button
           key={star}
           type="button"
-          class={`btn btn-sm p-0 border-0 ${readOnly ? '' : ''}`}
-          style="font-size:1.2rem; background:none; line-height:1;"
+          class="btn btn-sm p-0 border-0"
+          style={readOnly ? 'cursor:default' : 'cursor:pointer'}
           onClick={() => !readOnly && onChange && onChange(star)}
           disabled={readOnly}
           title={`${star} étoile${star > 1 ? 's' : ''}`}

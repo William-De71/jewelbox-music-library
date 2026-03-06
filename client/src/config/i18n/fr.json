@@ -1,0 +1,122 @@
+{
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "addAlbum": "Ajouter un album",
+    "settings": "Paramètres"
+  },
+  "dashboard": {
+    "title": "JewelBox Music Library",
+    "subtitle": "Parce que vos albums méritent mieux qu'une simple étagère.",
+    "searchPlaceholder": "Rechercher un album, un artiste...",
+    "noAlbums": "Aucun album trouvé",
+    "noAlbumsFilter": "Aucun album ne correspond à vos filtres",
+    "addFirstAlbum": "Ajouter votre premier album",
+    "viewMode": {
+      "grid": "Grille de pochettes",
+      "list": "Liste détaillée"
+    },
+    "filters": {
+      "genre": "Genre",
+      "rating": "Note",
+      "allGenres": "Tous les genres",
+      "allRatings": "Toutes les notes"
+    },
+    "sort": {
+      "by": "Trier par",
+      "title": "Titre",
+      "artist": "Artiste",
+      "year": "Année",
+      "rating": "Note",
+      "asc": "A-Z",
+      "desc": "Z-A"
+    },
+    "pagination": {
+      "previous": "Précédent",
+      "next": "Suivant",
+      "showing": "Affichage de {start}-{end} sur {total} albums"
+    }
+  },
+  "albumForm": {
+    "title": "Ajouter un album",
+    "editTitle": "Modifier l'album",
+    "externalSearch": "Recherche externe",
+    "externalSearchPlaceholder": "Titre, artiste ou EAN...",
+    "search": "Rechercher",
+    "clear": "Effacer",
+    "form": {
+      "title": "Titre",
+      "artist": "Artiste",
+      "label": "Label",
+      "year": "Année",
+      "genre": "Genre",
+      "duration": "Durée totale (mm:ss)",
+      "ean": "EAN",
+      "rating": "Note personnelle",
+      "notes": "Notes",
+      "cover": "Pochette",
+      "tracks": "Pistes",
+      "trackTitle": "Titre de la piste",
+      "trackDuration": "Durée",
+      "addTrack": "Ajouter une piste",
+      "removeTrack": "Supprimer"
+    },
+    "actions": {
+      "save": "Enregistrer",
+      "cancel": "Annuler",
+      "delete": "Supprimer",
+      "confirmDelete": "Êtes-vous sûr de vouloir supprimer cet album ?",
+      "lent": "Prêté",
+      "returned": "Rendu",
+      "lentTo": "Prêté à"
+    }
+  },
+  "albumDetail": {
+    "title": "Détails de l'album",
+    "tracks": "Pistes",
+    "duration": "Durée",
+    "label": "Label",
+    "year": "Année",
+    "genre": "Genre",
+    "ean": "EAN",
+    "rating": "Note",
+    "notes": "Notes",
+    "lent": "Prêté à",
+    "notLent": "Non prêté",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "back": "Retour"
+  },
+  "common": {
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "add": "Ajouter",
+    "search": "Rechercher",
+    "filter": "Filtrer",
+    "sort": "Trier",
+    "close": "Fermer",
+    "confirm": "Confirmer",
+    "yes": "Oui",
+    "no": "Non"
+  },
+  "genres": {
+    "rock": "Rock",
+    "pop": "Pop",
+    "jazz": "Jazz",
+    "classical": "Classique",
+    "electronic": "Électro",
+    "metal": "Metal",
+    "punk": "Punk",
+    "reggae": "Reggae",
+    "blues": "Blues",
+    "folk": "Folk",
+    "hip_hop": "Hip-Hop",
+    "soul": "Soul",
+    "funk": "Funk",
+    "country": "Country",
+    "other": "Autre"
+  }
+}
