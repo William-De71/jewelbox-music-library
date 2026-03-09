@@ -100,7 +100,63 @@
     "close": "Fermer",
     "confirm": "Confirmer",
     "yes": "Oui",
-    "no": "Non"
+    "no": "Non",
+    "lend": "Prêter",
+    "modify": "Modifier",
+    "grid": "Grille",
+    "list": "Liste",
+    "addAlbum": "Ajouter un album",
+    "back": "Retour"
+  },
+  "card": {
+    "modify": "Modifier",
+    "lend": "Prêter",
+    "delete": "Supprimer",
+    "lentBadge": "Prêté",
+    "lentTo": "à {name}"
+  },
+  "table": {
+    "cover": "",
+    "title": "Titre",
+    "artist": "Artiste",
+    "year": "Année",
+    "genre": "Genre",
+    "rating": "Note",
+    "label": "Label",
+    "actions": "Actions"
+  },
+  "filters": {
+    "allGenres": "Tous les genres",
+    "allRatings": "Toutes les notes",
+    "stars": "{count} étoile",
+    "starsPlural": "{count} étoiles",
+    "sortTitleAsc": "Titre A→Z",
+    "sortTitleDesc": "Titre Z→A",
+    "sortArtistAsc": "Artiste A→Z",
+    "sortArtistDesc": "Artiste Z→A",
+    "sortYearDesc": "Année ↓",
+    "sortYearAsc": "Année ↑"
+  },
+  "stats": {
+    "albums": "{count} album",
+    "albumsPlural": "{count} albums",
+    "lent": "{count} prêté",
+    "lentPlural": "{count} prêtés"
+  },
+  "messages": {
+    "albumDeleted": "\"{title}\" supprimé",
+    "albumLent": "\"{title}\" marqué comme prêté",
+    "albumReturned": "\"{title}\" récupéré",
+    "ratingUpdated": "Note mise à jour pour \"{title}\""
+  },
+  "modals": {
+    "deleteTitle": "Supprimer l'album ?",
+    "deleteMessage": "Voulez-vous vraiment supprimer \"{title}\" ?",
+    "lendTitle": "Prêter",
+    "returnTitle": "Récupérer",
+    "lendPlaceholder": "Prêté à...",
+    "cancel": "Annuler",
+    "confirm": "Confirmer"
   },
   "genres": {
     "rock": "Rock",

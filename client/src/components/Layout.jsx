@@ -1,5 +1,4 @@
 import { useI18n } from '../config/i18n/index.js';
-import { LanguageSelector } from './LanguageSelector.jsx';
 
 export function Layout({ children, navigate, currentPage }) {
   const { t } = useI18n();
@@ -35,37 +34,7 @@ export function Layout({ children, navigate, currentPage }) {
                   <span class="nav-link-title">{t('nav.dashboard')}</span>
                 </a>
               </li>
-              <li class="nav-item">
-                <a
-                  class={`nav-link ${currentPage === 'add' ? 'active' : ''}`}
-                  href="#"
-                  onClick={(e) => { e.preventDefault(); navigate('add'); }}
-                >
-                  <span class="nav-link-icon d-md-none d-lg-inline-block">
-                    <i class="ti ti-disc-plus"></i>
-                  </span>
-                  <span class="nav-link-title">{t('nav.addAlbum')}</span>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a
-                  class={`nav-link ${currentPage === 'settings' ? 'active' : ''}`}
-                  href="#"
-                  onClick={(e) => { e.preventDefault(); navigate('settings'); }}
-                >
-                  <span class="nav-link-icon d-md-none d-lg-inline-block">
-                    <i class="ti ti-settings"></i>
-                  </span>
-                  <span class="nav-link-title">{t('nav.settings')}</span>
-                </a>
-              </li>
             </ul>
-            
-            {/* Language selector */}
-            <div class="language-selector px-3">
-              <LanguageSelector className="w-100" />
-            </div>
-            
             <div class="mt-auto pb-3">
               <div class="px-3 small text-muted">
                 <i class="ti ti-quote me-1"></i>

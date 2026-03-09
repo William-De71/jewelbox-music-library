@@ -1,0 +1,23 @@
+/* AlbumCard component styles */
+
+.album-card {
+  background: rgba(26, 32, 44, 0.6) !important;
+  backdrop-filter: blur(10px);
+}
+
+.album-card-cover {
+  cursor: pointer;
+}
+
+.album-card-body {
+  cursor: pointer;
+}
+
+.album-card-title {
+  font-size: 1rem;
+  color: #e2e8f0;
+}
+
+.album-card-footer {
+  background: transparent !important;
+}

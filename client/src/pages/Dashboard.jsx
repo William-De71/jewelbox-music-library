@@ -12,7 +12,10 @@ export function Dashboard({ navigate }) {
   const [albums, setAlbums] = useState([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [viewMode, setViewMode] = useState('grid');
+  const [viewMode, setViewMode] = useState(() => {
+    const saved = localStorage.getItem('jewelbox-viewMode');
+    return saved || 'grid';
+  });
   const [page, setPage] = useState(1);
   const [genres, setGenres] = useState([]);
   const [filters, setFilters] = useState({ genre: '', rating: '', search: '', sort: 'title', order: 'asc' });
@@ -26,6 +29,11 @@ export function Dashboard({ navigate }) {
     setToast({ msg, type });
     setTimeout(() => setToast(null), 3000);
   };
+
+  // Save viewMode to localStorage when it changes
+  useEffect(() => {
+    localStorage.setItem('jewelbox-viewMode', viewMode);
+  }, [viewMode]);
 
   useEffect(() => {
     api.getGenres().then(setGenres).catch(() => {});
@@ -64,7 +72,7 @@ export function Dashboard({ navigate }) {
     if (!deleteTarget) return;
     try {
       await api.deleteAlbum(deleteTarget.id);
-      showToast(`"${deleteTarget.title}" supprimé`);
+      showToast(t('messages.albumDeleted', { title: deleteTarget.title }));
       setDeleteTarget(null);
       const result = await api.getAlbums({ page, limit: LIMIT, ...filters });
       setAlbums(result.data);
@@ -79,9 +87,21 @@ export function Dashboard({ navigate }) {
     try {
       const is_lent = !lendTarget.is_lent;
       await api.lendAlbum(lendTarget.id, is_lent, lentTo);
-      showToast(is_lent ? `"${lendTarget.title}" marqué comme prêté` : `"${lendTarget.title}" récupéré`);
+      showToast(is_lent ? t('messages.albumLent', { title: lendTarget.title }) : t('messages.albumReturned', { title: lendTarget.title }));
       setLendTarget(null);
       setLentTo('');
+      const result = await api.getAlbums({ page, limit: LIMIT, ...filters });
+      setAlbums(result.data);
+      setTotal(result.total);
+    } catch (e) {
+      showToast(e.message, 'danger');
+    }
+  };
+
+  const handleRate = async (album, rating) => {
+    try {
+      await api.updateAlbum(album.id, { rating });
+      showToast(t('messages.ratingUpdated', { title: album.title }));
       const result = await api.getAlbums({ page, limit: LIMIT, ...filters });
       setAlbums(result.data);
       setTotal(result.total);
@@ -95,24 +115,34 @@ export function Dashboard({ navigate }) {
   return (
     <div>
       {toast && (
-        <div class={`alert alert-${toast.type} alert-dismissible position-fixed top-0 end-0 m-3`} style="z-index:9999">
+        <div class={`alert alert-${toast.type} alert-dismissible position-fixed top-0 end-0 m-3`}>
           {toast.msg}
           <button type="button" class="btn-close" onClick={() => setToast(null)}></button>
         </div>
       )}
 
-      <div class="page-header d-print-none">
+      <div class="page-header d-print-none mb-4">
         <div class="container-xl">
           <div class="row align-items-center">
             <div class="col">
-              <h2 class="page-title">{t('dashboard.title')}</h2>
-              <div class="text-muted mt-1">
-                {total} album{total !== 1 ? 's' : ''} · {stats.lent} prêté{stats.lent !== 1 ? 's' : ''}
+              <h2 class="dashboard-title page-title mb-2">{t('dashboard.title')}</h2>
+              <div class="d-flex gap-3 align-items-center">
+                <span class="dashboard-badge badge bg-primary-lt">
+                  <i class="ti ti-disc me-1"></i>
+                  {total !== 1 ? t('stats.albumsPlural', { count: total }) : t('stats.albums', { count: total })}
+                </span>
+                {stats.lent > 0 && (
+                  <span class="dashboard-badge badge bg-warning-lt">
+                    <i class="ti ti-user-share me-1"></i>
+                    {stats.lent !== 1 ? t('stats.lentPlural', { count: stats.lent }) : t('stats.lent', { count: stats.lent })}
+                  </span>
+                )}
               </div>
             </div>
             <div class="col-auto">
               <button class="btn btn-primary" onClick={() => navigate('add')}>
-                <i class="ti ti-plus me-1"></i>Ajouter un CD
+                <i class="ti ti-plus me-1"></i>
+                {t('common.addAlbum')}
               </button>
             </div>
           </div>
@@ -135,14 +165,14 @@ export function Dashboard({ navigate }) {
                 </div>
                 <div class="col-md-2">
                   <select class="form-select" value={filters.genre} onChange={(e) => setFilter('genre', e.target.value)}>
-                    <option value="">Tous les genres</option>
+                    <option value="">{t('filters.allGenres')}</option>
                     {genres.map(g => <option key={g} value={g}>{g}</option>)}
                   </select>
                 </div>
                 <div class="col-md-2">
                   <select class="form-select" value={filters.rating} onChange={(e) => setFilter('rating', e.target.value)}>
-                    <option value="">Toutes les notes</option>
-                    {[5, 4, 3, 2, 1].map(r => <option key={r} value={r}>{r} étoile{r > 1 ? 's' : ''}</option>)}
+                    <option value="">{t('filters.allRatings')}</option>
+                    {[5, 4, 3, 2, 1].map(r => <option key={r} value={r}>{r > 1 ? t('filters.starsPlural', { count: r }) : t('filters.stars', { count: r })}</option>)}
                   </select>
                 </div>
                 <div class="col-md-2">
@@ -150,21 +180,23 @@ export function Dashboard({ navigate }) {
                     const [sort, order] = e.target.value.split('_');
                     setFilters({ ...filters, sort, order });
                   }}>
-                    <option value="title_asc">Titre A→Z</option>
-                    <option value="title_desc">Titre Z→A</option>
-                    <option value="artist_asc">Artiste A→Z</option>
-                    <option value="artist_desc">Artiste Z→A</option>
-                    <option value="year_desc">Année ↓</option>
-                    <option value="year_asc">Année ↑</option>
+                    <option value="title_asc">{t('filters.sortTitleAsc')}</option>
+                    <option value="title_desc">{t('filters.sortTitleDesc')}</option>
+                    <option value="artist_asc">{t('filters.sortArtistAsc')}</option>
+                    <option value="artist_desc">{t('filters.sortArtistDesc')}</option>
+                    <option value="year_desc">{t('filters.sortYearDesc')}</option>
+                    <option value="year_asc">{t('filters.sortYearAsc')}</option>
                   </select>
                 </div>
                 <div class="col-md-2">
                   <div class="btn-group w-100">
                     <button class={`btn ${viewMode === 'grid' ? 'btn-primary' : 'btn-outline-secondary'}`} onClick={() => setViewMode('grid')}>
-                      <i class="ti ti-layout-grid"></i>
+                      <i class="ti ti-layout-grid me-1"></i>
+                      {t('common.grid')}
                     </button>
                     <button class={`btn ${viewMode === 'list' ? 'btn-primary' : 'btn-outline-secondary'}`} onClick={() => setViewMode('list')}>
-                      <i class="ti ti-list"></i>
+                      <i class="ti ti-list me-1"></i>
+                      {t('common.list')}
                     </button>
                   </div>
                 </div>
@@ -180,11 +212,11 @@ export function Dashboard({ navigate }) {
 
           {!loading && albums.length === 0 && (
             <div class="empty">
-              <div class="empty-img"><i class="ti ti-music" style="font-size:4rem"></i></div>
-              <p class="empty-title">Aucun album trouvé</p>
+              <div class="empty-img"><i class="ti ti-music dashboard-empty-icon"></i></div>
+              <p class="empty-title">{t('dashboard.noAlbums')}</p>
               {total === 0 && (
                 <button class="btn btn-primary" onClick={() => navigate('add')}>
-                  <i class="ti ti-plus me-1"></i>Ajouter un CD
+                  <i class="ti ti-plus me-1"></i>{t('common.addAlbum')}
                 </button>
               )}
             </div>
@@ -200,6 +232,7 @@ export function Dashboard({ navigate }) {
                     onEdit={(a) => navigate('edit', { id: a.id })}
                     onDelete={(a) => setDeleteTarget(a)}
                     onLend={(a) => { setLendTarget(a); setLentTo(a.lent_to || ''); }}
+                    onRate={handleRate}
                   />
                 </div>
               ))}
@@ -212,13 +245,13 @@ export function Dashboard({ navigate }) {
                 <table class="table table-vcenter card-table">
                   <thead>
                     <tr>
-                      <th>Titre</th>
-                      <th>Artiste</th>
-                      <th>Année</th>
-                      <th>Genre</th>
-                      <th>Note</th>
-                      <th>Label</th>
-                      <th class="w-1">Actions</th>
+                      <th>{t('table.cover')}</th>
+                      <th>{t('table.title')}</th>
+                      <th>{t('table.artist')}</th>
+                      <th>{t('table.year')}</th>
+                      <th>{t('table.genre')}</th>
+                      <th>{t('table.rating')}</th>
+                      <th>{t('table.label')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -227,9 +260,6 @@ export function Dashboard({ navigate }) {
                         key={album.id}
                         album={album}
                         onClick={(a) => navigate('detail', { id: a.id })}
-                        onEdit={(a) => navigate('edit', { id: a.id })}
-                        onDelete={(a) => setDeleteTarget(a)}
-                        onLend={(a) => { setLendTarget(a); setLentTo(a.lent_to || ''); }}
                       />
                     ))}
                   </tbody>
@@ -245,16 +275,16 @@ export function Dashboard({ navigate }) {
       </div>
 
       {deleteTarget && (
-        <div class="modal modal-blur show d-block" style="background:rgba(0,0,0,0.5)">
+        <div class="modal modal-blur show d-block dashboard-modal-backdrop">
           <div class="modal-dialog modal-sm modal-dialog-centered">
             <div class="modal-content">
               <div class="modal-body">
-                <div class="modal-title">Supprimer l'album ?</div>
-                <div>Voulez-vous vraiment supprimer "{deleteTarget.title}" ?</div>
+                <div class="modal-title">{t('modals.deleteTitle')}</div>
+                <div>{t('modals.deleteMessage', { title: deleteTarget.title })}</div>
               </div>
               <div class="modal-footer">
-                <button class="btn me-auto" onClick={() => setDeleteTarget(null)}>Annuler</button>
-                <button class="btn btn-danger" onClick={handleDelete}>Supprimer</button>
+                <button class="btn me-auto" onClick={() => setDeleteTarget(null)}>{t('modals.cancel')}</button>
+                <button class="btn btn-danger" onClick={handleDelete}>{t('card.delete')}</button>
               </div>
             </div>
           </div>
@@ -262,11 +292,11 @@ export function Dashboard({ navigate }) {
       )}
 
       {lendTarget && (
-        <div class="modal modal-blur show d-block" style="background:rgba(0,0,0,0.5)">
+        <div class="modal modal-blur show d-block dashboard-modal-backdrop">
           <div class="modal-dialog modal-sm modal-dialog-centered">
             <div class="modal-content">
               <div class="modal-header">
-                <h5 class="modal-title">{lendTarget.is_lent ? 'Récupérer' : 'Prêter'}</h5>
+                <h5 class="modal-title">{lendTarget.is_lent ? t('modals.returnTitle') : t('modals.lendTitle')}</h5>
                 <button class="btn-close" onClick={() => setLendTarget(null)}></button>
               </div>
               <div class="modal-body">
@@ -275,16 +305,16 @@ export function Dashboard({ navigate }) {
                   <input
                     type="text"
                     class="form-control"
-                    placeholder="Prêté à..."
+                    placeholder={t('modals.lendPlaceholder')}
                     value={lentTo}
                     onChange={(e) => setLentTo(e.target.value)}
                   />
                 )}
               </div>
               <div class="modal-footer">
-                <button class="btn me-auto" onClick={() => setLendTarget(null)}>Annuler</button>
+                <button class="btn me-auto" onClick={() => setLendTarget(null)}>{t('modals.cancel')}</button>
                 <button class="btn btn-primary" onClick={handleLend}>
-                  {lendTarget.is_lent ? 'Récupérer' : 'Prêter'}
+                  {lendTarget.is_lent ? t('modals.returnTitle') : t('modals.lendTitle')}
                 </button>
               </div>
             </div>

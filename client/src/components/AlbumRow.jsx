@@ -1,7 +1,7 @@
 import { CoverImage } from './CoverImage.jsx';
 import { StarRating } from './StarRating.jsx';
 
-export function AlbumRow({ album, onClick, onEdit, onDelete, onLend }) {
+export function AlbumRow({ album, onClick }) {
   return (
     <tr style="cursor:pointer" onClick={() => onClick(album)}>
       <td style="width:60px">
@@ -17,19 +17,6 @@ export function AlbumRow({ album, onClick, onEdit, onDelete, onLend }) {
         <StarRating value={album.rating} readOnly />
       </td>
       <td class="text-muted small">{album.label?.name || album.label || '—'}</td>
-      <td onClick={(e) => e.stopPropagation()}>
-        <div class="btn-list">
-          <button class="btn btn-sm btn-icon" onClick={() => onEdit(album)} title="Modifier">
-            <i class="ti ti-pencil"></i>
-          </button>
-          <button class="btn btn-sm btn-icon" onClick={() => onLend(album)} title="Prêter">
-            <i class="ti ti-user-share"></i>
-          </button>
-          <button class="btn btn-sm btn-icon" onClick={() => onDelete(album)} title="Supprimer">
-            <i class="ti ti-trash"></i>
-          </button>
-        </div>
-      </td>
     </tr>
   );
 }
