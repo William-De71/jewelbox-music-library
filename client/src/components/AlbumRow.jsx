@@ -3,8 +3,8 @@ import { StarRating } from './StarRating.jsx';
 
 export function AlbumRow({ album, onClick }) {
   return (
-    <tr style="cursor:pointer" onClick={() => onClick(album)}>
-      <td style="width:60px">
+    <tr class="album-row" onClick={() => onClick(album)}>
+      <td class="album-row-cover">
         <CoverImage src={album.cover_url} title={album.title} size={40} />
       </td>
       <td>{album.title}</td>

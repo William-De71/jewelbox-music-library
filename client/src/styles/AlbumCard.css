@@ -7,6 +7,10 @@
 
 .album-card-cover {
   cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 1rem;
 }
 
 .album-card-body {

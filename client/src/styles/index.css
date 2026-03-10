@@ -7,7 +7,12 @@
 @import './Header.css';
 @import './TopMenu.css';
 @import './StatsCard.css';
+@import './StarRating.css';
+@import './CoverImage.css';
 @import './AlbumCard.css';
+@import './AlbumRow.css';
+@import './AlbumForm.css';
+@import './AlbumDetail.css';
 @import './Dashboard.css';
 
 /* Global custom styles */

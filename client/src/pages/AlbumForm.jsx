@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'preact/hooks';
 import { api } from '../api/client.js';
 import { StarRating } from '../components/StarRating.jsx';
 import { CoverImage } from '../components/CoverImage.jsx';
+import { useI18n } from '../config/i18n/index.js';
 
 const EMPTY_FORM = {
   title: '', artist_name: '', label_name: '', year: '', genre: '',
@@ -9,6 +10,7 @@ const EMPTY_FORM = {
 };
 
 export function AlbumForm({ navigate, albumId }) {
+  const { t } = useI18n();
   const isEdit = Boolean(albumId);
   const [form, setForm] = useState(EMPTY_FORM);
   const [loading, setLoading] = useState(false);
@@ -201,13 +203,13 @@ export function AlbumForm({ navigate, albumId }) {
         </div>
         <div class="card-body">
           <p class="text-muted small mb-2">
-            Recherchez par titre, artiste ou EAN/code-barres pour pré-remplir le formulaire automatiquement.
+            {t('albumForm.externalSearchHelp')}
           </p>
           <div class="input-group">
             <input
               type="text"
               class="form-control"
-              placeholder="Titre, artiste ou EAN (ex: 724385 586323)"
+              placeholder={t('albumForm.externalSearchPlaceholder')}
               value={searchQuery}
               onInput={(e) => setSearchQuery(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
@@ -215,14 +217,14 @@ export function AlbumForm({ navigate, albumId }) {
             <button class="btn btn-outline-primary" type="button" onClick={handleSearch} disabled={searching}>
               {searching
                 ? <span class="spinner-border spinner-border-sm"></span>
-                : <><i class="ti ti-search me-1"></i>Rechercher</>}
+                : <><i class="ti ti-search me-1"></i>{t('albumForm.search')}</>}
             </button>
           </div>
           {searchError && <div class="text-danger small mt-1"><i class="ti ti-alert-circle me-1"></i>{searchError}</div>}
 
           {/* Search results dropdown */}
           {searchResults.length > 0 && (
-            <div class="list-group mt-2" style="max-height:280px;overflow-y:auto">
+            <div class="list-group mt-2 search-results-dropdown">
               {searchResults.map((r) => (
                 <button
                   key={r.mbid}
@@ -249,7 +251,7 @@ export function AlbumForm({ navigate, albumId }) {
           <div class="col-12 col-md-3">
             <div class="card h-100">
               <div class="card-body d-flex flex-column align-items-center gap-3">
-                <div class="position-relative" style="width:180px;height:180px">
+                <div class="position-relative cover-preview">
                   <CoverImage src={form.cover_url} title={form.title} size={180} className="w-100 h-100" />
                   {uploadingCover && (
                     <div class="position-absolute inset-0 d-flex align-items-center justify-content-center bg-dark bg-opacity-75 rounded">
@@ -261,18 +263,18 @@ export function AlbumForm({ navigate, albumId }) {
                   <input ref={coverInputRef} type="file" class="d-none" accept="image/*" onChange={handleCoverUpload} />
                   <button type="button" class="btn btn-outline-secondary btn-sm w-100 mb-2"
                     onClick={() => coverInputRef.current.click()} disabled={uploadingCover}>
-                    <i class="ti ti-upload me-1"></i>Uploader une pochette
+                    <i class="ti ti-upload me-1"></i>{t('albumForm.actions.uploadCover')}
                   </button>
                   <input
                     type="text"
                     class="form-control form-control-sm"
-                    placeholder="ou URL de la pochette…"
+                    placeholder={t('albumForm.form.coverUrlPlaceholder')}
                     value={form.cover_url}
                     onInput={(e) => set('cover_url', e.target.value)}
                   />
                 </div>
                 <div class="w-100">
-                  <label class="form-label small mb-1">Note personnelle</label>
+                  <label class="form-label small mb-1">{t('albumForm.form.rating')}</label>
                   <StarRating value={form.rating} onChange={(v) => set('rating', v)} />
                 </div>
               </div>
@@ -283,27 +285,27 @@ export function AlbumForm({ navigate, albumId }) {
           <div class="col-12 col-md-9">
             <div class="card">
               <div class="card-header">
-                <h3 class="card-title"><i class="ti ti-info-circle me-2"></i>Informations</h3>
+                <h3 class="card-title"><i class="ti ti-info-circle me-2"></i>{t('albumForm.infoTitle')}</h3>
               </div>
               <div class="card-body">
                 <div class="row g-3">
                   <div class="col-12 col-sm-8">
-                    <label class="form-label required">Titre de l'album</label>
+                    <label class="form-label required">{t('albumForm.form.title')}</label>
                     <input
                       type="text"
                       class="form-control"
-                      placeholder="ex: OK Computer"
+                      placeholder={t('albumForm.form.titlePlaceholder')}
                       required
                       value={form.title}
                       onInput={(e) => set('title', e.target.value)}
                     />
                   </div>
                   <div class="col-12 col-sm-4">
-                    <label class="form-label">Année</label>
+                    <label class="form-label">{t('albumForm.form.year')}</label>
                     <input
                       type="number"
                       class="form-control"
-                      placeholder="1997"
+                      placeholder={t('albumForm.form.yearPlaceholder')}
                       min="1900"
                       max={new Date().getFullYear() + 1}
                       value={form.year}
@@ -311,62 +313,62 @@ export function AlbumForm({ navigate, albumId }) {
                     />
                   </div>
                   <div class="col-12 col-sm-6">
-                    <label class="form-label required">Artiste</label>
+                    <label class="form-label required">{t('albumForm.form.artist')}</label>
                     <input
                       type="text"
                       class="form-control"
-                      placeholder="ex: Radiohead"
+                      placeholder={t('albumForm.form.artistPlaceholder')}
                       required
                       value={form.artist_name}
                       onInput={(e) => set('artist_name', e.target.value)}
                     />
                   </div>
                   <div class="col-12 col-sm-6">
-                    <label class="form-label">Label</label>
+                    <label class="form-label">{t('albumForm.form.label')}</label>
                     <input
                       type="text"
                       class="form-control"
-                      placeholder="ex: Parlophone"
+                      placeholder={t('albumForm.form.labelPlaceholder')}
                       value={form.label_name}
                       onInput={(e) => set('label_name', e.target.value)}
                     />
                   </div>
                   <div class="col-12 col-sm-4">
-                    <label class="form-label">Genre</label>
+                    <label class="form-label">{t('albumForm.form.genre')}</label>
                     <input
                       type="text"
                       class="form-control"
-                      placeholder="ex: Alternative"
+                      placeholder={t('albumForm.form.genrePlaceholder')}
                       value={form.genre}
                       onInput={(e) => set('genre', e.target.value)}
                     />
                   </div>
                   <div class="col-12 col-sm-4">
-                    <label class="form-label">Durée totale</label>
+                    <label class="form-label">{t('albumForm.form.duration')}</label>
                     <input
                       type="text"
                       class="form-control"
-                      placeholder="ex: 42:30"
+                      placeholder={t('albumForm.form.durationPlaceholder')}
                       value={form.total_duration}
                       onInput={(e) => set('total_duration', e.target.value)}
                     />
                   </div>
                   <div class="col-12 col-sm-4">
-                    <label class="form-label">EAN / Code-barres</label>
+                    <label class="form-label">{t('albumForm.form.ean')}</label>
                     <input
                       type="text"
                       class="form-control"
-                      placeholder="ex: 724385586323"
+                      placeholder={t('albumForm.form.eanPlaceholder')}
                       value={form.ean}
                       onInput={(e) => set('ean', e.target.value)}
                     />
                   </div>
                   <div class="col-12">
-                    <label class="form-label">Notes personnelles</label>
+                    <label class="form-label">{t('albumForm.form.notes')}</label>
                     <textarea
                       class="form-control"
                       rows="2"
-                      placeholder="Commentaire, anecdote…"
+                      placeholder={t('albumForm.form.notesPlaceholder')}
                       value={form.notes}
                       onInput={(e) => set('notes', e.target.value)}
                     />
@@ -380,9 +382,9 @@ export function AlbumForm({ navigate, albumId }) {
           <div class="col-12">
             <div class="card">
               <div class="card-header d-flex align-items-center">
-                <h3 class="card-title mb-0"><i class="ti ti-list-numbers me-2"></i>Liste des pistes</h3>
+                <h3 class="card-title mb-0"><i class="ti ti-list-numbers me-2"></i>{t('albumForm.tracksTitle')}</h3>
                 <button type="button" class="btn btn-sm btn-outline-primary ms-auto" onClick={addTrack}>
-                  <i class="ti ti-plus me-1"></i>Ajouter une piste
+                  <i class="ti ti-plus me-1"></i>{t('albumForm.form.addTrack')}
                 </button>
               </div>
               {form.tracks.length > 0 ? (
@@ -390,10 +392,10 @@ export function AlbumForm({ navigate, albumId }) {
                   <table class="table table-sm card-table">
                     <thead>
                       <tr>
-                        <th style="width:60px">#</th>
-                        <th>Titre</th>
-                        <th style="width:120px">Durée</th>
-                        <th style="width:50px"></th>
+                        <th class="track-number-col">{t('albumForm.form.trackNumber')}</th>
+                        <th>{t('albumForm.form.trackTitle')}</th>
+                        <th class="track-duration-col">{t('albumForm.form.trackDuration')}</th>
+                        <th class="track-actions-col"></th>
                       </tr>
                     </thead>
                     <tbody>
@@ -412,7 +414,7 @@ export function AlbumForm({ navigate, albumId }) {
                             <input
                               type="text"
                               class="form-control form-control-sm"
-                              placeholder="Titre de la piste"
+                              placeholder={t('albumForm.form.trackTitlePlaceholder')}
                               value={track.title}
                               onInput={(e) => updateTrack(idx, 'title', e.target.value)}
                             />
@@ -421,7 +423,7 @@ export function AlbumForm({ navigate, albumId }) {
                             <input
                               type="text"
                               class="form-control form-control-sm"
-                              placeholder="3:45"
+                              placeholder={t('albumForm.form.durationPlaceholder')}
                               value={track.duration || ''}
                               onInput={(e) => updateTrack(idx, 'duration', e.target.value)}
                             />
@@ -438,8 +440,8 @@ export function AlbumForm({ navigate, albumId }) {
                 </div>
               ) : (
                 <div class="card-body text-center text-muted py-3">
-                  <i class="ti ti-music-off me-1"></i>Aucune piste ajoutée.
-                  <button type="button" class="btn btn-link p-0 ms-1" onClick={addTrack}>Ajouter la première</button>
+                  <i class="ti ti-music-off me-1"></i>{t('albumForm.form.noTracks')}
+                  <button type="button" class="btn btn-link p-0 ms-1" onClick={addTrack}>{t('albumForm.form.addFirstTrack')}</button>
                 </div>
               )}
             </div>
@@ -448,12 +450,12 @@ export function AlbumForm({ navigate, albumId }) {
           {/* Form actions */}
           <div class="col-12 d-flex gap-2 justify-content-end mb-4">
             <button type="button" class="btn btn-outline-secondary" onClick={() => navigate('dashboard')}>
-              Annuler
+              {t('albumForm.actions.cancel')}
             </button>
             <button type="submit" class="btn btn-primary" disabled={saving}>
               {saving
-                ? <><span class="spinner-border spinner-border-sm me-1"></span>Enregistrement…</>
-                : <><i class={`ti ${isEdit ? 'ti-device-floppy' : 'ti-plus'} me-1`}></i>{isEdit ? 'Enregistrer' : 'Ajouter'}</>}
+                ? <><span class="spinner-border spinner-border-sm me-1"></span>{t('common.loading')}</>
+                : <><i class={`ti ${isEdit ? 'ti-device-floppy' : 'ti-plus'} me-1`}></i>{t('albumForm.actions.save')}</>}
             </button>
           </div>
         </div>

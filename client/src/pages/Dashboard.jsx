@@ -127,25 +127,25 @@ export function Dashboard({ navigate }) {
         <div class="row g-3 mb-4">
           <StatsCard 
             icon="disc" 
-            title={total !== 1 ? 'Albums' : 'Album'}
+            title={total !== 1 ? t('stats.albumsLabel') : t('stats.albumLabel')}
             value={total}
             color="primary"
           />
           <StatsCard 
             icon="user-share" 
-            title={stats.lent !== 1 ? 'Prêtés' : 'Prêté'}
+            title={stats.lent !== 1 ? t('stats.lentLabelPlural') : t('stats.lentLabel')}
             value={stats.lent}
             color="warning"
           />
           <StatsCard 
             icon="music" 
-            title="Genres"
+            title={t('stats.genresLabel')}
             value={genres.length}
             color="info"
           />
           <StatsCard 
             icon="star-filled" 
-            title="Notés"
+            title={t('stats.ratedLabel')}
             value={albums.filter(a => a.rating > 0).length}
             color="success"
           />

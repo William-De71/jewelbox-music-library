@@ -1,6 +1,9 @@
 import { Home } from 'lucide-preact';
+import { useI18n } from '../config/i18n/index.js';
 
 export function TopMenu({ currentPage, navigate }) {
+  const { t } = useI18n();
+  
   return (
     <nav class="top-menu">
       <div class="header-container">
@@ -12,7 +15,7 @@ export function TopMenu({ currentPage, navigate }) {
               onClick={(e) => { e.preventDefault(); navigate('dashboard'); }}
             >
               <Home size={24} />
-              <span>Accueil</span>
+              <span>{t('common.home')}</span>
             </a>
           </li>
         </ul>

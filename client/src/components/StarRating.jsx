@@ -1,4 +1,8 @@
+import { useI18n } from '../config/i18n/index.js';
+
 export function StarRating({ value, onChange, readOnly = false }) {
+  const { t } = useI18n();
+  
   return (
     <div class="d-flex gap-2 align-items-center">
       {[1, 2, 3, 4, 5].map((star) => {
@@ -7,17 +11,10 @@ export function StarRating({ value, onChange, readOnly = false }) {
           <button
             key={star}
             type="button"
-            class="btn p-0 border-0 bg-transparent"
-            style={{
-              cursor: readOnly ? 'default' : 'pointer',
-              fontSize: '1.5rem',
-              lineHeight: 1,
-              color: isFilled ? '#f59f00' : '#6c757d',
-              opacity: readOnly ? 0.7 : 1,
-            }}
+            class={`star-button ${isFilled ? 'star-filled' : 'star-empty'} ${readOnly ? 'star-readonly' : ''}`}
             onClick={() => !readOnly && onChange && onChange(star)}
             disabled={readOnly}
-            title={`${star} étoile${star > 1 ? 's' : ''}`}
+            title={`${star} ${star > 1 ? t('common.stars') : t('common.star')}`}
           >
             {isFilled ? '★' : '☆'}
           </button>

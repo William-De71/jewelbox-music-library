@@ -1,0 +1,23 @@
+/* AlbumForm component styles */
+
+.search-results-dropdown {
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.cover-preview {
+  width: 180px;
+  height: 180px;
+}
+
+.track-number-col {
+  width: 60px;
+}
+
+.track-duration-col {
+  width: 120px;
+}
+
+.track-actions-col {
+  width: 50px;
+}

@@ -21,7 +21,7 @@ export function Header({ onThemeToggle, isDark }) {
             <button 
               class="theme-toggle" 
               onClick={onThemeToggle}
-              title={isDark ? 'Mode clair' : 'Mode sombre'}
+              title={isDark ? t('common.lightMode') : t('common.darkMode')}
             >
               {isDark ? <Sun size={20} /> : <Moon size={20} />}
             </button>

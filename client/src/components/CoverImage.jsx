@@ -3,13 +3,19 @@ import { useState } from 'preact/hooks';
 export function CoverImage({ src, title, size = 256, className = '' }) {
   const [error, setError] = useState(false);
 
+  const sizeStyle = {
+    width: `${size}px`,
+    height: `${size}px`,
+    minWidth: `${size}px`
+  };
+
   if (!src || error) {
     return (
       <div
-        class={`bg-dark d-flex align-items-center justify-content-center rounded ${className}`}
-        style={{ width: size, height: size, minWidth: size }}
+        class={`cover-image-placeholder ${className}`}
+        style={sizeStyle}
       >
-        <i class="ti ti-disc text-muted" style={`font-size:${size * 0.5}px`}></i>
+        <i class="ti ti-disc cover-image-icon" style={{ fontSize: `${size * 0.5}px` }}></i>
       </div>
     );
   }
@@ -18,8 +24,8 @@ export function CoverImage({ src, title, size = 256, className = '' }) {
     <img
       src={src}
       alt={title}
-      class={`rounded object-fit-cover ${className}`}
-      style={{ width: size, height: size, minWidth: size }}
+      class={`cover-image ${className}`}
+      style={sizeStyle}
       onError={() => setError(true)}
       loading="lazy"
     />

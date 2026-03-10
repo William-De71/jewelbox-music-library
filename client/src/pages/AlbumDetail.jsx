@@ -2,8 +2,10 @@ import { useState, useEffect } from 'preact/hooks';
 import { api } from '../api/client.js';
 import { StarRating } from '../components/StarRating.jsx';
 import { CoverImage } from '../components/CoverImage.jsx';
+import { useI18n } from '../config/i18n/index.js';
 
 export function AlbumDetail({ navigate, albumId }) {
+  const { t } = useI18n();
   const [album, setAlbum] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -49,7 +51,7 @@ export function AlbumDetail({ navigate, albumId }) {
     return (
       <div class="alert alert-danger">
         <i class="ti ti-alert-circle me-2"></i>{error}
-        <button class="btn btn-link p-0 ms-2" onClick={() => navigate('dashboard')}>Retour</button>
+        <button class="btn btn-link p-0 ms-2" onClick={() => navigate('dashboard')}>{t('common.back')}</button>
       </div>
     );
   }
@@ -66,7 +68,7 @@ export function AlbumDetail({ navigate, albumId }) {
         <div class="row align-items-center">
           <div class="col-auto">
             <button class="btn btn-outline-secondary btn-sm" onClick={() => navigate('dashboard')}>
-              <i class="ti ti-arrow-left me-1"></i>Retour
+              <i class="ti ti-arrow-left me-1"></i>{t('common.back')}
             </button>
           </div>
           <div class="col">
@@ -77,16 +79,16 @@ export function AlbumDetail({ navigate, albumId }) {
             <button
               class={`btn btn-sm ${album.is_lent ? 'btn-success' : 'btn-warning'}`}
               onClick={handleLend}
-              title={album.is_lent ? 'Marquer comme récupéré' : 'Marquer comme prêté'}
+              title={album.is_lent ? t('albumDetail.markReturned') : t('albumDetail.markLent')}
             >
               <i class={`ti ${album.is_lent ? 'ti-user-check' : 'ti-user-share'} me-1`}></i>
-              {album.is_lent ? 'Récupéré' : 'Prêter'}
+              {album.is_lent ? t('albumDetail.returned') : t('common.lend')}
             </button>
             <button class="btn btn-sm btn-primary" onClick={() => navigate('edit', { id: albumId })}>
-              <i class="ti ti-pencil me-1"></i>Modifier
+              <i class="ti ti-pencil me-1"></i>{t('albumDetail.edit')}
             </button>
             <button class="btn btn-sm btn-danger" onClick={() => setConfirmDelete(true)}>
-              <i class="ti ti-trash me-1"></i>Supprimer
+              <i class="ti ti-trash me-1"></i>{t('albumDetail.delete')}
             </button>
           </div>
         </div>
@@ -102,8 +104,7 @@ export function AlbumDetail({ navigate, albumId }) {
                   <img
                     src={album.cover_url}
                     alt={album.title}
-                    class="rounded shadow"
-                    style="max-width:220px;width:100%;object-fit:cover"
+                    class="rounded shadow album-detail-cover"
                     onError={(e) => {
                       e.currentTarget.style.display = 'none';
                       e.currentTarget.nextSibling.style.display = 'flex';
@@ -111,51 +112,51 @@ export function AlbumDetail({ navigate, albumId }) {
                   />
                 ) : null}
                 <div
-                  class="bg-dark rounded d-flex align-items-center justify-content-center shadow"
-                  style={`width:220px;height:220px;${album.cover_url ? 'display:none' : ''}`}
+                  class="bg-dark rounded d-flex align-items-center justify-content-center shadow album-detail-cover-placeholder"
+                  style={album.cover_url ? 'display:none' : ''}
                 >
-                  <i class="ti ti-disc text-muted" style="font-size:5rem"></i>
+                  <i class="ti ti-disc text-muted album-detail-cover-icon"></i>
                 </div>
               </div>
 
               {album.is_lent && (
                 <div class="alert alert-warning p-2 mb-3 text-start">
                   <i class="ti ti-user-share me-1"></i>
-                  <strong>Prêté</strong>
-                  {album.lent_to && <> à <strong>{album.lent_to}</strong></>}
+                  <strong>{t('albumDetail.lent')}</strong>
+                  {album.lent_to && <> <strong>{album.lent_to}</strong></>}
                 </div>
               )}
 
               <div class="text-start">
                 <div class="mb-2">
-                  <div class="text-muted small">Note</div>
+                  <div class="text-muted small">{t('albumDetail.rating')}</div>
                   <StarRating value={album.rating} readOnly />
                 </div>
                 {album.genre && (
                   <div class="mb-2">
-                    <div class="text-muted small">Genre</div>
+                    <div class="text-muted small">{t('albumDetail.genre')}</div>
                     <span class="badge bg-blue-lt">{album.genre}</span>
                   </div>
                 )}
                 <div class="mb-2">
-                  <div class="text-muted small">Année</div>
+                  <div class="text-muted small">{t('albumDetail.year')}</div>
                   <div class="fw-semibold">{album.year || '—'}</div>
                 </div>
                 {album.label && (
                   <div class="mb-2">
-                    <div class="text-muted small">Label</div>
+                    <div class="text-muted small">{t('albumDetail.label')}</div>
                     <div class="fw-semibold">{album.label.name}</div>
                   </div>
                 )}
                 {album.total_duration && (
                   <div class="mb-2">
-                    <div class="text-muted small">Durée totale</div>
+                    <div class="text-muted small">{t('albumDetail.totalDuration')}</div>
                     <div class="fw-semibold">{album.total_duration}</div>
                   </div>
                 )}
                 {album.ean && (
                   <div class="mb-2">
-                    <div class="text-muted small">EAN</div>
+                    <div class="text-muted small">{t('albumDetail.ean')}</div>
                     <div class="fw-semibold font-monospace small">{album.ean}</div>
                   </div>
                 )}
@@ -169,10 +170,10 @@ export function AlbumDetail({ navigate, albumId }) {
           {album.notes && (
             <div class="card mb-3">
               <div class="card-header">
-                <h3 class="card-title"><i class="ti ti-notes me-2"></i>Notes personnelles</h3>
+                <h3 class="card-title"><i class="ti ti-notes me-2"></i>{t('albumDetail.notes')}</h3>
               </div>
               <div class="card-body">
-                <p class="mb-0" style="white-space:pre-wrap">{album.notes}</p>
+                <p class="mb-0 album-notes">{album.notes}</p>
               </div>
             </div>
           )}
@@ -182,7 +183,7 @@ export function AlbumDetail({ navigate, albumId }) {
               <div class="card-header d-flex align-items-center">
                 <h3 class="card-title mb-0">
                   <i class="ti ti-list-numbers me-2"></i>
-                  Pistes ({album.tracks.length})
+                  {t('albumDetail.tracks')} ({album.tracks.length})
                 </h3>
                 {album.total_duration && (
                   <span class="ms-auto text-muted small">
@@ -194,9 +195,9 @@ export function AlbumDetail({ navigate, albumId }) {
                 <table class="table table-sm card-table">
                   <thead>
                     <tr>
-                      <th style="width:50px">#</th>
-                      <th>Titre</th>
-                      <th style="width:80px" class="text-end">Durée</th>
+                      <th class="track-number-col">{t('albumDetail.trackNumber')}</th>
+                      <th>{t('albumDetail.trackTitle')}</th>
+                      <th class="track-duration-col text-end">{t('albumDetail.duration')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -214,10 +215,10 @@ export function AlbumDetail({ navigate, albumId }) {
           ) : (
             <div class="card">
               <div class="card-body text-center text-muted py-4">
-                <i class="ti ti-music-off" style="font-size:2rem"></i>
-                <div class="mt-2">Aucune piste renseignée.</div>
+                <i class="ti ti-music-off no-tracks-icon"></i>
+                <div class="mt-2">{t('albumDetail.noTracks')}</div>
                 <button class="btn btn-sm btn-outline-primary mt-2" onClick={() => navigate('edit', { id: albumId })}>
-                  <i class="ti ti-pencil me-1"></i>Modifier l'album
+                  <i class="ti ti-pencil me-1"></i>{t('albumDetail.editAlbum')}
                 </button>
               </div>
             </div>
@@ -227,19 +228,19 @@ export function AlbumDetail({ navigate, albumId }) {
 
       {/* Confirm delete modal */}
       {confirmDelete && (
-        <div class="modal modal-blur show d-block" style="background:rgba(0,0,0,.5)">
+        <div class="modal modal-blur show d-block modal-backdrop">
           <div class="modal-dialog modal-sm modal-dialog-centered">
             <div class="modal-content">
               <div class="modal-body">
-                <div class="modal-title mb-1">Supprimer l'album ?</div>
+                <div class="modal-title mb-1">{t('modals.deleteTitle')}</div>
                 <p class="text-muted">
-                  Voulez-vous vraiment supprimer <strong>"{album.title}"</strong> ? Cette action est irréversible.
+                  {t('albumDetail.confirmDelete')}
                 </p>
               </div>
               <div class="modal-footer">
-                <button class="btn btn-outline-secondary me-auto" onClick={() => setConfirmDelete(false)}>Annuler</button>
+                <button class="btn btn-outline-secondary me-auto" onClick={() => setConfirmDelete(false)}>{t('modals.cancel')}</button>
                 <button class="btn btn-danger" onClick={handleDelete} disabled={deleting}>
-                  {deleting ? <span class="spinner-border spinner-border-sm"></span> : <><i class="ti ti-trash me-1"></i>Supprimer</>}
+                  {deleting ? <span class="spinner-border spinner-border-sm"></span> : <><i class="ti ti-trash me-1"></i>{t('common.delete')}</>}
                 </button>
               </div>
             </div>
