@@ -6,7 +6,7 @@ export function AlbumCard({ album, onClick, onEdit, onDelete, onLend, onRate }) 
   const { t } = useI18n();
   
   return (
-    <div class="album-card card h-100 shadow-sm border-0">
+    <div class="album-card card shadow-sm border-0">
       <div class="album-card-cover position-relative" onClick={() => onClick(album)}>
         <CoverImage src={album.cover_url} title={album.title} />
         {album.is_lent && (

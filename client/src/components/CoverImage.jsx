@@ -1,6 +1,6 @@
 import { useState } from 'preact/hooks';
 
-export function CoverImage({ src, title, size = 48, className = '' }) {
+export function CoverImage({ src, title, size = 256, className = '' }) {
   const [error, setError] = useState(false);
 
   if (!src || error) {
