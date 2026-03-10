@@ -4,6 +4,9 @@
 @import './Layout.css';
 
 /* Component styles */
+@import './Header.css';
+@import './TopMenu.css';
+@import './StatsCard.css';
 @import './AlbumCard.css';
 @import './Dashboard.css';
 
@@ -16,24 +19,91 @@
   --jewelbox-success: #2fb344;
   --jewelbox-danger: #d63939;
   --jewelbox-warning: #f59f00;
-  --jewelbox-info: #3c8dbc;
-  
-  /* Dark theme colors */
   --jewelbox-bg-dark: #0f172a;
   --jewelbox-bg-darker: #1e293b;
-  --jewelbox-text-light: #e2e8f0;
-  --jewelbox-text-muted: #94a3b8;
-  
-  /* Animation durations */
-  --transition-fast: 0.15s;
-  --transition-normal: 0.3s;
-  --transition-slow: 0.5s;
+}
+
+/* Light theme overrides */
+[data-bs-theme="light"] {
+  --jewelbox-bg-dark: #f8f9fa;
+  --jewelbox-bg-darker: #ffffff;
+}
+
+[data-bs-theme="light"] body {
+  background-color: #f8f9fa !important;
+  color: #1e293b !important;
+}
+
+[data-bs-theme="light"] .header-top,
+[data-bs-theme="light"] .top-menu {
+  background: #ffffff !important;
+  border-bottom-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+[data-bs-theme="light"] .header-title {
+  color: #1e293b !important;
+}
+
+[data-bs-theme="light"] .main-content {
+  background: #f8f9fa !important;
+}
+
+[data-bs-theme="light"] .card {
+  background: #ffffff !important;
+  color: #1e293b !important;
+}
+
+[data-bs-theme="light"] .text-muted {
+  color: #6c757d !important;
+}
+
+[data-bs-theme="light"] .form-select,
+[data-bs-theme="light"] .form-control {
+  background-color: #ffffff !important;
+  color: #1e293b !important;
+  border-color: #dee2e6 !important;
+}
+
+[data-bs-theme="light"] .form-select option {
+  background-color: #ffffff !important;
+  color: #1e293b !important;
 }
 
 /* Dark theme improvements */
-body {
+[data-bs-theme="dark"] body {
   background: var(--jewelbox-bg-dark) !important;
-  color: var(--jewelbox-text-light) !important;
+  color: #e2e8f0 !important;
+}
+
+[data-bs-theme="dark"] .header-subtitle,
+[data-bs-theme="dark"] .text-muted {
+  color: #94a3b8 !important;
+}
+
+[data-bs-theme="dark"] .stats-label {
+  color: #94a3b8 !important;
+}
+
+[data-bs-theme="dark"] .form-select,
+[data-bs-theme="dark"] .form-control {
+  background-color: #1e293b !important;
+  color: #e2e8f0 !important;
+  border-color: rgba(148, 163, 184, 0.2) !important;
+}
+
+[data-bs-theme="dark"] .form-select option {
+  background-color: #1e293b !important;
+  color: #e2e8f0 !important;
+}
+
+[data-bs-theme="dark"] .card-title,
+[data-bs-theme="dark"] .album-card-title {
+  color: #e2e8f0 !important;
+}
+
+[data-bs-theme="dark"] .card-body p,
+[data-bs-theme="dark"] .card-body small {
+  color: #94a3b8 !important;
 }
 
 .page-wrapper {

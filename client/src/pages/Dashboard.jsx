@@ -3,6 +3,7 @@ import { api } from '../api/client.js';
 import { AlbumCard } from '../components/AlbumCard.jsx';
 import { AlbumRow } from '../components/AlbumRow.jsx';
 import { Pagination } from '../components/Pagination.jsx';
+import { StatsCard } from '../components/StatsCard.jsx';
 import { useI18n } from '../config/i18n/index.js';
 
 const LIMIT = 24;
@@ -121,39 +122,47 @@ export function Dashboard({ navigate }) {
         </div>
       )}
 
-      <div class="page-header d-print-none mb-4">
-        <div class="container-xl">
-          <div class="row align-items-center">
-            <div class="col">
-              <h2 class="dashboard-title page-title mb-2">{t('dashboard.title')}</h2>
-              <div class="d-flex gap-3 align-items-center">
-                <span class="dashboard-badge badge bg-primary-lt">
-                  <i class="ti ti-disc me-1"></i>
-                  {total !== 1 ? t('stats.albumsPlural', { count: total }) : t('stats.albums', { count: total })}
-                </span>
-                {stats.lent > 0 && (
-                  <span class="dashboard-badge badge bg-warning-lt">
-                    <i class="ti ti-user-share me-1"></i>
-                    {stats.lent !== 1 ? t('stats.lentPlural', { count: stats.lent }) : t('stats.lent', { count: stats.lent })}
-                  </span>
-                )}
-              </div>
-            </div>
-            <div class="col-auto">
-              <button class="btn btn-primary" onClick={() => navigate('add')}>
-                <i class="ti ti-plus me-1"></i>
-                {t('common.addAlbum')}
-              </button>
-            </div>
-          </div>
+      <div class="header-container">
+        {/* Stats Cards Section */}
+        <div class="row g-3 mb-4">
+          <StatsCard 
+            icon="disc" 
+            title={total !== 1 ? 'Albums' : 'Album'}
+            value={total}
+            color="primary"
+          />
+          <StatsCard 
+            icon="user-share" 
+            title={stats.lent !== 1 ? 'Prêtés' : 'Prêté'}
+            value={stats.lent}
+            color="warning"
+          />
+          <StatsCard 
+            icon="music" 
+            title="Genres"
+            value={genres.length}
+            color="info"
+          />
+          <StatsCard 
+            icon="star-filled" 
+            title="Notés"
+            value={albums.filter(a => a.rating > 0).length}
+            color="success"
+          />
         </div>
-      </div>
 
-      <div class="page-body">
-        <div class="container-xl">
-          <div class="card mb-3">
-            <div class="card-body">
-              <div class="row g-2">
+        {/* Action Button */}
+        <div class="mb-3">
+          <button class="btn btn-primary" onClick={() => navigate('add')}>
+            <i class="ti ti-plus me-1"></i>
+            {t('common.addAlbum')}
+          </button>
+        </div>
+
+        {/* Filters Section */}
+        <div class="card mb-3">
+          <div class="card-body">
+            <div class="row g-2">
                 <div class="col-md-4">
                   <input
                     type="text"
@@ -268,10 +277,9 @@ export function Dashboard({ navigate }) {
             </div>
           )}
 
-          {!loading && albums.length > 0 && (
-            <Pagination page={page} limit={LIMIT} total={total} onChange={setPage} />
-          )}
-        </div>
+        {!loading && albums.length > 0 && (
+          <Pagination page={page} limit={LIMIT} total={total} onChange={setPage} />
+        )}
       </div>
 
       {deleteTarget && (
