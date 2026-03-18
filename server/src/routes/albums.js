@@ -1,6 +1,7 @@
 import {
   getAlbums, getAlbumById, createAlbum, updateAlbum, deleteAlbum, getGenres,
 } from '../db/queries.js';
+import { downloadCover } from '../utils/downloadCover.js';
 
 export async function albumRoutes(fastify) {
   // GET /api/albums?page=1&limit=24&genre=Rock&rating=5&sort=title&order=asc&search=
@@ -59,7 +60,21 @@ export async function albumRoutes(fastify) {
       },
     },
   }, async (req, reply) => {
-    const album = createAlbum(req.body);
+    const albumData = { ...req.body };
+    
+    // If cover_url is from coverartarchive.org, download it locally
+    if (albumData.cover_url && albumData.cover_url.includes('coverartarchive.org')) {
+      console.log('[CreateAlbum] Downloading cover from CoverArtArchive...');
+      const localCoverUrl = await downloadCover(albumData.cover_url);
+      if (localCoverUrl) {
+        albumData.cover_url = localCoverUrl;
+        console.log('[CreateAlbum] Cover downloaded successfully:', localCoverUrl);
+      } else {
+        console.log('[CreateAlbum] Cover download failed, keeping original URL');
+      }
+    }
+    
+    const album = createAlbum(albumData);
     return reply.code(201).send(album);
   });
 

@@ -14,7 +14,7 @@ export function TopMenu({ currentPage, navigate }) {
               href="#"
               onClick={(e) => { e.preventDefault(); navigate('dashboard'); }}
             >
-              <Home size={24} />
+              <Home size={20} />
               <span>{t('common.home')}</span>
             </a>
           </li>

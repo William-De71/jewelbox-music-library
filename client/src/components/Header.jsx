@@ -13,7 +13,6 @@ export function Header({ onThemeToggle, isDark }) {
               <i class="ti ti-disc fs-1 text-primary"></i>
               <div>
                 <h1 class="header-title mb-0">JewelBox</h1>
-                <p class="header-subtitle mb-0 text-muted small">{t('dashboard.subtitle')}</p>
               </div>
             </div>
           </div>
