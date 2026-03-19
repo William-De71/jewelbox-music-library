@@ -1,5 +1,8 @@
 /* Main styles file - imports all component styles */
 
+/* Tabler Core CSS */
+@import '@tabler/core/dist/css/tabler.min.css';
+
 /* Layout styles */
 @import './Layout.css';
 
@@ -8,7 +11,6 @@
 @import './TopMenu.css';
 @import './StatsCard.css';
 @import './StarRating.css';
-@import './CoverImage.css';
 @import './AlbumCard.css';
 @import './AlbumRow.css';
 @import './AlbumForm.css';

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'preact/hooks';
 import { api } from '../api/client.js';
 import { StarRating } from '../components/StarRating.jsx';
-import { CoverImage } from '../components/CoverImage.jsx';
+//import { CoverImage } from '../components/CoverImage.jsx';
 import { useI18n } from '../config/i18n/index.js';
 
 export function AlbumDetail({ navigate, albumId }) {

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'preact/hooks';
 import { api } from '../api/client.js';
 import { StarRating } from '../components/StarRating.jsx';
-import { CoverImage } from '../components/CoverImage.jsx';
+//import { CoverImage } from '../components/CoverImage.jsx';
 import { useI18n } from '../config/i18n/index.js';
 
 const EMPTY_FORM = {
@@ -232,7 +232,7 @@ export function AlbumForm({ navigate, albumId }) {
                   class="list-group-item list-group-item-action d-flex align-items-center gap-3"
                   onClick={() => selectRelease(r)}
                 >
-                  <CoverImage src={r.cover_url} title={r.title} size={40} />
+                  {/*<CoverImage src={r.cover_url} title={r.title} size={40} />*/}
                   <div class="flex-grow-1 text-start overflow-hidden">
                     <div class="fw-semibold text-truncate">{r.title}</div>
                     <div class="text-muted small">{r.artist_name} · {r.year || '?'} · {r.label_name}</div>
