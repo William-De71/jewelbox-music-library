@@ -1,4 +1,3 @@
-//import { CoverImage } from './CoverImage.jsx';
 import { StarRating } from './StarRating.jsx';
 
 export function AlbumRow({ album, onClick }) {

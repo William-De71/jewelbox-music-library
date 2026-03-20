@@ -252,7 +252,7 @@ export function AlbumForm({ navigate, albumId }) {
             <div class="card h-100">
               <div class="card-body d-flex flex-column align-items-center gap-3">
                 <div class="position-relative cover-preview">
-                  <CoverImage src={form.cover_url} title={form.title} size={180} className="w-100 h-100" />
+                  {/*<CoverImage src={form.cover_url} title={form.title} size={180} className="w-100 h-100" />*/}
                   {uploadingCover && (
                     <div class="position-absolute inset-0 d-flex align-items-center justify-content-center bg-dark bg-opacity-75 rounded">
                       <div class="spinner-border spinner-border-sm text-white"></div>
