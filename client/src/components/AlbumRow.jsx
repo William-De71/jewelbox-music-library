@@ -1,16 +1,34 @@
 import { StarRating } from './StarRating.jsx';
+import { getPlaceholderSVG } from '../utils/placeholder.js';
 
 export function AlbumRow({ album, onClick }) {
+
   return (
-    <tr class="album-row" onClick={() => onClick(album)}>
-      <td class="album-row-cover">
-        {/*<CoverImage src={album.cover_url} title={album.title} size={40} />*/}
+    <tr class="hover:bg-light-lt cursor-pointer" onClick={() => onClick(album)}>
+      <td class="text-center">
+        <div class="d-flex align-items-center justify-content-center" 
+          style={{width: '40px', height: '40px'}}>
+          {album.cover_url ? (
+            <img 
+              src={album.cover_url} 
+              alt={album.title}
+              class="rounded"
+              style={{width: '40px', height: '40px', objectFit: 'cover'}}
+              onError={(e) => {
+                e.target.style.display = 'none';
+                e.target.parentElement.innerHTML = getPlaceholderSVG();
+              }}
+            />
+          ) : (
+            <div dangerouslySetInnerHTML={{__html: getPlaceholderSVG()}}></div>
+          )}
+        </div>
       </td>
-      <td>{album.title}</td>
+      <td class="fw-medium">{album.title}</td>
       <td class="text-muted">{album.artist?.name || album.artist}</td>
       <td class="text-muted">{album.year || '—'}</td>
       <td>
-        {album.genre ? <span class="badge bg-blue-lt">{album.genre}</span> : '—'}
+        {album.genre ? <span class="badge bg-primary-lt">{album.genre}</span> : '—'}
       </td>
       <td>
         <StarRating value={album.rating} readOnly />

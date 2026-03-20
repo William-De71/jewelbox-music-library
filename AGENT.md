@@ -93,7 +93,29 @@ JewelBox-Music-Library/
 - Component-based with Preact hooks
 - Centralized i18n with useI18n hook
 - CSS extracted to separate files (no inline styles)
-- Lucide icons replacing Tabler where possible
+- **Lucide icons for UI components** (preferred over Tabler icons)
+
+### Icons Usage
+
+#### Lucide Icons (Preferred)
+
+- Import from `lucide-preact` package
+- Use as React components: `<IconName size={16} />`
+- Available icons: `Share`, `User`, `Calendar`, `Disc`, `X`, etc.
+- Example: `import { Share, User } from 'lucide-preact';`
+
+#### Tabler Icons (CSS only)
+
+- Use only for CSS classes where Lucide not available
+- Format: `<i class="ti ti-icon-name"></i>`
+- Note: Tabler icon fonts are NOT installed, avoid CSS icon classes
+
+#### SVG Icons (Fallback)
+
+- Use for complex placeholders that need DOM manipulation
+- Create reusable HTML functions: `getPlaceholderHTML()`
+- Use with `dangerouslySetInnerHTML` for JSX
+- Use with `innerHTML` for DOM manipulation in onError handlers
 
 ## Common Issues & Solutions
 

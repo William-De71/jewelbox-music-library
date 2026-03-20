@@ -1,21 +1,8 @@
 import { StarRating } from './StarRating.jsx';
 import { useI18n } from '../config/i18n/index.js';
 import { Share } from 'lucide-preact';
+import { getPlaceholderHTML } from '../utils/placeholder.js';
 
-// Placeholder
-function getPlaceholderHTML() {
-  return `
-    <div class="position-relative">
-      <svg class="text-muted opacity-50" width="48" height="48" fill="currentColor" viewBox="0 0 24 24">
-        <circle cx="12" cy="12" r="10"/>
-        <circle cx="12" cy="12" r="3" fill="white"/>
-      </svg>
-      <svg class="text-danger position-absolute top-0 start-100 translate-middle" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-      </svg>
-    </div>
-  `;
-}
 
 export function AlbumCard({ album, onClick, onEdit, onDelete, onLend, onRate }) {
   const { t } = useI18n();
