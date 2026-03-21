@@ -74,6 +74,11 @@ export async function albumRoutes(fastify) {
       }
     }
     
+    // Solution 3: Supprimer l'EAN s'il est vide pour éviter les conflits UNIQUE
+    if (!albumData.ean || albumData.ean.trim() === '') {
+      delete albumData.ean;
+    }
+    
     const album = createAlbum(albumData);
     return reply.code(201).send(album);
   });

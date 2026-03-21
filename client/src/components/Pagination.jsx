@@ -1,4 +1,8 @@
+import { ChevronLeft, ChevronRight } from 'lucide-preact';
+import { useI18n } from '../config/i18n/index.js';
+
 export function Pagination({ page, limit, total, onChange }) {
+  const { t } = useI18n();
   const totalPages = Math.ceil(total / limit);
   if (totalPages <= 1) return null;
 
@@ -13,8 +17,8 @@ export function Pagination({ page, limit, total, onChange }) {
     <ul class="pagination justify-content-center m-0">
       <li class={`page-item ${page === 1 ? 'disabled' : ''}`}>
         <button class="page-link" onClick={() => onChange(page - 1)}>
-          <i class="ti ti-chevron-left"></i>
-          <span class="sr-only">Précédent</span>
+          <ChevronLeft size={16} />
+          <span class="visually-hidden">{t('pagination.previous')}</span>
         </button>
       </li>
 
@@ -44,8 +48,8 @@ export function Pagination({ page, limit, total, onChange }) {
 
       <li class={`page-item ${page === totalPages ? 'disabled' : ''}`}>
         <button class="page-link" onClick={() => onChange(page + 1)}>
-          <i class="ti ti-chevron-right"></i>
-          <span class="sr-only">Suivant</span>
+          <ChevronRight size={16} />
+          <span class="visually-hidden">{t('pagination.next')}</span>
         </button>
       </li>
     </ul>
