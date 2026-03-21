@@ -4,7 +4,6 @@ import { useI18n } from '../config/i18n/index.js';
 export function Pagination({ page, limit, total, onChange }) {
   const { t } = useI18n();
   const totalPages = Math.ceil(total / limit);
-  if (totalPages <= 1) return null;
 
   const pages = [];
   const delta = 2;
@@ -14,7 +13,7 @@ export function Pagination({ page, limit, total, onChange }) {
   for (let i = left; i <= right; i++) pages.push(i);
 
   return (
-    <ul class="pagination justify-content-center m-0">
+    <ul class="pagination m-0">
       <li class={`page-item ${page === 1 ? 'disabled' : ''}`}>
         <button class="page-link" onClick={() => onChange(page - 1)}>
           <ChevronLeft size={16} />

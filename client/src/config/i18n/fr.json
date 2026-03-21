@@ -33,6 +33,7 @@
     "pagination": {
       "previous": "Précédent",
       "next": "Suivant",
+      "itemsPerPage": "Éléments par page",
       "showing": "Affichage de {start}-{end} sur {total} albums"
     }
   },
@@ -136,6 +137,7 @@
     "home": "Accueil",
     "lightMode": "Mode clair",
     "darkMode": "Mode sombre",
+    "all": "Tous",
     "star": "étoile",
     "stars": "étoiles",
     "album": "Album",

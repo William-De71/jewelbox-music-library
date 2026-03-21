@@ -5,8 +5,11 @@ import { AlbumRow } from '../components/AlbumRow.jsx';
 import { Pagination } from '../components/Pagination.jsx';
 import { StatsCard } from '../components/StatsCard.jsx';
 import { useI18n } from '../config/i18n/index.js';
+import { Search, Grid, List } from 'lucide-preact';
+import '../styles/custom-grid.css';
 
-const LIMIT = 24;
+const LIMIT_OPTIONS = [10, 20, 50, 100, 999999];
+const DEFAULT_LIMIT = 20;
 
 export function Dashboard({ navigate }) {
   const { t } = useI18n();
@@ -18,8 +21,12 @@ export function Dashboard({ navigate }) {
     return saved || 'grid';
   });
   const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(() => {
+    const saved = localStorage.getItem('jewelbox-limit');
+    return saved ? Number(saved) : DEFAULT_LIMIT;
+  });
   const [genres, setGenres] = useState([]);
-  const [filters, setFilters] = useState({ genre: '', rating: '', search: '', sort: 'title', order: 'asc' });
+  const [filters, setFilters] = useState({ genre: '', rating: '', search: '', sort: 'artist', order: 'asc' });
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [lendTarget, setLendTarget] = useState(null);
   const [lentTo, setLentTo] = useState('');
@@ -44,7 +51,7 @@ export function Dashboard({ navigate }) {
     const loadAlbums = async () => {
       setLoading(true);
       try {
-        const result = await api.getAlbums({ page, limit: LIMIT, ...filters });
+        const result = await api.getAlbums({ page, limit, ...filters });
         setAlbums(result.data);
         setTotal(result.total);
       } catch (e) {
@@ -55,12 +62,22 @@ export function Dashboard({ navigate }) {
     };
     
     loadAlbums();
-  }, [page, filters]);
+  }, [page, limit, filters]);
+
+  useEffect(() => {
+    localStorage.setItem('jewelbox-limit', limit);
+  }, [limit]);
 
   const setFilter = (key, value) => {
     const next = { ...filters, [key]: value };
     setFilters(next);
     setPage(1);
+  };
+
+  const handleLimitChange = (newLimit) => {
+    setLimit(Number(newLimit));
+    setPage(1);
+    localStorage.setItem('jewelbox-limit', newLimit);
   };
 
   const handleSearch = (e) => {
@@ -75,7 +92,7 @@ export function Dashboard({ navigate }) {
       await api.deleteAlbum(deleteTarget.id);
       showToast(t('messages.albumDeleted', { title: deleteTarget.title }));
       setDeleteTarget(null);
-      const result = await api.getAlbums({ page, limit: LIMIT, ...filters });
+      const result = await api.getAlbums({ page, limit, ...filters });
       setAlbums(result.data);
       setTotal(result.total);
     } catch (e) {
@@ -91,7 +108,7 @@ export function Dashboard({ navigate }) {
       showToast(is_lent ? t('messages.albumLent', { title: lendTarget.title }) : t('messages.albumReturned', { title: lendTarget.title }));
       setLendTarget(null);
       setLentTo('');
-      const result = await api.getAlbums({ page, limit: LIMIT, ...filters });
+      const result = await api.getAlbums({ page, limit, ...filters });
       setAlbums(result.data);
       setTotal(result.total);
     } catch (e) {
@@ -103,7 +120,7 @@ export function Dashboard({ navigate }) {
     try {
       await api.updateAlbum(album.id, { rating });
       showToast(t('messages.ratingUpdated', { title: album.title }));
-      const result = await api.getAlbums({ page, limit: LIMIT, ...filters });
+      const result = await api.getAlbums({ page, limit, ...filters });
       setAlbums(result.data);
       setTotal(result.total);
     } catch (e) {
@@ -163,22 +180,21 @@ export function Dashboard({ navigate }) {
         <div class="card mb-3">
           <div class="card-body">
             <div class="row g-2">
-                <div class="col-md-4">
-                  <input
-                    type="text"
-                    class="form-control"
-                    placeholder={t('dashboard.searchPlaceholder')}
-                    ref={searchRef}
-                    onKeyPress={handleSearch}
-                  />
+                <div class="col-md-5">
+                  <div class="input-group">
+                    <input
+                      type="text"
+                      class="form-control"
+                      placeholder={t('dashboard.searchPlaceholder')}
+                      ref={searchRef}
+                      onKeyPress={handleSearch}
+                    />
+                    <button class="btn btn-outline-secondary" type="button" onClick={handleSearch}>
+                      <Search size={16} />
+                    </button>
+                  </div>
                 </div>
-                <div class="col-md-2">
-                  <select class="form-select" value={filters.genre} onChange={(e) => setFilter('genre', e.target.value)}>
-                    <option value="">{t('filters.allGenres')}</option>
-                    {genres.map(g => <option key={g} value={g}>{g}</option>)}
-                  </select>
-                </div>
-                <div class="col-md-2">
+                <div class="col-md-3">
                   <select class="form-select" value={filters.rating} onChange={(e) => setFilter('rating', e.target.value)}>
                     <option value="">{t('filters.allRatings')}</option>
                     {[5, 4, 3, 2, 1].map(r => <option key={r} value={r}>{r > 1 ? t('filters.starsPlural', { count: r }) : t('filters.stars', { count: r })}</option>)}
@@ -193,18 +209,16 @@ export function Dashboard({ navigate }) {
                     <option value="title_desc">{t('filters.sortTitleDesc')}</option>
                     <option value="artist_asc">{t('filters.sortArtistAsc')}</option>
                     <option value="artist_desc">{t('filters.sortArtistDesc')}</option>
-                    <option value="year_desc">{t('filters.sortYearDesc')}</option>
-                    <option value="year_asc">{t('filters.sortYearAsc')}</option>
                   </select>
                 </div>
                 <div class="col-md-2">
                   <div class="btn-group w-100">
                     <button class={`btn ${viewMode === 'grid' ? 'btn-primary' : 'btn-outline-secondary'}`} onClick={() => setViewMode('grid')}>
-                      <i class="ti ti-layout-grid me-1"></i>
+                      <Grid size={16} class="me-1" />
                       {t('common.grid')}
                     </button>
                     <button class={`btn ${viewMode === 'list' ? 'btn-primary' : 'btn-outline-secondary'}`} onClick={() => setViewMode('list')}>
-                      <i class="ti ti-list me-1"></i>
+                      <List size={16} class="me-1" />
                       {t('common.list')}
                     </button>
                   </div>
@@ -231,55 +245,77 @@ export function Dashboard({ navigate }) {
             </div>
           )}
 
-          {!loading && viewMode === 'grid' && albums.length > 0 && (
-            <div class="row row-cards">
-              {albums.map(album => (
-                <div class="col-sm-6 col-lg-3" key={album.id}>
-                  <AlbumCard
-                    album={album}
-                    onClick={(a) => navigate('detail', { id: a.id })}
-                    onEdit={(a) => navigate('edit', { id: a.id })}
-                    onDelete={(a) => setDeleteTarget(a)}
-                    onLend={(a) => { setLendTarget(a); setLentTo(a.lent_to || ''); }}
-                    onRate={handleRate}
-                  />
-                </div>
-              ))}
-            </div>
-          )}
-
-          {!loading && viewMode === 'list' && albums.length > 0 && (
-            <div class="card">
-              <div class="table-responsive">
-                <table class="table table-vcenter card-table">
-                  <thead>
-                    <tr>
-                      <th>{t('table.cover')}</th>
-                      <th>{t('table.title')}</th>
-                      <th>{t('table.artist')}</th>
-                      <th>{t('table.year')}</th>
-                      <th>{t('table.genre')}</th>
-                      <th>{t('table.rating')}</th>
-                      <th>{t('table.label')}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {albums.map(album => (
-                      <AlbumRow
-                        key={album.id}
+          {!loading && albums.length > 0 && (
+            <div class="card mb-3">
+              <div class="card-body">
+                <div class="container">
+                  {viewMode === 'grid' && (
+                    <div class="row row-cards">
+                  {albums.map(album => (
+                    <div class="col-sm-6 col-lg-2 five-columns" key={album.id}>
+                      <AlbumCard
                         album={album}
                         onClick={(a) => navigate('detail', { id: a.id })}
+                        onEdit={(a) => navigate('edit', { id: a.id })}
+                        onDelete={(a) => setDeleteTarget(a)}
+                        onLend={(a) => { setLendTarget(a); setLentTo(a.lent_to || ''); }}
+                        onRate={handleRate}
                       />
-                    ))}
-                  </tbody>
-                </table>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {viewMode === 'list' && (
+                <div class="card">
+                  <div class="table-responsive">
+                    <table class="table table-vcenter card-table">
+                      <thead>
+                        <tr>
+                          <th>{t('table.cover')}</th>
+                          <th>{t('table.title')}</th>
+                          <th>{t('table.artist')}</th>
+                          <th>{t('table.year')}</th>
+                          <th>{t('table.genre')}</th>
+                          <th>{t('table.rating')}</th>
+                          <th>{t('table.actions')}</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {albums.map(album => (
+                          <AlbumRow
+                            key={album.id}
+                            album={album}
+                            onClick={(a) => navigate('detail', { id: a.id })}
+                            onEdit={(a) => navigate('edit', { id: a.id })}
+                            onDelete={(a) => setDeleteTarget(a)}
+                            onLend={(a) => { setLendTarget(a); setLentTo(a.lent_to || ''); }}
+                            onRate={handleRate}
+                          />
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              <div class="mt-4 d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center gap-2">
+                  <span class="text-muted me-2">{t('dashboard.pagination.itemsPerPage')}</span>
+                  <select class="form-select form-select-sm" style="width: auto;" value={limit} onChange={(e) => handleLimitChange(e.target.value)}>
+                    <option value="10">10</option>
+                    <option value="20">20</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                    <option value="999999">{t('common.all')}</option>
+                  </select>
+                </div>
+                <Pagination page={page} limit={limit} total={total} onChange={setPage} />
+              </div>
+                </div>
               </div>
             </div>
           )}
-
-        {!loading && albums.length > 0 && (
-          <Pagination page={page} limit={LIMIT} total={total} onChange={setPage} />
-        )}
       </div>
 
       {deleteTarget && (

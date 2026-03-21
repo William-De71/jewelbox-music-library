@@ -1,0 +1,14 @@
+/* Custom grid for 5 cards per row */
+.five-columns {
+  flex: 0 0 auto !important;
+  width: 20% !important;
+  max-width: 20% !important;
+}
+
+@media (min-width: 992px) {
+  .col-lg-2.five-columns {
+    flex: 0 0 auto !important;
+    width: 20% !important;
+    max-width: 20% !important;
+  }
+}
