@@ -176,57 +176,7 @@ export function Dashboard({ navigate }) {
           </button>
         </div>
 
-        {/* Filters Section */}
-        <div class="card mb-3">
-          <div class="card-body">
-            <div class="row g-2">
-                <div class="col-md-5">
-                  <div class="input-group">
-                    <input
-                      type="text"
-                      class="form-control"
-                      placeholder={t('dashboard.searchPlaceholder')}
-                      ref={searchRef}
-                      onKeyPress={handleSearch}
-                    />
-                    <button class="btn btn-outline-secondary" type="button" onClick={handleSearch}>
-                      <Search size={16} />
-                    </button>
-                  </div>
-                </div>
-                <div class="col-md-3">
-                  <select class="form-select" value={filters.rating} onChange={(e) => setFilter('rating', e.target.value)}>
-                    <option value="">{t('filters.allRatings')}</option>
-                    {[5, 4, 3, 2, 1].map(r => <option key={r} value={r}>{r > 1 ? t('filters.starsPlural', { count: r }) : t('filters.stars', { count: r })}</option>)}
-                  </select>
-                </div>
-                <div class="col-md-2">
-                  <select class="form-select" value={`${filters.sort}_${filters.order}`} onChange={(e) => {
-                    const [sort, order] = e.target.value.split('_');
-                    setFilters({ ...filters, sort, order });
-                  }}>
-                    <option value="title_asc">{t('filters.sortTitleAsc')}</option>
-                    <option value="title_desc">{t('filters.sortTitleDesc')}</option>
-                    <option value="artist_asc">{t('filters.sortArtistAsc')}</option>
-                    <option value="artist_desc">{t('filters.sortArtistDesc')}</option>
-                  </select>
-                </div>
-                <div class="col-md-2">
-                  <div class="btn-group w-100">
-                    <button class={`btn ${viewMode === 'grid' ? 'btn-primary' : 'btn-outline-secondary'}`} onClick={() => setViewMode('grid')}>
-                      <Grid size={16} class="me-1" />
-                      {t('common.grid')}
-                    </button>
-                    <button class={`btn ${viewMode === 'list' ? 'btn-primary' : 'btn-outline-secondary'}`} onClick={() => setViewMode('list')}>
-                      <List size={16} class="me-1" />
-                      {t('common.list')}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
+        
           {loading && (
             <div class="text-center py-5">
               <div class="spinner-border" role="status"></div>
@@ -248,7 +198,60 @@ export function Dashboard({ navigate }) {
           {!loading && albums.length > 0 && (
             <div class="card mb-3">
               <div class="card-body">
-                <div class="container">
+                {/* Top controls */}
+                <div class="row g-2 align-items-center mb-4">
+                  <div class="col-md-3">
+                    <div class="d-flex align-items-center gap-2">
+                      <span class="text-muted me-2">{t('dashboard.pagination.itemsPerPage')}</span>
+                      <select class="form-select form-select-sm" style="width: auto;" value={limit} onChange={(e) => handleLimitChange(e.target.value)}>
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                        <option value="999999">{t('common.all')}</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="col-md-5">
+                    <div class="input-group">
+                      <input
+                        type="text"
+                        class="form-control"
+                        placeholder={t('dashboard.searchPlaceholder')}
+                        ref={searchRef}
+                        onKeyPress={handleSearch}
+                      />
+                      <button class="btn btn-outline-secondary" type="button" onClick={handleSearch}>
+                        <Search size={16} />
+                      </button>
+                    </div>
+                  </div>
+                  <div class="col-md-2">
+                    <select class="form-select" value={`${filters.sort}_${filters.order}`} onChange={(e) => {
+                      const [sort, order] = e.target.value.split('_');
+                      setFilters({ ...filters, sort, order });
+                    }}>
+                      <option value="title_asc">{t('filters.sortTitleAsc')}</option>
+                      <option value="title_desc">{t('filters.sortTitleDesc')}</option>
+                      <option value="artist_asc">{t('filters.sortArtistAsc')}</option>
+                      <option value="artist_desc">{t('filters.sortArtistDesc')}</option>
+                    </select>
+                  </div>
+                  <div class="col-md-2">
+                    <div class="btn-group w-100">
+                      <button class={`btn ${viewMode === 'grid' ? 'btn-primary' : 'btn-outline-secondary'}`} onClick={() => setViewMode('grid')}>
+                        <Grid size={16} class="me-1" />
+                        {t('common.grid')}
+                      </button>
+                      <button class={`btn ${viewMode === 'list' ? 'btn-primary' : 'btn-outline-secondary'}`} onClick={() => setViewMode('list')}>
+                        <List size={16} class="me-1" />
+                        {t('common.list')}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Grid/List content */}
                   {viewMode === 'grid' && (
                     <div class="row row-cards">
                   {albums.map(album => (
@@ -299,20 +302,17 @@ export function Dashboard({ navigate }) {
                 </div>
               )}
 
+              {/* Bottom controls */}
               <div class="mt-4 d-flex justify-content-between align-items-center">
-                <div class="d-flex align-items-center gap-2">
-                  <span class="text-muted me-2">{t('dashboard.pagination.itemsPerPage')}</span>
-                  <select class="form-select form-select-sm" style="width: auto;" value={limit} onChange={(e) => handleLimitChange(e.target.value)}>
-                    <option value="10">10</option>
-                    <option value="20">20</option>
-                    <option value="50">50</option>
-                    <option value="100">100</option>
-                    <option value="999999">{t('common.all')}</option>
-                  </select>
+                <div class="text-muted">
+                  {t('dashboard.pagination.showing', { 
+                    start: (page - 1) * limit + 1, 
+                    end: Math.min(page * limit, total), 
+                    total 
+                  })}
                 </div>
                 <Pagination page={page} limit={limit} total={total} onChange={setPage} />
               </div>
-                </div>
               </div>
             </div>
           )}
