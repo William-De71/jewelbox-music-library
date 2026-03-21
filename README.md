@@ -22,7 +22,7 @@ A Progressive Web App (PWA) for managing your physical CD collection, built with
 
 ## 🗂️ Structure du projet
 
-```
+```bash
 JewelBox-Music-Library/
 ├── client/                  # Frontend Preact
 │   ├── public/
@@ -79,6 +79,7 @@ tracks     (id, album_id→albums CASCADE, position, title, duration)
 ## 🚀 Démarrage rapide (développement)
 
 ### Prérequis
+
 - Node.js 20+
 - npm 9+
 
@@ -143,12 +144,12 @@ L'application sera disponible sur **http://localhost:3001**
 ### Variables d'environnement
 
 | Variable       | Default              | Description                     |
-|---------------|----------------------|---------------------------------|
-| `PORT`        | `3001`               | Port du serveur                 |
-| `HOST`        | `0.0.0.0`            | Interface d'écoute              |
-| `DB_PATH`     | `./data/jewelbox.db` | Chemin vers la base SQLite      |
-| `UPLOADS_DIR` | `./data/uploads`     | Dossier pour les pochettes      |
-| `CORS_ORIGIN` | `true`               | Origines CORS autorisées        |
+|----------------|----------------------|---------------------------------|
+| `PORT`         | `3001`               | Port du serveur                 |
+| `HOST`         | `0.0.0.0`            | Interface d'écoute              |
+| `DB_PATH`      | `./data/jewelbox.db` | Chemin vers la base SQLite      |
+| `UPLOADS_DIR`  | `./data/uploads`     | Dossier pour les pochettes      |
+| `CORS_ORIGIN`  | `true`               | Origines CORS autorisées        |
 
 ---
 
@@ -188,11 +189,13 @@ L'application sera disponible sur **http://localhost:3001**
 ## 📱 PWA
 
 L'application inclut un **manifest** et un **Service Worker** (via Workbox/vite-plugin-pwa) permettant :
+
 - Installation sur l'écran d'accueil (mobile & desktop)
 - Mise en cache des assets statiques
 - Cache réseau pour les requêtes API albums
 - Cache des pochettes depuis Cover Art Archive
 
 Pour générer les icônes PWA, placez vos images dans `client/public/icons/` :
+
 - `icon-192.png` (192×192)
 - `icon-512.png` (512×512)

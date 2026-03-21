@@ -5,17 +5,17 @@ export function TopMenu({ currentPage, navigate }) {
   const { t } = useI18n();
   
   return (
-    <nav class="top-menu">
-      <div class="header-container">
-        <ul class="menu-list">
-          <li class="menu-item">
+    <nav class="navbar navbar-expand">
+      <div class="container">
+        <ul class="navbar-nav">
+          <li class="nav-item">
             <a 
-              class={`menu-link ${currentPage === 'dashboard' ? 'active' : ''}`}
+              class={`nav-link ${currentPage === 'dashboard' ? 'active' : ''}`}
               href="#"
               onClick={(e) => { e.preventDefault(); navigate('dashboard'); }}
             >
-              <Home size={20} />
-              <span>{t('common.home')}</span>
+              <Home size={20} class="me-2" />
+              {t('common.home')}
             </a>
           </li>
         </ul>
