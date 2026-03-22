@@ -33,9 +33,10 @@ export const api = {
   getLabels: () => request('GET', '/labels'),
 
   // External search
-  search: (q) => request('GET', `/search?q=${encodeURIComponent(q)}`),
-  searchByEan: (ean) => request('GET', `/search?ean=${encodeURIComponent(ean)}`),
+  search: (q, source = 'musicbrainz') => request('GET', `/search?q=${encodeURIComponent(q)}&source=${source}`),
+  searchByEan: (ean, source = 'musicbrainz') => request('GET', `/search?ean=${encodeURIComponent(ean)}&source=${source}`),
   getRelease: (mbid) => request('GET', `/search/${mbid}`),
+  getDiscogsRelease: (id) => request('GET', `/search/discogs/${id}`),
 
   // Cover upload
   uploadCover: async (file) => {

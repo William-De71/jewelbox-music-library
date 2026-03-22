@@ -7,6 +7,7 @@ const MB_HEADERS = {
 };
 
 import { getCacheKey, getFromCache, setCache } from '../utils/searchCache.js';
+import { searchDiscogsByQuery, searchDiscogsByBarcode, getDiscogsRelease, isDiscogsConfigured } from '../utils/discogs.js';
 
 let lastRequestTime = 0;
 const MIN_REQUEST_INTERVAL = 10000; // 10 seconds between requests (MusicBrainz rate limit - extremely conservative)
@@ -165,7 +166,7 @@ function normalizeMBRelease(r) {
     year,
     genre,
     ean: r.barcode || '',
-    cover_url: r.id ? `https://coverartarchive.org/release/${r.id}/front-250` : '',
+    cover_url: r.id ? `https://coverartarchive.org/release/${r.id}/front-250` : '', // Keep original URL
     total_duration: totalMs ? msToMMSS(totalMs) : '',
     tracks,
   };
@@ -182,29 +183,44 @@ export async function searchRoutes(fastify) {
   // GET /api/search?q=<query>   →  search by title/artist
   // GET /api/search?ean=<ean>   →  lookup by barcode
   fastify.get('/search', async (req, reply) => {
-    const { q, ean } = req.query;
+    const { q, ean, source = 'musicbrainz' } = req.query;
 
     if (!q && !ean) {
       return reply.code(400).send({ error: 'Provide q or ean parameter' });
     }
 
+    if (!['musicbrainz', 'discogs'].includes(source)) {
+      return reply.code(400).send({ error: 'Source must be musicbrainz or discogs' });
+    }
+
     try {
       if (ean) {
-        const result = await searchByEAN(ean);
-        if (!result) return reply.code(404).send({ error: 'No release found for this barcode' });
-        const full = await getFullRelease(result.mbid);
-        return full;
+        if (source === 'discogs') {
+          const result = await searchDiscogsByBarcode(ean);
+          if (!result) return reply.code(404).send({ error: 'No release found for this barcode' });
+          return result;
+        } else {
+          const result = await searchByEAN(ean);
+          if (!result) return reply.code(404).send({ error: 'No release found for this barcode' });
+          const full = await getFullRelease(result.mbid);
+          return full;
+        }
       }
 
-      const results = await searchByQuery(q);
-      return results;
+      if (source === 'discogs') {
+        const results = await searchDiscogsByQuery(q);
+        return results;
+      } else {
+        const results = await searchByQuery(q);
+        return results;
+      }
     } catch (err) {
       fastify.log.error(err);
       return reply.code(200).send([]);
     }
   });
 
-  // GET /api/search/:mbid  →  get full release details
+  // GET /api/search/:mbid  →  get full release details (MusicBrainz)
   fastify.get('/search/:mbid', async (req, reply) => {
     try {
       const full = await getFullRelease(req.params.mbid);
@@ -214,6 +230,20 @@ export async function searchRoutes(fastify) {
       // Return error message instead of 502 when MusicBrainz is unavailable
       return reply.code(404).send({ 
         error: 'MusicBrainz service temporarily unavailable. Please try again later.',
+        fallback: true
+      });
+    }
+  });
+
+  // GET /api/search/discogs/:id  →  get full Discogs release details
+  fastify.get('/search/discogs/:id', async (req, reply) => {
+    try {
+      const full = await getDiscogsRelease(req.params.id);
+      return full;
+    } catch (err) {
+      fastify.log.error(err);
+      return reply.code(404).send({ 
+        error: 'Discogs service temporarily unavailable. Please try again later.',
         fallback: true
       });
     }

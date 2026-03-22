@@ -30,9 +30,12 @@
   "albumForm": {
     "title": "Ajouter un album",
     "editTitle": "Modifier l'album",
-    "externalSearch": "Recherche automatique (MusicBrainz)",
+    "externalSearch": "Recherche automatique",
     "externalSearchPlaceholder": "Titre, artiste ou EAN (ex: 724385 586323)",
     "externalSearchHelp": "Recherchez par titre, artiste ou EAN/code-barres pour pré-remplir le formulaire automatiquement.",
+    "searchSource": "Source de recherche",
+    "musicbrainz": "MusicBrainz",
+    "discogs": "Discogs",
     "search": "Rechercher",
     "clear": "Effacer",
     "infoTitle": "Informations",

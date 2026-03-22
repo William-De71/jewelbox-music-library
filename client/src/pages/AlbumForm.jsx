@@ -21,6 +21,7 @@ export function AlbumForm({ navigate, albumId }) {
   const [searchResults, setSearchResults] = useState([]);
   const [searching, setSearching] = useState(false);
   const [searchError, setSearchError] = useState(null);
+  const [searchSource, setSearchSource] = useState('musicbrainz');
   const [uploadingCover, setUploadingCover] = useState(false);
   const coverInputRef = useRef();
 
@@ -81,10 +82,10 @@ export function AlbumForm({ navigate, albumId }) {
     try {
       const isEAN = /^\d{8,13}$/.test(searchQuery.trim());
       if (isEAN) {
-        const result = await api.searchByEan(searchQuery.trim());
+        const result = await api.searchByEan(searchQuery.trim(), searchSource);
         applyResult(result);
       } else {
-        const results = await api.search(searchQuery.trim());
+        const results = await api.search(searchQuery.trim(), searchSource);
         setSearchResults(results);
       }
     } catch (e) {
@@ -114,7 +115,12 @@ export function AlbumForm({ navigate, albumId }) {
   const selectRelease = async (r) => {
     setSearching(true);
     try {
-      const full = await api.getRelease(r.mbid);
+      let full;
+      if (r.source === 'discogs') {
+        full = await api.getDiscogsRelease(r.id);
+      } else {
+        full = await api.getRelease(r.mbid);
+      }
       applyResult(full);
     } catch {
       applyResult(r);
@@ -199,27 +205,43 @@ export function AlbumForm({ navigate, albumId }) {
         <div class="card-header">
           <h3 class="card-title">
             <i class="ti ti-search me-2 text-primary"></i>
-            Recherche automatique (MusicBrainz)
+            {t('albumForm.externalSearch')}
           </h3>
         </div>
         <div class="card-body">
           <p class="text-muted small mb-2">
             {t('albumForm.externalSearchHelp')}
           </p>
-          <div class="input-group">
-            <input
-              type="text"
-              class="form-control"
-              placeholder={t('albumForm.externalSearchPlaceholder')}
-              value={searchQuery}
-              onInput={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-            />
-            <button class="btn btn-outline-primary" type="button" onClick={handleSearch} disabled={searching}>
-              {searching
-                ? <span class="spinner-border spinner-border-sm"></span>
-                : <><i class="ti ti-search me-1"></i>{t('albumForm.search')}</>}
-            </button>
+          <div class="row g-2 mb-3">
+            <div class="col-md-4">
+              <label class="form-label small">{t('albumForm.searchSource')}</label>
+              <select 
+                class="form-select form-select-sm" 
+                value={searchSource} 
+                onChange={(e) => setSearchSource(e.target.value)}
+              >
+                <option value="musicbrainz">{t('albumForm.musicbrainz')}</option>
+                <option value="discogs">{t('albumForm.discogs')}</option>
+              </select>
+            </div>
+            <div class="col-md-8">
+              <label class="form-label small">&nbsp;</label>
+              <div class="input-group">
+                <input
+                  type="text"
+                  class="form-control"
+                  placeholder={t('albumForm.externalSearchPlaceholder')}
+                  value={searchQuery}
+                  onInput={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                />
+                <button class="btn btn-outline-primary" type="button" onClick={handleSearch} disabled={searching}>
+                  {searching
+                    ? <span class="spinner-border spinner-border-sm"></span>
+                    : <><i class="ti ti-search me-1"></i>{t('albumForm.search')}</>}
+                </button>
+              </div>
+            </div>
           </div>
           {searchError && <div class="text-danger small mt-1"><i class="ti ti-alert-circle me-1"></i>{searchError}</div>}
 
@@ -228,7 +250,7 @@ export function AlbumForm({ navigate, albumId }) {
             <div class="list-group mt-2 search-results-dropdown">
               {searchResults.map((r) => (
                 <button
-                  key={r.mbid}
+                  key={r.mbid || r.id}
                   type="button"
                   class="list-group-item list-group-item-action d-flex align-items-center gap-3"
                   onClick={() => selectRelease(r)}

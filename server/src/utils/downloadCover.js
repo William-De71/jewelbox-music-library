@@ -25,9 +25,31 @@ export async function downloadCover(imageUrl) {
   try {
     console.log(`[DownloadCover] Downloading: ${imageUrl}`);
     
-    const response = await fetch(imageUrl);
+    // Add headers for Discogs and other external sites
+    const headers = {
+      'User-Agent': 'JewelBox-Music-Library/1.0 ( https://github.com/william/jewelbox-music-library )',
+    };
+    
+    // Add Discogs authentication if this is a Discogs URL
+    if (imageUrl.includes('discogs.com')) {
+      const DISCOGS_KEY = process.env.DISCOGS_KEY;
+      const DISCOGS_SECRET = process.env.DISCOGS_SECRET;
+      if (DISCOGS_KEY && DISCOGS_SECRET) {
+        headers['Authorization'] = `Discogs key=${DISCOGS_KEY}, secret=${DISCOGS_SECRET}`;
+        console.log(`[DownloadCover] Using Discogs authentication for image`);
+      }
+    }
+    
+    const response = await fetch(imageUrl, { headers });
     if (!response.ok) {
       console.error(`[DownloadCover] HTTP ${response.status} for ${imageUrl}`);
+      return null;
+    }
+
+    // Check content type
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.startsWith('image/')) {
+      console.error(`[DownloadCover] Not an image: ${contentType} for ${imageUrl}`);
       return null;
     }
 
@@ -37,16 +59,23 @@ export async function downloadCover(imageUrl) {
 
     // Generate a unique filename using hash
     const hash = crypto.createHash('md5').update(imageUrl).digest('hex');
-    const ext = path.extname(new URL(imageUrl).pathname) || '.jpg';
-    const filename = `${hash}${ext}`;
-    const filepath = path.join(UPLOADS_DIR, filename);
+    
+    // Better extension detection from content type
+    let ext = '.jpg';
+    if (contentType.includes('png')) ext = '.png';
+    else if (contentType.includes('webp')) ext = '.webp';
+    else if (contentType.includes('gif')) ext = '.gif';
+    else ext = path.extname(new URL(imageUrl).pathname) || '.jpg';
+    
+    const fileHash = `${hash}${ext}`;
+    const filePath = path.join(UPLOADS_DIR, fileHash);
 
     // Save the file
-    fs.writeFileSync(filepath, imageBuffer);
-    console.log(`[DownloadCover] Saved to: ${filename}`);
+    fs.writeFileSync(filePath, imageBuffer);
+    console.log(`[DownloadCover] Saved to: ${fileHash}`);
 
     // Return the local URL path
-    return `/uploads/${filename}`;
+    return `/uploads/${fileHash}`;
   } catch (err) {
     console.error(`[DownloadCover] Failed to download ${imageUrl}:`, err.message);
     return null;

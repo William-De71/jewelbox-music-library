@@ -62,16 +62,23 @@ export async function albumRoutes(fastify) {
   }, async (req, reply) => {
     const albumData = { ...req.body };
     
-    // If cover_url is from coverartarchive.org, download it locally
-    if (albumData.cover_url && albumData.cover_url.includes('coverartarchive.org')) {
-      console.log('[CreateAlbum] Downloading cover from CoverArtArchive...');
+    // If cover_url is from external sources, download it locally
+    if (albumData.cover_url && (
+      albumData.cover_url.includes('coverartarchive.org') || 
+      albumData.cover_url.includes('discogs.com') ||
+      albumData.cover_url.includes('i.discogs.com')
+    )) {
+      const source = albumData.cover_url.includes('discogs.com') ? 'Discogs' : 'MusicBrainz';
+      console.log(`[CreateAlbum] Downloading cover from ${source}: ${albumData.cover_url}`);
       const localCoverUrl = await downloadCover(albumData.cover_url);
       if (localCoverUrl) {
         albumData.cover_url = localCoverUrl;
-        console.log('[CreateAlbum] Cover downloaded successfully:', localCoverUrl);
+        console.log(`[CreateAlbum] Cover downloaded successfully: ${localCoverUrl}`);
       } else {
-        console.log('[CreateAlbum] Cover download failed, keeping original URL');
+        console.log(`[CreateAlbum] Cover download failed, keeping original URL: ${albumData.cover_url}`);
       }
+    } else {
+      console.log(`[CreateAlbum] No external cover URL detected: ${albumData.cover_url}`);
     }
     
     // Solution 3: Supprimer l'EAN s'il est vide pour éviter les conflits UNIQUE
