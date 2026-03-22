@@ -1,26 +1,10 @@
 {
-  "nav": {
-    "dashboard": "Tableau de bord",
-    "addAlbum": "Ajouter un album",
-    "settings": "Paramètres"
-  },
   "dashboard": {
     "title": "JewelBox Music Library",
     "subtitle": "Parce que vos albums méritent mieux qu'une simple étagère.",
     "searchPlaceholder": "Rechercher un album, un artiste...",
     "noAlbums": "Aucun album trouvé",
-    "noAlbumsFilter": "Aucun album ne correspond à vos filtres",
     "addFirstAlbum": "Ajouter votre premier album",
-    "viewMode": {
-      "grid": "Grille de pochettes",
-      "list": "Liste détaillée"
-    },
-    "filters": {
-      "genre": "Genre",
-      "rating": "Note",
-      "allGenres": "Tous les genres",
-      "allRatings": "Toutes les notes"
-    },
     "sort": {
       "by": "Trier par",
       "title": "Titre",
@@ -177,9 +161,7 @@
     "sortTitleAsc": "Titre A→Z",
     "sortTitleDesc": "Titre Z→A",
     "sortArtistAsc": "Artiste A→Z",
-    "sortArtistDesc": "Artiste Z→A",
-    "sortYearDesc": "Année ↓",
-    "sortYearAsc": "Année ↑"
+    "sortArtistDesc": "Artiste Z→A"
   },
   "stats": {
     "albums": "{count} album",

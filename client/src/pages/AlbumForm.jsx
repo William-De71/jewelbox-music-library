@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'preact/hooks';
 import { api } from '../api/client.js';
 import { StarRating } from '../components/StarRating.jsx';
+import { Plus } from 'lucide-preact';
 //import { CoverImage } from '../components/CoverImage.jsx';
 import { useI18n } from '../config/i18n/index.js';
 
@@ -384,7 +385,7 @@ export function AlbumForm({ navigate, albumId }) {
               <div class="card-header d-flex align-items-center">
                 <h3 class="card-title mb-0"><i class="ti ti-list-numbers me-2"></i>{t('albumForm.tracksTitle')}</h3>
                 <button type="button" class="btn btn-sm btn-outline-primary ms-auto" onClick={addTrack}>
-                  <i class="ti ti-plus me-1"></i>{t('albumForm.form.addTrack')}
+                  <Plus size={16} class="me-1" />{t('albumForm.form.addTrack')}
                 </button>
               </div>
               {form.tracks.length > 0 ? (
@@ -441,7 +442,9 @@ export function AlbumForm({ navigate, albumId }) {
               ) : (
                 <div class="card-body text-center text-muted py-3">
                   <i class="ti ti-music-off me-1"></i>{t('albumForm.form.noTracks')}
-                  <button type="button" class="btn btn-link p-0 ms-1" onClick={addTrack}>{t('albumForm.form.addFirstTrack')}</button>
+                  <button type="button" class="btn btn-link p-0 ms-1" onClick={addTrack}>
+                    <Plus size={16} class="me-1" />{t('albumForm.form.addFirstTrack')}
+                  </button>
                 </div>
               )}
             </div>

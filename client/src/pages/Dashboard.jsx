@@ -5,7 +5,7 @@ import { AlbumRow } from '../components/AlbumRow.jsx';
 import { Pagination } from '../components/Pagination.jsx';
 import { StatsCard } from '../components/StatsCard.jsx';
 import { useI18n } from '../config/i18n/index.js';
-import { Search, Grid, List, X } from 'lucide-preact';
+import { Search, Grid, List, X, Plus } from 'lucide-preact';
 import '../styles/custom-grid.css';
 
 const LIMIT_OPTIONS = [10, 20, 50, 100, 999999];
@@ -176,7 +176,7 @@ export function Dashboard({ navigate }) {
         {/* Action Button */}
         <div class="mb-3">
           <button class="btn btn-primary" onClick={() => navigate('add')}>
-            <i class="ti ti-plus me-1"></i>
+            <Plus size={16} class="me-1" />
             {t('common.addAlbum')}
           </button>
         </div>
@@ -319,17 +319,33 @@ export function Dashboard({ navigate }) {
                   </>
                 ) : (
                   <div class="empty">
-                    <div class="empty-img"><i class="ti ti-search dashboard-empty-icon"></i></div>
-                    <p class="empty-title">{t('dashboard.search.noResults')}</p>
-                    <p class="empty-subtitle text-muted">
-                      {filters.search ? t('dashboard.search.noResultsMessage', { query: filters.search }) : t('dashboard.search.noAlbumsMessage')}
+                    <div class="empty-img">
+                      <i class={`ti ${total === 0 && !filters.search ? 'music' : 'search'} dashboard-empty-icon`}></i>
+                    </div>
+                    <p class="empty-title">
+                      {total === 0 && !filters.search ? t('dashboard.noAlbums') : t('dashboard.search.noResults')}
                     </p>
-                    {filters.search && (
-                      <button class="btn btn-primary mt-3" onClick={handleClearSearch}>
-                        <X size={16} class="me-1" />
-                        {t('dashboard.search.clearSearch')}
-                      </button>
-                    )}
+                    <p class="empty-subtitle text-muted">
+                      {total === 0 && !filters.search 
+                        ? t('dashboard.addFirstAlbum')
+                        : filters.search 
+                          ? t('dashboard.search.noResultsMessage', { query: filters.search })
+                          : t('dashboard.search.noAlbumsMessage')
+                      }
+                    </p>
+                    <div class="mt-3">
+                      {total === 0 && !filters.search ? (
+                        <button class="btn btn-primary" onClick={() => navigate('add')}>
+                          <Plus size={16} class="me-1" />
+                          {t('common.addAlbum')}
+                        </button>
+                      ) : filters.search ? (
+                        <button class="btn btn-primary" onClick={handleClearSearch}>
+                          <X size={16} class="me-1" />
+                          {t('dashboard.search.clearSearch')}
+                        </button>
+                      ) : null}
+                    </div>
                   </div>
                 )}
               </div>
