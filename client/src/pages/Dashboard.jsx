@@ -255,7 +255,7 @@ export function Dashboard({ navigate }) {
                   {viewMode === 'grid' && (
                     <div class="row row-cards">
                   {albums.map(album => (
-                    <div class="col-sm-6 col-lg-2 five-columns" key={album.id}>
+                    <div class="col-sm-6 col-lg-2 album-grid-item" key={album.id}>
                       <AlbumCard
                         album={album}
                         onClick={(a) => navigate('detail', { id: a.id })}
