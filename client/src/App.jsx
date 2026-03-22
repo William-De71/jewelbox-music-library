@@ -3,6 +3,11 @@ import { Layout } from './components/Layout.jsx';
 import { Dashboard } from './pages/Dashboard.jsx';
 import { AlbumForm } from './pages/AlbumForm.jsx';
 import { AlbumDetail } from './pages/AlbumDetail.jsx';
+import { Collections } from './pages/Collections.jsx';
+import { WantList } from './pages/WantList.jsx';
+import { Lend } from './pages/Lend.jsx';
+import { Stats } from './pages/Stats.jsx';
+import { Settings } from './pages/Settings.jsx';
 
 export function App() {
   const [route, setRoute] = useState({ page: 'dashboard', params: {} });
@@ -15,6 +20,11 @@ export function App() {
       {route.page === 'add' && <AlbumForm navigate={navigate} />}
       {route.page === 'edit' && <AlbumForm navigate={navigate} albumId={route.params.id} />}
       {route.page === 'detail' && <AlbumDetail navigate={navigate} albumId={route.params.id} />}
+      {route.page === 'collections' && <Collections />}
+      {route.page === 'wantlist' && <WantList />}
+      {route.page === 'lend' && <Lend />}
+      {route.page === 'stats' && <Stats />}
+      {route.page === 'settings' && <Settings />}
     </Layout>
   );
 }

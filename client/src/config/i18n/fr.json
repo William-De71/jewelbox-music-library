@@ -139,6 +139,14 @@
     "genres": "Genres",
     "rated": "Notés"
   },
+  "menu": {
+    "dashboard": "Tableau de bord",
+    "collections": "Collections",
+    "wantlist": "Liste de souhaits",
+    "lend": "Prêts",
+    "stats": "Statistiques",
+    "settings": "Paramètres"
+  },
   "card": {
     "modify": "Modifier",
     "lend": "Prêter",

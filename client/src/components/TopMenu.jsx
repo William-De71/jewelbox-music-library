@@ -1,4 +1,4 @@
-import { Home } from 'lucide-preact';
+import { Home, Disc, Heart, HandHeart, BarChart3, Settings } from 'lucide-preact';
 import { useI18n } from '../config/i18n/index.js';
 import '../styles/topmenu.css';
 
@@ -8,7 +8,7 @@ export function TopMenu({ currentPage, navigate }) {
   return (
     <nav class="navbar navbar-expand">
       <div class="container">
-        <ul class="navbar-nav">
+        <ul class="navbar-nav me-auto">
           <li class="nav-item">
             <a 
               class={`nav-link ${currentPage === 'dashboard' ? 'active' : ''}`}
@@ -17,6 +17,58 @@ export function TopMenu({ currentPage, navigate }) {
             >
               <Home size={20} class="me-2" />
               {t('common.home')}
+            </a>
+          </li>
+          <li class="nav-item">
+            <a 
+              class={`nav-link ${currentPage === 'collections' ? 'active' : ''}`}
+              href="#"
+              onClick={(e) => { e.preventDefault(); navigate('collections'); }}
+            >
+              <Disc size={20} class="me-2" />
+              {t('menu.collections')}
+            </a>
+          </li>
+          <li class="nav-item">
+            <a 
+              class={`nav-link ${currentPage === 'wantlist' ? 'active' : ''}`}
+              href="#"
+              onClick={(e) => { e.preventDefault(); navigate('wantlist'); }}
+            >
+              <Heart size={20} class="me-2" />
+              {t('menu.wantlist')}
+            </a>
+          </li>
+          <li class="nav-item">
+            <a 
+              class={`nav-link ${currentPage === 'lend' ? 'active' : ''}`}
+              href="#"
+              onClick={(e) => { e.preventDefault(); navigate('lend'); }}
+            >
+              <HandHeart size={20} class="me-2" />
+              {t('menu.lend')}
+            </a>
+          </li>
+          <li class="nav-item">
+            <a 
+              class={`nav-link ${currentPage === 'stats' ? 'active' : ''}`}
+              href="#"
+              onClick={(e) => { e.preventDefault(); navigate('stats'); }}
+            >
+              <BarChart3 size={20} class="me-2" />
+              {t('menu.stats')}
+            </a>
+          </li>
+        </ul>
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a 
+              class={`nav-link ${currentPage === 'settings' ? 'active' : ''}`}
+              href="#"
+              onClick={(e) => { e.preventDefault(); navigate('settings'); }}
+            >
+              <Settings size={20} class="me-2" />
+              {t('menu.settings')}
             </a>
           </li>
         </ul>
