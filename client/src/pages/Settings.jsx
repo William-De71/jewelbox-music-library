@@ -1,4 +1,5 @@
 import { useI18n } from '../config/i18n/index.js';
+import { Settings as SettingsIcon } from 'lucide-preact';
 import '../styles/settings.css';
 
 export function Settings() {
@@ -12,7 +13,7 @@ export function Settings() {
             <div class="card">
               <div class="card-header">
                 <h2 class="card-title">
-                  <i class="ti ti-settings me-2 text-secondary"></i>
+                  <SettingsIcon size={24} class="me-2 text-secondary" />
                   {t('menu.settings')}
                 </h2>
               </div>

@@ -1,4 +1,5 @@
 import { useI18n } from '../config/i18n/index.js';
+import { Disc } from 'lucide-preact';
 import '../styles/collections.css';
 
 export function Collections() {
@@ -12,7 +13,7 @@ export function Collections() {
             <div class="card">
               <div class="card-header">
                 <h2 class="card-title">
-                  <i class="ti ti-collection me-2 text-primary"></i>
+                  <Disc size={24} class="me-2 text-primary" />
                   {t('menu.collections')}
                 </h2>
               </div>

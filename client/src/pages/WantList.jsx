@@ -1,4 +1,5 @@
 import { useI18n } from '../config/i18n/index.js';
+import { Heart } from 'lucide-preact';
 import '../styles/wantlist.css';
 
 export function WantList() {
@@ -12,7 +13,7 @@ export function WantList() {
             <div class="card">
               <div class="card-header">
                 <h2 class="card-title">
-                  <i class="ti ti-heart me-2 text-danger"></i>
+                  <Heart size={24} class="me-2 text-danger" />
                   {t('menu.wantlist')}
                 </h2>
               </div>

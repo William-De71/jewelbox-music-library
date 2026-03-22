@@ -1,4 +1,5 @@
 import { useI18n } from '../config/i18n/index.js';
+import { BarChart3 } from 'lucide-preact';
 import '../styles/stats.css';
 
 export function Stats() {
@@ -12,7 +13,7 @@ export function Stats() {
             <div class="card">
               <div class="card-header">
                 <h2 class="card-title">
-                  <i class="ti ti-chart-bar me-2 text-info"></i>
+                  <BarChart3 size={24} class="me-2 text-info" />
                   {t('menu.stats')}
                 </h2>
               </div>

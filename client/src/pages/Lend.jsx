@@ -1,4 +1,5 @@
 import { useI18n } from '../config/i18n/index.js';
+import { HandHeart } from 'lucide-preact';
 import '../styles/lend.css';
 
 export function Lend() {
@@ -12,7 +13,7 @@ export function Lend() {
             <div class="card">
               <div class="card-header">
                 <h2 class="card-title">
-                  <i class="ti ti-hand-heart me-2 text-warning"></i>
+                  <HandHeart size={24} class="me-2 text-warning" />
                   {t('menu.lend')}
                 </h2>
               </div>
