@@ -5,7 +5,7 @@ import { AlbumRow } from '../components/AlbumRow.jsx';
 import { Pagination } from '../components/Pagination.jsx';
 import { StatsCard } from '../components/StatsCard.jsx';
 import { useI18n } from '../config/i18n/index.js';
-import { Search, Grid, List } from 'lucide-preact';
+import { Search, Grid, List, X } from 'lucide-preact';
 import '../styles/custom-grid.css';
 
 const LIMIT_OPTIONS = [10, 20, 50, 100, 999999];
@@ -84,6 +84,11 @@ export function Dashboard({ navigate }) {
     if (e.key === 'Enter' || e.type === 'click') {
       setFilter('search', searchRef.current.value);
     }
+  };
+
+  const handleClearSearch = () => {
+    searchRef.current.value = '';
+    setFilter('search', '');
   };
 
   const handleDelete = async () => {
@@ -183,19 +188,8 @@ export function Dashboard({ navigate }) {
             </div>
           )}
 
-          {!loading && albums.length === 0 && (
-            <div class="empty">
-              <div class="empty-img"><i class="ti ti-music dashboard-empty-icon"></i></div>
-              <p class="empty-title">{t('dashboard.noAlbums')}</p>
-              {total === 0 && (
-                <button class="btn btn-primary" onClick={() => navigate('add')}>
-                  <i class="ti ti-plus me-1"></i>{t('common.addAlbum')}
-                </button>
-              )}
-            </div>
-          )}
-
-          {!loading && albums.length > 0 && (
+          
+          {!loading && (
             <div class="card mb-3">
               <div class="card-body">
                 {/* Top controls */}
@@ -219,11 +213,18 @@ export function Dashboard({ navigate }) {
                         class="form-control"
                         placeholder={t('dashboard.searchPlaceholder')}
                         ref={searchRef}
+                        value={filters.search || ''}
                         onKeyPress={handleSearch}
+                        onChange={(e) => searchRef.current.value = e.target.value}
                       />
                       <button class="btn btn-outline-secondary" type="button" onClick={handleSearch}>
                         <Search size={16} />
                       </button>
+                      {filters.search && (
+                        <button class="btn btn-outline-secondary text-danger" type="button" onClick={handleClearSearch}>
+                          <X size={16} />
+                        </button>
+                      )}
                     </div>
                   </div>
                   <div class="col-md-2">
@@ -252,67 +253,85 @@ export function Dashboard({ navigate }) {
                 </div>
 
                 {/* Grid/List content */}
-                  {viewMode === 'grid' && (
-                    <div class="row row-cards">
-                  {albums.map(album => (
-                    <div class="col-sm-6 col-lg-2 album-grid-item" key={album.id}>
-                      <AlbumCard
-                        album={album}
-                        onClick={(a) => navigate('detail', { id: a.id })}
-                        onEdit={(a) => navigate('edit', { id: a.id })}
-                        onDelete={(a) => setDeleteTarget(a)}
-                        onLend={(a) => { setLendTarget(a); setLentTo(a.lent_to || ''); }}
-                        onRate={handleRate}
-                      />
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {viewMode === 'list' && (
-                <div class="card">
-                  <div class="table-responsive">
-                    <table class="table table-vcenter card-table">
-                      <thead>
-                        <tr>
-                          <th>{t('table.cover')}</th>
-                          <th>{t('table.title')}</th>
-                          <th>{t('table.artist')}</th>
-                          <th>{t('table.year')}</th>
-                          <th>{t('table.genre')}</th>
-                          <th>{t('table.rating')}</th>
-                          <th>{t('table.actions')}</th>
-                        </tr>
-                      </thead>
-                      <tbody>
+                {albums.length > 0 ? (
+                  <>
+                    {viewMode === 'grid' && (
+                      <div class="row row-cards">
                         {albums.map(album => (
-                          <AlbumRow
-                            key={album.id}
-                            album={album}
-                            onClick={(a) => navigate('detail', { id: a.id })}
-                            onEdit={(a) => navigate('edit', { id: a.id })}
-                            onDelete={(a) => setDeleteTarget(a)}
-                            onLend={(a) => { setLendTarget(a); setLentTo(a.lent_to || ''); }}
-                            onRate={handleRate}
-                          />
+                          <div class="col-sm-6 col-lg-2 album-grid-item" key={album.id}>
+                            <AlbumCard
+                              album={album}
+                              onClick={(a) => navigate('detail', { id: a.id })}
+                              onEdit={(a) => navigate('edit', { id: a.id })}
+                              onDelete={(a) => setDeleteTarget(a)}
+                              onLend={(a) => { setLendTarget(a); setLentTo(a.lent_to || ''); }}
+                              onRate={handleRate}
+                            />
+                          </div>
                         ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              )}
+                      </div>
+                    )}
 
-              {/* Bottom controls */}
-              <div class="mt-4 d-flex justify-content-between align-items-center">
-                <div class="text-muted">
-                  {t('dashboard.pagination.showing', { 
-                    start: (page - 1) * limit + 1, 
-                    end: Math.min(page * limit, total), 
-                    total 
-                  })}
-                </div>
-                <Pagination page={page} limit={limit} total={total} onChange={setPage} />
-              </div>
+                    {viewMode === 'list' && (
+                      <div class="card">
+                        <div class="table-responsive">
+                          <table class="table table-vcenter card-table">
+                            <thead>
+                              <tr>
+                                <th>{t('table.cover')}</th>
+                                <th>{t('table.title')}</th>
+                                <th>{t('table.artist')}</th>
+                                <th>{t('table.year')}</th>
+                                <th>{t('table.genre')}</th>
+                                <th>{t('table.rating')}</th>
+                                <th>{t('table.actions')}</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {albums.map(album => (
+                                <AlbumRow
+                                  key={album.id}
+                                  album={album}
+                                  onClick={(a) => navigate('detail', { id: a.id })}
+                                  onEdit={(a) => navigate('edit', { id: a.id })}
+                                  onDelete={(a) => setDeleteTarget(a)}
+                                  onLend={(a) => { setLendTarget(a); setLentTo(a.lent_to || ''); }}
+                                  onRate={handleRate}
+                                />
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Bottom controls */}
+                    <div class="mt-4 d-flex justify-content-between align-items-center">
+                      <div class="text-muted">
+                        {t('dashboard.pagination.showing', { 
+                          start: (page - 1) * limit + 1, 
+                          end: Math.min(page * limit, total), 
+                          total 
+                        })}
+                      </div>
+                      <Pagination page={page} limit={limit} total={total} onChange={setPage} />
+                    </div>
+                  </>
+                ) : (
+                  <div class="empty">
+                    <div class="empty-img"><i class="ti ti-search dashboard-empty-icon"></i></div>
+                    <p class="empty-title">{t('dashboard.search.noResults')}</p>
+                    <p class="empty-subtitle text-muted">
+                      {filters.search ? t('dashboard.search.noResultsMessage', { query: filters.search }) : t('dashboard.search.noAlbumsMessage')}
+                    </p>
+                    {filters.search && (
+                      <button class="btn btn-primary mt-3" onClick={handleClearSearch}>
+                        <X size={16} class="me-1" />
+                        {t('dashboard.search.clearSearch')}
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           )}

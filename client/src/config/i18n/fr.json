@@ -35,6 +35,12 @@
       "next": "Suivant",
       "itemsPerPage": "Éléments par page",
       "showing": "Affichage de {start}-{end} sur {total} albums"
+    },
+    "search": {
+      "noResults": "Aucun résultat trouvé",
+      "noResultsMessage": "Aucun album ne correspond à \"{query}\"",
+      "noAlbumsMessage": "Aucun album dans la bibliothèque",
+      "clearSearch": "Effacer la recherche"
     }
   },
   "albumForm": {
