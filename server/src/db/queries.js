@@ -89,7 +89,15 @@ export function getAlbums({ page = 1, limit = 24, genre, rating, sort = 'title',
     ${where}
   `).get(...params);
 
-  return { data: rows.map(mapAlbum), total, page, limit };
+  return { 
+    data: rows.map(mapAlbum), 
+    pagination: {
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit)
+    }
+  };
 }
 
 export function getAlbumById(id) {

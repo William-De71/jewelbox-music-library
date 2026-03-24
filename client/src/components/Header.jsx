@@ -12,8 +12,8 @@ export function Header({ onThemeToggle, isDark }) {
             <div class="d-flex align-items-center gap-2">
               <Disc size={32} class="text-primary" />
               <div>
-                <h1 class="header-title mb-0">{t('dashboard.title')}</h1>
-                <p class="header-subtitle mb-0 text-muted small"><em>{t('dashboard.subtitle')}</em></p>
+                <h1 class="header-title mb-0">{t('common.title')}</h1>
+                <p class="header-subtitle mb-0 text-muted small"><em>{t('common.subtitle')}</em></p>
               </div>
             </div>
           </div>

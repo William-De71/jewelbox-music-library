@@ -2,16 +2,41 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import crypto from 'crypto';
+import Database from 'better-sqlite3';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const DATA_DIR = path.resolve(__dirname, '../../data');
+const MANAGER_DB_PATH = path.join(DATA_DIR, 'jewelbox_manager.db');
 
-// Uploads directory path
-const UPLOADS_DIR = path.resolve(__dirname, '../../data/uploads');
-
-// Ensure uploads directory exists
-if (!fs.existsSync(UPLOADS_DIR)) {
-  fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+/**
+ * Get the covers directory for the active database
+ * @returns {string|null} - Path to covers directory or null if no active database
+ */
+function getActiveCoversDir() {
+  try {
+    const managerDb = new Database(MANAGER_DB_PATH);
+    const activeDb = managerDb.prepare('SELECT * FROM databases WHERE is_active = 1 LIMIT 1').get();
+    managerDb.close();
+    
+    if (!activeDb) {
+      console.error('[DownloadCover] No active database found');
+      return null;
+    }
+    
+    const dbFolder = path.dirname(activeDb.path);
+    const coversDir = path.join(dbFolder, 'covers');
+    
+    // Ensure covers directory exists
+    if (!fs.existsSync(coversDir)) {
+      fs.mkdirSync(coversDir, { recursive: true });
+    }
+    
+    return coversDir;
+  } catch (err) {
+    console.error('[DownloadCover] Error getting covers directory:', err);
+    return null;
+  }
 }
 
 /**
@@ -68,14 +93,22 @@ export async function downloadCover(imageUrl) {
     else ext = path.extname(new URL(imageUrl).pathname) || '.jpg';
     
     const fileHash = `${hash}${ext}`;
-    const filePath = path.join(UPLOADS_DIR, fileHash);
+    
+    // Get active database covers directory
+    const coversDir = getActiveCoversDir();
+    if (!coversDir) {
+      console.error('[DownloadCover] Cannot save cover - no active database');
+      return null;
+    }
+    
+    const filePath = path.join(coversDir, fileHash);
 
     // Save the file
     fs.writeFileSync(filePath, imageBuffer);
-    console.log(`[DownloadCover] Saved to: ${fileHash}`);
+    console.log(`[DownloadCover] Saved to: ${filePath}`);
 
-    // Return the local URL path
-    return `/uploads/${fileHash}`;
+    // Return the local URL path (served by /covers/:filename route)
+    return `/covers/${fileHash}`;
   } catch (err) {
     console.error(`[DownloadCover] Failed to download ${imageUrl}:`, err.message);
     return null;

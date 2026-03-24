@@ -13,7 +13,8 @@
 @import './StarRating.css';
 @import './AlbumForm.css';
 @import './AlbumDetail.css';
-@import './Dashboard.css';
+@import './custom-grid.css';
+@import './dashboard.css';
 
 /* Global custom styles */
 :root {

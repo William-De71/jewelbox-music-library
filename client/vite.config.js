@@ -45,6 +45,7 @@ export default defineConfig({
     proxy: {
       '/api': { target: 'http://localhost:3001', changeOrigin: true },
       '/uploads': { target: 'http://localhost:3001', changeOrigin: true },
+      '/covers': { target: 'http://localhost:3001', changeOrigin: true },
     },
   },
   test: {

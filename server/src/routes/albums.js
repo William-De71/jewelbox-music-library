@@ -6,13 +6,18 @@ import { downloadCover } from '../utils/downloadCover.js';
 export async function albumRoutes(fastify) {
   // GET /api/albums?page=1&limit=24&genre=Rock&rating=5&sort=title&order=asc&search=
   fastify.get('/albums', async (req, reply) => {
-    const { page, limit, genre, rating, sort, order, search } = req.query;
-    const result = getAlbums({
-      page: page ? Number(page) : 1,
-      limit: limit ? Math.min(Number(limit), 100) : 24,
-      genre, rating, sort, order, search,
-    });
-    return result;
+    try {
+      const { page, limit, genre, rating, sort, order, search } = req.query;
+      const result = getAlbums({
+        page: page ? Number(page) : 1,
+        limit: limit ? Math.min(Number(limit), 100) : 24,
+        genre, rating, sort, order, search,
+      });
+      return result;
+    } catch (err) {
+      console.error('[GetAlbums] Error:', err);
+      return reply.code(500).send({ error: err.message });
+    }
   });
 
   // GET /api/albums/genres
@@ -86,8 +91,13 @@ export async function albumRoutes(fastify) {
       delete albumData.ean;
     }
     
-    const album = createAlbum(albumData);
-    return reply.code(201).send(album);
+    try {
+      const album = createAlbum(albumData);
+      return reply.code(201).send(album);
+    } catch (err) {
+      console.error('[CreateAlbum] Error creating album:', err);
+      return reply.code(500).send({ error: err.message });
+    }
   });
 
   // PATCH /api/albums/:id

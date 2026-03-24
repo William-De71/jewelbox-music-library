@@ -1,100 +1,345 @@
-import 'dotenv/config';
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import staticFiles from '@fastify/static';
-import multipart from '@fastify/multipart';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
+import Database from 'better-sqlite3';
 import { albumRoutes } from './routes/albums.js';
 import { searchRoutes } from './routes/search.js';
-import { metaRoutes } from './routes/meta.js';
-import { getDb } from './db/database.js';
+import { createDatabase, setActiveDatabase, deleteDatabase } from './db/manager.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+// Database setup
+const DATA_DIR = path.join(__dirname, '../data');
+if (!fs.existsSync(DATA_DIR)) {
+  fs.mkdirSync(DATA_DIR, { recursive: true });
+}
+
+const MANAGER_DB_PATH = path.join(DATA_DIR, 'jewelbox_manager.db');
+let managerDb = null;
+
+function getManagerDb() {
+  if (!managerDb) {
+    managerDb = new Database(MANAGER_DB_PATH);
+    // Initialize tables
+    managerDb.exec(`
+      CREATE TABLE IF NOT EXISTS databases (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL UNIQUE,
+        path TEXT NOT NULL UNIQUE,
+        description TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        is_active BOOLEAN DEFAULT 0
+      )
+    `);
+  }
+  return managerDb;
+}
+
 const fastify = Fastify({
-  logger: {
-    transport: {
-      target: 'pino-pretty',
-      options: { colorize: true },
-    },
-  },
+  logger: false
 });
 
-await fastify.register(cors, {
-  origin: process.env.CORS_ORIGIN || true,
-});
+// Register CORS
+await fastify.register(cors);
 
-await fastify.register(multipart, { limits: { fileSize: 10 * 1024 * 1024 } });
-
-// Serve uploaded covers
-const uploadsDir = path.resolve(process.env.UPLOADS_DIR || path.join(__dirname, '../../data/uploads'));
-fs.mkdirSync(uploadsDir, { recursive: true });
+// Register static files plugin for sendFile support
 await fastify.register(staticFiles, {
-  root: uploadsDir,
-  prefix: '/uploads/',
-  decorateReply: true,
+  root: DATA_DIR,
+  serve: false,
+  decorateReply: true
 });
 
-// Serve built frontend in production
-const clientDist = path.resolve(process.env.CLIENT_DIST || path.join(__dirname, '../../client/dist'));
+// Register album routes
+await fastify.register(albumRoutes, { prefix: '/api' });
+
+// Register search routes
+await fastify.register(searchRoutes, { prefix: '/api' });
+
+// Serve covers from active database folder
+fastify.get('/covers/:filename', async (req, reply) => {
+  try {
+    console.log(`[Covers] Request for: ${req.params.filename}`);
+    
+    const db = getManagerDb();
+    const activeDb = db.prepare('SELECT * FROM databases WHERE is_active = 1 LIMIT 1').get();
+    
+    if (!activeDb) {
+      console.error('[Covers] No active database found');
+      return reply.code(404).send({ error: 'No active database' });
+    }
+    
+    console.log(`[Covers] Active DB: ${activeDb.path}`);
+    
+    const dbFolder = path.dirname(activeDb.path);
+    const coversFolder = path.join(dbFolder, 'covers');
+    const filePath = path.join(coversFolder, req.params.filename);
+    
+    console.log(`[Covers] Looking for file: ${filePath}`);
+    
+    // Security: ensure file is within covers folder
+    if (!filePath.startsWith(coversFolder)) {
+      console.error('[Covers] Security violation - path outside covers folder');
+      return reply.code(403).send({ error: 'Forbidden' });
+    }
+    
+    if (!fs.existsSync(filePath)) {
+      console.error(`[Covers] File not found: ${filePath}`);
+      return reply.code(404).send({ error: 'File not found' });
+    }
+    
+    console.log(`[Covers] Serving file: ${filePath}`);
+    return reply.sendFile(req.params.filename, coversFolder);
+  } catch (err) {
+    console.error('[Covers] Error serving file:', err);
+    return reply.code(500).send({ error: 'Failed to serve file' });
+  }
+});
+
+// Serve frontend
+const clientDist = path.resolve(__dirname, '../../client/dist');
 if (fs.existsSync(clientDist)) {
-  await fastify.register(staticFiles, {
-    root: clientDist,
-    prefix: '/',
-    decorateReply: false,
+  fastify.get('/*', async (req, reply) => {
+    const filePath = path.join(clientDist, req.url === '/' ? 'index.html' : req.url);
+    if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
+      return reply.sendFile(req.url === '/' ? 'index.html' : req.url, clientDist);
+    }
+    return reply.sendFile('index.html', clientDist);
   });
 }
 
-// API routes
-fastify.register(albumRoutes, { prefix: '/api' });
-fastify.register(searchRoutes, { prefix: '/api' });
-fastify.register(metaRoutes, { prefix: '/api' });
-
-// Cover upload endpoint
-fastify.post('/api/upload/cover', async (req, reply) => {
-  const data = await req.file();
-  if (!data) return reply.code(400).send({ error: 'No file provided' });
-
-  const { randomUUID } = await import('crypto');
-  const ext = (data.filename.split('.').pop() || 'jpg').toLowerCase();
-  const filename = `${randomUUID()}.${ext}`;
-  const filepath = path.join(uploadsDir, filename);
-
-  await new Promise((resolve, reject) => {
-    const ws = fs.createWriteStream(filepath);
-    data.file.pipe(ws);
-    ws.on('finish', resolve);
-    ws.on('error', reject);
-  });
-
-  return { url: `/uploads/${filename}` };
-});
-
-// Health check
-fastify.get('/api/health', async () => ({ status: 'ok', timestamp: new Date().toISOString() }));
-
-// SPA fallback
-fastify.setNotFoundHandler((req, reply) => {
-  if (!req.url.startsWith('/api') && !req.url.startsWith('/uploads')) {
-    try {
-      return reply.sendFile('index.html', clientDist);
-    } catch {}
+// Real database routes
+fastify.get('/api/databases', async (req, reply) => {
+  try {
+    const db = getManagerDb();
+    const databases = db.prepare('SELECT * FROM databases ORDER BY created_at DESC').all();
+    const activeDb = db.prepare('SELECT * FROM databases WHERE is_active = 1 LIMIT 1').get();
+    
+    return { databases, active: activeDb };
+  } catch (err) {
+    console.error('[DB] Error fetching databases:', err);
+    return reply.code(500).send({ error: 'Failed to fetch databases' });
   }
-  reply.code(404).send({ error: 'Not found' });
 });
 
-// Init DB on startup
-getDb();
+fastify.post('/api/databases', async (req, reply) => {
+  try {
+    const { name, description } = req.body;
+    
+    if (!name || name.trim() === '') {
+      return reply.code(400).send({ error: 'Database name is required' });
+    }
 
-const PORT = 3001;
-const HOST = process.env.HOST || '0.0.0.0';
+    const db = getManagerDb();
+    
+    // Create folder for this database
+    const dbFolder = path.join(DATA_DIR, name.trim());
+    if (!fs.existsSync(dbFolder)) {
+      fs.mkdirSync(dbFolder, { recursive: true });
+    }
+    
+    // Create covers subfolder
+    const coversFolder = path.join(dbFolder, 'covers');
+    if (!fs.existsSync(coversFolder)) {
+      fs.mkdirSync(coversFolder, { recursive: true });
+    }
+    
+    const dbPath = path.join(dbFolder, `${name.trim()}.db`);
+    
+    // Create the database file with correct schema
+    const newDb = new Database(dbPath);
+    newDb.exec(`
+      PRAGMA journal_mode = WAL;
+      PRAGMA foreign_keys = ON;
 
+      CREATE TABLE IF NOT EXISTS artists (
+        id        INTEGER PRIMARY KEY AUTOINCREMENT,
+        name      TEXT NOT NULL UNIQUE COLLATE NOCASE,
+        created_at TEXT NOT NULL DEFAULT (datetime('now'))
+      );
+
+      CREATE TABLE IF NOT EXISTS labels (
+        id        INTEGER PRIMARY KEY AUTOINCREMENT,
+        name      TEXT NOT NULL UNIQUE COLLATE NOCASE,
+        created_at TEXT NOT NULL DEFAULT (datetime('now'))
+      );
+
+      CREATE TABLE IF NOT EXISTS albums (
+        id             INTEGER PRIMARY KEY AUTOINCREMENT,
+        title          TEXT NOT NULL,
+        artist_id      INTEGER NOT NULL REFERENCES artists(id) ON DELETE RESTRICT,
+        label_id       INTEGER REFERENCES labels(id) ON DELETE SET NULL,
+        year           INTEGER,
+        genre          TEXT,
+        total_duration TEXT,
+        ean            TEXT UNIQUE,
+        rating         INTEGER CHECK(rating BETWEEN 1 AND 5),
+        cover_url      TEXT,
+        notes          TEXT,
+        is_lent        INTEGER NOT NULL DEFAULT 0 CHECK(is_lent IN (0,1)),
+        lent_to        TEXT,
+        created_at     TEXT NOT NULL DEFAULT (datetime('now')),
+        updated_at     TEXT NOT NULL DEFAULT (datetime('now'))
+      );
+
+      CREATE TABLE IF NOT EXISTS tracks (
+        id         INTEGER PRIMARY KEY AUTOINCREMENT,
+        album_id   INTEGER NOT NULL REFERENCES albums(id) ON DELETE CASCADE,
+        position   INTEGER NOT NULL,
+        title      TEXT NOT NULL,
+        duration   TEXT
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_albums_artist  ON albums(artist_id);
+      CREATE INDEX IF NOT EXISTS idx_albums_label   ON albums(label_id);
+      CREATE INDEX IF NOT EXISTS idx_albums_genre   ON albums(genre);
+      CREATE INDEX IF NOT EXISTS idx_albums_rating  ON albums(rating);
+      CREATE INDEX IF NOT EXISTS idx_tracks_album   ON tracks(album_id);
+    `);
+    
+    newDb.close();
+    
+    console.log(`[CreateDB] Created database with correct schema: ${dbPath}`);
+
+    // Insert into manager
+    const result = db.prepare(`
+      INSERT INTO databases (name, path, description) 
+      VALUES (?, ?, ?)
+    `).run(name.trim(), dbPath, description || '');
+    
+    return reply.code(201).send({
+      id: result.lastInsertRowid,
+      name: name.trim(),
+      description: description || '',
+      message: 'Database created successfully'
+    });
+  } catch (err) {
+    console.error('[DB] Error creating database:', err);
+    
+    if (err.message.includes('UNIQUE constraint failed')) {
+      return reply.code(409).send({ error: 'Database name already exists' });
+    }
+    
+    return reply.code(500).send({ error: 'Failed to create database' });
+  }
+});
+
+// Activate database
+fastify.post('/api/databases/:id/activate', {
+  config: {
+    rawBody: false
+  }
+}, async (req, reply) => {
+  try {
+    const { id } = req.params;
+    console.log('[ACTIVATE] Received ID:', id, 'Type:', typeof id);
+    const db = getManagerDb();
+    
+    // Clear all active flags
+    db.exec('UPDATE databases SET is_active = 0');
+    
+    // Set new active
+    const result = db.prepare('UPDATE databases SET is_active = 1 WHERE id = ?').run(parseInt(id));
+    
+    if (result.changes === 0) {
+      return reply.code(404).send({ error: 'Database not found' });
+    }
+    
+    return { message: 'Database activated successfully' };
+  } catch (err) {
+    console.error('[DB] Error activating database:', err);
+    console.error('[DB] Error details:', err.message, err.stack);
+    return reply.code(500).send({ error: 'Failed to activate database' });
+  }
+});
+
+// Update database
+fastify.patch('/api/databases/:id', async (req, reply) => {
+  try {
+    const { id } = req.params;
+    const { name, description } = req.body;
+    
+    if (!name || name.trim() === '') {
+      return reply.code(400).send({ error: 'Database name is required' });
+    }
+
+    const db = getManagerDb();
+    const result = db.prepare(`
+      UPDATE databases 
+      SET name = ?, description = ?, updated_at = CURRENT_TIMESTAMP 
+      WHERE id = ?
+    `).run(name.trim(), description || '', parseInt(id));
+    
+    if (result.changes === 0) {
+      return reply.code(404).send({ error: 'Database not found' });
+    }
+    
+    return { message: 'Database updated successfully' };
+  } catch (err) {
+    console.error('[DB] Error updating database:', err);
+    
+    if (err.message.includes('UNIQUE constraint failed')) {
+      return reply.code(409).send({ error: 'Database name already exists' });
+    }
+    
+    return reply.code(500).send({ error: 'Failed to update database' });
+  }
+});
+
+// Delete database
+fastify.delete('/api/databases/:id', async (req, reply) => {
+  try {
+    const { id } = req.params;
+    const db = getManagerDb();
+    
+    // Get database info
+    const dbRecord = db.prepare('SELECT * FROM databases WHERE id = ?').get(parseInt(id));
+    if (!dbRecord) {
+      return reply.code(404).send({ error: 'Database not found' });
+    }
+
+    // Delete the entire database folder
+    const dbFolder = path.dirname(dbRecord.path);
+    if (fs.existsSync(dbFolder)) {
+      // Remove folder and all contents recursively
+      fs.rmSync(dbFolder, { recursive: true, force: true });
+    }
+
+    // Delete from manager
+    const result = db.prepare('DELETE FROM databases WHERE id = ?').run(parseInt(id));
+    
+    return { message: 'Database deleted successfully' };
+  } catch (err) {
+    console.error('[DB] Error deleting database:', err);
+    return reply.code(500).send({ error: 'Failed to delete database' });
+  }
+});
+
+// Get active database info
+fastify.get('/api/database/active', async (req, reply) => {
+  try {
+    const db = getManagerDb();
+    const activeDb = db.prepare('SELECT * FROM databases WHERE is_active = 1 LIMIT 1').get();
+    
+    if (!activeDb) {
+      return reply.code(404).send({ error: 'No active database found' });
+    }
+    
+    return { database: activeDb };
+  } catch (err) {
+    console.error('[DB] Error fetching active database:', err);
+    return reply.code(500).send({ error: 'Failed to fetch active database' });
+  }
+});
+
+// Start server
 try {
-  await fastify.listen({ port: PORT, host: HOST });
-  fastify.log.info(`JewelBox server running on http://${HOST}:${PORT}`);
+  await fastify.listen({ port: 3001, host: '0.0.0.0' });
+  console.log('Server listening at http://0.0.0.0:3001');
 } catch (err) {
-  fastify.log.error(err);
+  console.error('Error starting server:', err);
   process.exit(1);
 }

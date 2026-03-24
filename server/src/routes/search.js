@@ -34,6 +34,16 @@ async function fetchJson(url, retries = 3) {
         console.error(`[MusicBrainz] HTTP ${res.status} for ${url}`);
         throw new Error(`HTTP ${res.status}`);
       }
+      
+      // Check Content-Type to ensure we got JSON
+      const contentType = res.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        console.error(`[MusicBrainz] Unexpected content-type: ${contentType}`);
+        const text = await res.text();
+        console.error(`[MusicBrainz] Response body: ${text.substring(0, 200)}...`);
+        throw new Error(`Expected JSON but got ${contentType}`);
+      }
+      
       console.log(`[MusicBrainz] Success on attempt ${attempt + 1}`);
       return res.json();
     } catch (err) {

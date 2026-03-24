@@ -1,16 +1,46 @@
 {
-  "dashboard": {
+  "common": {
     "title": "JewelBox Music Library",
     "subtitle": "Parce que vos albums méritent mieux qu'une simple étagère.",
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "add": "Ajouter",
+    "search": "Rechercher",
+    "filter": "Filtrer",
+    "sort": "Trier",
+    "close": "Fermer",
+    "confirm": "Confirmer",
+    "yes": "Oui",
+    "no": "Non",
+    "lend": "Prêter",
+    "modify": "Modifier",
+    "grid": "Grille",
+    "list": "Liste",
+    "addAlbum": "Ajouter un album",
+    "back": "Retour",
+    "home": "Accueil",
+    "lightMode": "Mode clair",
+    "darkMode": "Mode sombre",
+    "all": "Tous",
+    "star": "étoile",
+    "stars": "étoiles",
+    "album": "Album",
+    "albums": "Albums",
+    "lent": "Prêtés",
+    "genres": "Genres",
+    "rated": "Notés"
+  },
+  "dashboard": {
     "searchPlaceholder": "Rechercher un album, un artiste...",
     "noAlbums": "Aucun album trouvé",
     "addFirstAlbum": "Ajouter votre premier album",
     "sort": {
-      "by": "Trier par",
       "title": "Titre",
       "artist": "Artiste",
-      "year": "Année",
-      "rating": "Note",
       "asc": "A-Z",
       "desc": "Z-A"
     },
@@ -25,6 +55,39 @@
       "noResultsMessage": "Aucun album ne correspond à \"{query}\"",
       "noAlbumsMessage": "Aucun album dans la bibliothèque",
       "clearSearch": "Effacer la recherche"
+    }
+  },
+  "database": {
+    "createDatabase": "Créer une base de données",
+    "databaseList": "Liste des bases de données",
+    "activeDatabase": "Base active",
+    "viewCollection": "Voir la collection",
+    "noDatabases": "Aucune base de données",
+    "createFirstDatabase": "Créez votre première base de données pour commencer",
+    "name": "Nom",
+    "description": "Description",
+    "createdAt": "Créée le",
+    "status": "Statut",
+    "actions": "Actions",
+    "active": "Active",
+    "inactive": "Inactive",
+    "activate": "Activer",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "create": "Créer",
+    "save": "Enregistrer",
+    "editDatabase": "Modifier la base de données",
+    "confirm": {
+      "deleteDatabase": "Êtes-vous sûr de vouloir supprimer cette base de données ? Toutes les données seront perdues."
+    },
+    "error": {
+      "loadDatabases": "Erreur lors du chargement des bases de données"
+    },
+    "success": {
+      "databaseCreated": "Base de données créée avec succès",
+      "databaseUpdated": "Base de données mise à jour avec succès",
+      "databaseDeleted": "Base de données supprimée avec succès",
+      "databaseActivated": "Base de données activée avec succès"
     }
   },
   "albumForm": {
@@ -106,39 +169,7 @@
     "markReturned": "Marquer comme récupéré",
     "confirmDelete": "Voulez-vous vraiment supprimer cet album ?"
   },
-  "common": {
-    "loading": "Chargement...",
-    "error": "Erreur",
-    "save": "Enregistrer",
-    "cancel": "Annuler",
-    "delete": "Supprimer",
-    "edit": "Modifier",
-    "add": "Ajouter",
-    "search": "Rechercher",
-    "filter": "Filtrer",
-    "sort": "Trier",
-    "close": "Fermer",
-    "confirm": "Confirmer",
-    "yes": "Oui",
-    "no": "Non",
-    "lend": "Prêter",
-    "modify": "Modifier",
-    "grid": "Grille",
-    "list": "Liste",
-    "addAlbum": "Ajouter un album",
-    "back": "Retour",
-    "home": "Accueil",
-    "lightMode": "Mode clair",
-    "darkMode": "Mode sombre",
-    "all": "Tous",
-    "star": "étoile",
-    "stars": "étoiles",
-    "album": "Album",
-    "albums": "Albums",
-    "lent": "Prêtés",
-    "genres": "Genres",
-    "rated": "Notés"
-  },
+  
   "menu": {
     "dashboard": "Tableau de bord",
     "collections": "Collections",

@@ -50,3 +50,14 @@
     max-width: 16.666% !important;
   }
 }
+
+/* Modal backdrop */
+.modal-backdrop-dark {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+/* Toast notifications */
+.toast-notification {
+  position: fixed;
+  z-index: 9999;
+}
