@@ -96,6 +96,19 @@ export async function albumRoutes(fastify) {
       return reply.code(201).send(album);
     } catch (err) {
       console.error('[CreateAlbum] Error creating album:', err);
+      
+      // Handle UNIQUE constraint violations
+      if (err.code === 'SQLITE_CONSTRAINT_UNIQUE') {
+        if (err.message.includes('albums.ean')) {
+          return reply.code(409).send({ 
+            error: 'Un album avec ce code EAN existe déjà dans votre collection.' 
+          });
+        }
+        return reply.code(409).send({ 
+          error: 'Cet album existe déjà dans votre collection.' 
+        });
+      }
+      
       return reply.code(500).send({ error: err.message });
     }
   });

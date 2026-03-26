@@ -29,50 +29,10 @@
   --jewelbox-bg-darker: #1e293b;
 }
 
-/* Light theme overrides */
+/* Light theme - let Tabler handle it by default */
 [data-bs-theme="light"] {
   --jewelbox-bg-dark: #f8f9fa;
   --jewelbox-bg-darker: #ffffff;
-}
-
-[data-bs-theme="light"] body {
-  background-color: #f8f9fa !important;
-  color: #1e293b !important;
-}
-
-[data-bs-theme="light"] .header-top,
-[data-bs-theme="light"] .top-menu {
-  background: #ffffff !important;
-  border-bottom-color: rgba(0, 0, 0, 0.1) !important;
-}
-
-[data-bs-theme="light"] .header-title {
-  color: #1e293b !important;
-}
-
-[data-bs-theme="light"] .main-content {
-  background: #f8f9fa !important;
-}
-
-[data-bs-theme="light"] .card {
-  background: #ffffff !important;
-  color: #1e293b !important;
-}
-
-[data-bs-theme="light"] .text-muted {
-  color: #6c757d !important;
-}
-
-[data-bs-theme="light"] .form-select,
-[data-bs-theme="light"] .form-control {
-  background-color: #ffffff !important;
-  color: #1e293b !important;
-  border-color: #dee2e6 !important;
-}
-
-[data-bs-theme="light"] .form-select option {
-  background-color: #ffffff !important;
-  color: #1e293b !important;
 }
 
 /* Dark theme improvements */
@@ -112,38 +72,40 @@
   color: #94a3b8 !important;
 }
 
-.page-wrapper {
+[data-bs-theme="dark"] .page-wrapper {
   background: var(--jewelbox-bg-dark) !important;
 }
 
-.page-header {
+[data-bs-theme="dark"] .page-header {
   background: transparent !important;
   border-bottom: 1px solid rgba(148, 163, 184, 0.1) !important;
 }
 
-.card {
+[data-bs-theme="dark"] .card {
   background: rgba(30, 41, 59, 0.5) !important;
   border: 1px solid rgba(148, 163, 184, 0.1) !important;
   color: var(--jewelbox-text-light) !important;
 }
 
-.card-body {
+[data-bs-theme="dark"] .card-body {
   color: var(--jewelbox-text-light) !important;
 }
 
-.form-control, .form-select {
+[data-bs-theme="dark"] .form-control,
+[data-bs-theme="dark"] .form-select {
   background: rgba(30, 41, 59, 0.8) !important;
   border-color: rgba(148, 163, 184, 0.2) !important;
   color: var(--jewelbox-text-light) !important;
 }
 
-.form-control:focus, .form-select:focus {
+[data-bs-theme="dark"] .form-control:focus,
+[data-bs-theme="dark"] .form-select:focus {
   background: rgba(30, 41, 59, 0.9) !important;
   border-color: var(--jewelbox-primary) !important;
   color: var(--jewelbox-text-light) !important;
 }
 
-.text-muted {
+[data-bs-theme="dark"] .text-muted {
   color: var(--jewelbox-text-muted) !important;
 }
 
@@ -203,24 +165,24 @@
   }
 }
 
-/* Card hover effects */
-.card:hover {
+/* Card hover effects - dark theme only */
+[data-bs-theme="dark"] .card:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
   transition: all 0.2s ease;
 }
 
-/* Table dark theme */
-.table thead th {
+/* Table dark theme only */
+[data-bs-theme="dark"] .table thead th {
   background: rgba(30, 41, 59, 0.9) !important;
   color: #e2e8f0 !important;
   border-bottom: 2px solid rgba(148, 163, 184, 0.2) !important;
 }
 
-.table tbody tr {
+[data-bs-theme="dark"] .table tbody tr {
   border-bottom: 1px solid rgba(148, 163, 184, 0.1) !important;
 }
 
-.table tbody tr:hover {
+[data-bs-theme="dark"] .table tbody tr:hover {
   background: rgba(30, 41, 59, 0.3) !important;
 }

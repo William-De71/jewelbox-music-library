@@ -92,6 +92,7 @@
   },
   "albumForm": {
     "title": "Ajouter un album",
+    "addTitle": "Ajouter un CD",
     "editTitle": "Modifier l'album",
     "externalSearch": "Recherche automatique",
     "externalSearchPlaceholder": "Titre, artiste ou EAN (ex: 724385 586323)",

@@ -104,7 +104,7 @@ async function searchByQuery(query) {
   console.log(`[Search] Cache MISS for "${query}", fetching from MusicBrainz...`);
   
   const data = await fetchJson(
-    `${MB_BASE}/release?query=${encodeURIComponent(query)}&fmt=json&limit=10&inc=artist-credits+labels+recordings`
+    `${MB_BASE}/release?query=${encodeURIComponent(query)}&fmt=json&limit=50&inc=artist-credits+labels+recordings`
   );
   if (!data.releases?.length) {
     // Cache empty results too

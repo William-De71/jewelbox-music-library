@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'preact/hooks';
 import { api } from '../api/client.js';
 import { StarRating } from '../components/StarRating.jsx';
-import { Plus } from 'lucide-preact';
+import { Plus, ArrowLeft, Pencil, AlertCircle, Search, ChevronRight, Upload, Info, ListOrdered, X, Music2, Save, ImageIcon } from 'lucide-preact';
 //import { CoverImage } from '../components/CoverImage.jsx';
 import { useI18n } from '../config/i18n/index.js';
 
@@ -23,6 +23,8 @@ export function AlbumForm({ navigate, albumId }) {
   const [searchError, setSearchError] = useState(null);
   const [searchSource, setSearchSource] = useState('musicbrainz');
   const [uploadingCover, setUploadingCover] = useState(false);
+  const [searchPage, setSearchPage] = useState(1);
+  const [searchResultsPerPage] = useState(10);
   const coverInputRef = useRef();
 
   // Load existing album for edit
@@ -65,7 +67,7 @@ export function AlbumForm({ navigate, albumId }) {
       } else {
         await api.createAlbum(payload);
       }
-      navigate('dashboard');
+      navigate('collections');
     } catch (e) {
       setError(e.message);
     } finally {
@@ -79,6 +81,7 @@ export function AlbumForm({ navigate, albumId }) {
     setSearching(true);
     setSearchError(null);
     setSearchResults([]);
+    setSearchPage(1);
     try {
       const isEAN = /^\d{8,13}$/.test(searchQuery.trim());
       if (isEAN) {
@@ -176,18 +179,18 @@ export function AlbumForm({ navigate, albumId }) {
   }
 
   return (
-    <>
+    <div class="container-xl">
       <div class="page-header d-print-none mb-3">
         <div class="row align-items-center">
           <div class="col-auto">
-            <button class="btn btn-outline-secondary btn-sm" onClick={() => navigate('dashboard')}>
-              <i class="ti ti-arrow-left me-1"></i>Retour
+            <button class="btn btn-outline-secondary" onClick={() => navigate('collections')}>
+              <ArrowLeft size={16} class="me-1" />{t('common.back')}
             </button>
           </div>
           <div class="col">
             <h2 class="page-title">
-              <i class={`ti ${isEdit ? 'ti-pencil' : 'ti-plus'} me-2 text-primary`}></i>
-              {isEdit ? 'Modifier l\'album' : 'Ajouter un CD'}
+              {isEdit ? <Pencil size={20} class="me-2 text-primary" /> : <Plus size={20} class="me-2 text-primary" />}
+              {isEdit ? t('albumForm.editTitle') : t('albumForm.addTitle')}
             </h2>
           </div>
         </div>
@@ -195,7 +198,7 @@ export function AlbumForm({ navigate, albumId }) {
 
       {error && (
         <div class="alert alert-danger mb-3">
-          <i class="ti ti-alert-circle me-2"></i>{error}
+          <AlertCircle size={16} class="me-2" />{error}
           <button class="btn-close" onClick={() => setError(null)}></button>
         </div>
       )}
@@ -204,7 +207,7 @@ export function AlbumForm({ navigate, albumId }) {
       <div class="card mb-3">
         <div class="card-header">
           <h3 class="card-title">
-            <i class="ti ti-search me-2 text-primary"></i>
+            <Search size={18} class="me-2 text-primary" />
             {t('albumForm.externalSearch')}
           </h3>
         </div>
@@ -216,7 +219,7 @@ export function AlbumForm({ navigate, albumId }) {
             <div class="col-md-4">
               <label class="form-label small">{t('albumForm.searchSource')}</label>
               <select 
-                class="form-select form-select-sm" 
+                class="form-select" 
                 value={searchSource} 
                 onChange={(e) => setSearchSource(e.target.value)}
               >
@@ -225,7 +228,7 @@ export function AlbumForm({ navigate, albumId }) {
               </select>
             </div>
             <div class="col-md-8">
-              <label class="form-label small">&nbsp;</label>
+              <label class="form-label small">{t('albumForm.externalSearchPlaceholder')}</label>
               <div class="input-group">
                 <input
                   type="text"
@@ -235,36 +238,103 @@ export function AlbumForm({ navigate, albumId }) {
                   onInput={(e) => setSearchQuery(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                 />
-                <button class="btn btn-outline-primary" type="button" onClick={handleSearch} disabled={searching}>
-                  {searching
-                    ? <span class="spinner-border spinner-border-sm"></span>
-                    : <><i class="ti ti-search me-1"></i>{t('albumForm.search')}</>}
+                <button class="btn btn-primary btn-fixed-height" type="button" onClick={handleSearch} disabled={searching}>
+                  {searching ? (
+                    <><span class="spinner-border spinner-border-xs me-1"></span><span>{t('common.loading')}</span></>
+                  ) : (
+                    <><Search size={16} class="me-1" /><span>{t('albumForm.search')}</span></>
+                  )}
                 </button>
               </div>
             </div>
           </div>
-          {searchError && <div class="text-danger small mt-1"><i class="ti ti-alert-circle me-1"></i>{searchError}</div>}
+          {searchError && <div class="text-danger small mt-1"><AlertCircle size={14} class="me-1" />{searchError}</div>}
 
-          {/* Search results dropdown */}
-          {searchResults.length > 0 && (
-            <div class="list-group mt-2 search-results-dropdown">
-              {searchResults.map((r) => (
-                <button
-                  key={r.mbid || r.id}
-                  type="button"
-                  class="list-group-item list-group-item-action d-flex align-items-center gap-3"
-                  onClick={() => selectRelease(r)}
-                >
-                  {/*<CoverImage src={r.cover_url} title={r.title} size={40} />*/}
-                  <div class="flex-grow-1 text-start overflow-hidden">
-                    <div class="fw-semibold text-truncate">{r.title}</div>
-                    <div class="text-muted small">{r.artist_name} · {r.year || '?'} · {r.label_name}</div>
+          {/* Search results */}
+          {searchResults.length > 0 && (() => {
+            const startIdx = (searchPage - 1) * searchResultsPerPage;
+            const endIdx = startIdx + searchResultsPerPage;
+            const paginatedResults = searchResults.slice(startIdx, endIdx);
+            const totalPages = Math.ceil(searchResults.length / searchResultsPerPage);
+            
+            return (
+              <div class="card mt-3">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                  <h4 class="card-title mb-0">
+                    {searchResults.length} {searchResults.length === 1 ? 'résultat trouvé' : 'résultats trouvés'}
+                  </h4>
+                  {totalPages > 1 && (
+                    <div class="text-muted small">
+                      Page {searchPage} / {totalPages}
+                    </div>
+                  )}
+                </div>
+                <div class="list-group list-group-flush">
+                  {paginatedResults.map((r) => (
+                  <button
+                    key={r.mbid || r.id}
+                    type="button"
+                    class="list-group-item list-group-item-action"
+                    onClick={() => selectRelease(r)}
+                  >
+                    <div class="row align-items-center">
+                      <div class="col-auto">
+                        {r.cover_url ? (
+                          <img src={r.cover_url} alt={r.title} class="avatar avatar-md" style="object-fit: cover;" />
+                        ) : (
+                          <div class="avatar avatar-md bg-secondary-lt">
+                            <Music2 size={24} />
+                          </div>
+                        )}
+                      </div>
+                      <div class="col">
+                        <div class="fw-bold">{r.title}</div>
+                        <div class="text-muted">
+                          <span class="me-2"><strong>Artiste:</strong> {r.artist_name}</span>
+                          {r.year && <span class="me-2"><strong>Année:</strong> {r.year}</span>}
+                        </div>
+                        {r.label_name && (
+                          <div class="text-muted small">
+                            <strong>Label:</strong> {r.label_name}
+                          </div>
+                        )}
+                        {r.ean && (
+                          <div class="text-muted small">
+                            <strong>EAN:</strong> {r.ean}
+                          </div>
+                        )}
+                      </div>
+                      <div class="col-auto">
+                        <ChevronRight size={20} class="text-muted" />
+                      </div>
+                    </div>
+                  </button>
+                  ))}
+                </div>
+                {totalPages > 1 && (
+                  <div class="card-footer d-flex justify-content-between align-items-center">
+                    <button 
+                      class="btn btn-sm"
+                      onClick={() => setSearchPage(p => Math.max(1, p - 1))}
+                      disabled={searchPage === 1}
+                    >
+                      Précédent
+                    </button>
+                    <span class="text-muted small">
+                      {startIdx + 1}-{Math.min(endIdx, searchResults.length)} sur {searchResults.length}
+                    </span>
+                    <button 
+                      class="btn btn-sm"
+                      onClick={() => setSearchPage(p => Math.min(totalPages, p + 1))}
+                      disabled={searchPage === totalPages}
+                    >
+                      Suivant
+                    </button>
                   </div>
-                  <i class="ti ti-chevron-right text-muted"></i>
-                </button>
-              ))}
-            </div>
-          )}
+                )}
+              </div>
+            );
+          })()}
         </div>
       </div>
 
@@ -275,7 +345,18 @@ export function AlbumForm({ navigate, albumId }) {
             <div class="card h-100">
               <div class="card-body d-flex flex-column align-items-center gap-3">
                 <div class="position-relative cover-preview">
-                  {/*<CoverImage src={form.cover_url} title={form.title} size={180} className="w-100 h-100" />*/}
+                  {form.cover_url ? (
+                    <img 
+                      src={form.cover_url} 
+                      alt={form.title || 'Album cover'} 
+                      class="w-100 h-100 rounded object-fit-cover"
+                      onError={(e) => { e.target.style.display = 'none'; }}
+                    />
+                  ) : (
+                    <div class="w-100 h-100 d-flex align-items-center justify-content-center bg-secondary-subtle rounded">
+                      <ImageIcon size={48} class="text-muted" />
+                    </div>
+                  )}
                   {uploadingCover && (
                     <div class="position-absolute inset-0 d-flex align-items-center justify-content-center bg-dark bg-opacity-75 rounded">
                       <div class="spinner-border spinner-border-sm text-white"></div>
@@ -286,7 +367,7 @@ export function AlbumForm({ navigate, albumId }) {
                   <input ref={coverInputRef} type="file" class="d-none" accept="image/*" onChange={handleCoverUpload} />
                   <button type="button" class="btn btn-outline-secondary btn-sm w-100 mb-2"
                     onClick={() => coverInputRef.current.click()} disabled={uploadingCover}>
-                    <i class="ti ti-upload me-1"></i>{t('albumForm.actions.uploadCover')}
+                    <Upload size={16} class="me-1" />{t('albumForm.actions.uploadCover')}
                   </button>
                   <input
                     type="text"
@@ -296,8 +377,8 @@ export function AlbumForm({ navigate, albumId }) {
                     onInput={(e) => set('cover_url', e.target.value)}
                   />
                 </div>
-                <div class="w-100">
-                  <label class="form-label small mb-1">{t('albumForm.form.rating')}</label>
+                <div class="w-100 mt-3">
+                  <label class="form-label small mb-2">{t('albumForm.form.rating')}</label>
                   <StarRating value={form.rating} onChange={(v) => set('rating', v)} />
                 </div>
               </div>
@@ -308,7 +389,7 @@ export function AlbumForm({ navigate, albumId }) {
           <div class="col-12 col-md-9">
             <div class="card">
               <div class="card-header">
-                <h3 class="card-title"><i class="ti ti-info-circle me-2"></i>{t('albumForm.infoTitle')}</h3>
+                <h3 class="card-title"><Info size={18} class="me-2" />{t('albumForm.infoTitle')}</h3>
               </div>
               <div class="card-body">
                 <div class="row g-3">
@@ -405,8 +486,8 @@ export function AlbumForm({ navigate, albumId }) {
           <div class="col-12">
             <div class="card">
               <div class="card-header d-flex align-items-center">
-                <h3 class="card-title mb-0"><i class="ti ti-list-numbers me-2"></i>{t('albumForm.tracksTitle')}</h3>
-                <button type="button" class="btn btn-sm btn-outline-primary ms-auto" onClick={addTrack}>
+                <h3 class="card-title mb-0"><ListOrdered size={18} class="me-2" />{t('albumForm.tracksTitle')}</h3>
+                <button type="button" class="btn btn-primary ms-auto" onClick={addTrack}>
                   <Plus size={16} class="me-1" />{t('albumForm.form.addTrack')}
                 </button>
               </div>
@@ -453,7 +534,7 @@ export function AlbumForm({ navigate, albumId }) {
                           </td>
                           <td>
                             <button type="button" class="btn btn-sm btn-ghost-danger p-1" onClick={() => removeTrack(idx)}>
-                              <i class="ti ti-x"></i>
+                              <X size={16} />
                             </button>
                           </td>
                         </tr>
@@ -462,9 +543,11 @@ export function AlbumForm({ navigate, albumId }) {
                   </table>
                 </div>
               ) : (
-                <div class="card-body text-center text-muted py-3">
-                  <i class="ti ti-music-off me-1"></i>{t('albumForm.form.noTracks')}
-                  <button type="button" class="btn btn-link p-0 ms-1" onClick={addTrack}>
+                <div class="card-body text-center py-3">
+                  <div class="text-muted mb-3">
+                    <Music2 size={16} class="me-1" />{t('albumForm.form.noTracks')}
+                  </div>
+                  <button type="button" class="btn btn-primary" onClick={addTrack}>
                     <Plus size={16} class="me-1" />{t('albumForm.form.addFirstTrack')}
                   </button>
                 </div>
@@ -474,17 +557,19 @@ export function AlbumForm({ navigate, albumId }) {
 
           {/* Form actions */}
           <div class="col-12 d-flex gap-2 justify-content-end mb-4">
-            <button type="button" class="btn btn-outline-secondary" onClick={() => navigate('dashboard')}>
+            <button type="button" class="btn" onClick={() => navigate('collections')}>
               {t('albumForm.actions.cancel')}
             </button>
-            <button type="submit" class="btn btn-primary" disabled={saving}>
-              {saving
-                ? <><span class="spinner-border spinner-border-sm me-1"></span>{t('common.loading')}</>
-                : <><i class={`ti ${isEdit ? 'ti-device-floppy' : 'ti-plus'} me-1`}></i>{t('albumForm.actions.save')}</>}
+            <button type="submit" class="btn btn-primary btn-fixed-height" disabled={saving}>
+              {saving ? (
+                <><span class="spinner-border spinner-border-xs me-1"></span><span>{t('common.loading')}</span></>
+              ) : (
+                <>{isEdit ? <Save size={16} class="me-1" /> : <Plus size={16} class="me-1" />}<span>{t('albumForm.actions.save')}</span></>
+              )}
             </button>
           </div>
         </div>
       </form>
-    </>
+    </div>
   );
 }

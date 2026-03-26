@@ -82,7 +82,7 @@ export async function searchDiscogsByQuery(query) {
   }
 
   const data = await fetchDiscogsJson(
-    `${DISCOGS_BASE}/database/search?q=${encodeURIComponent(query)}&type=release&per_page=10`
+    `${DISCOGS_BASE}/database/search?q=${encodeURIComponent(query)}&type=release&per_page=50`
   );
   
   return normalizeDiscogsSearch(data);

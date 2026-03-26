@@ -11,7 +11,8 @@
 }
 
 .track-number-col {
-  width: 60px;
+  width: 70px !important;
+  min-width: 70px !important;
 }
 
 .track-duration-col {
@@ -20,4 +21,74 @@
 
 .track-actions-col {
   width: 50px;
+}
+
+/* Fix button height and width consistency */
+.btn-fixed-height {
+  height: 42px !important;
+  width: 130px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+}
+
+.btn-fixed-height > * {
+  line-height: 1 !important;
+}
+
+/* Smaller spinner for buttons */
+.spinner-border-xs {
+  width: 0.875rem !important;
+  height: 0.875rem !important;
+  border-width: 0.15em !important;
+  margin-right: 0.5rem !important;
+}
+
+/* Hide number input spinners */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* Track number and duration input styling */
+.table .track-number-col input[type="number"],
+.table .track-duration-col input[type="text"] {
+  text-align: center !important;
+  padding: 0.25rem 0.5rem !important;
+  width: 100% !important;
+  font-size: 0.875rem !important;
+}
+
+/* Fix text selection visibility in inputs */
+.form-control::selection {
+  background-color: #206bc4 !important;
+  color: #ffffff !important;
+}
+
+.form-control::-moz-selection {
+  background-color: #206bc4 !important;
+  color: #ffffff !important;
+}
+
+/* Fix input focus background for light theme */
+[data-bs-theme="light"] .form-control:focus,
+[data-bs-theme="light"] .form-select:focus {
+  background-color: #ffffff !important;
+  color: #1e293b !important;
+}
+
+/* Fix card headers for light theme */
+[data-bs-theme="light"] .card-header {
+  background-color: #f8f9fa !important;
+  color: #1e293b !important;
+  border-bottom: 1px solid #dee2e6 !important;
 }
