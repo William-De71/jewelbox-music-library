@@ -10,6 +10,10 @@
   color: #e2e8f0;
 }
 
+[data-bs-theme="light"] .header-title {
+  color: #1e293b;
+}
+
 .header-subtitle {
   font-size: 0.75rem;
   font-style: italic;
