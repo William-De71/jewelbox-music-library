@@ -10,7 +10,7 @@ import { Search, Grid, List, X, Plus, Disc, Database, AlertCircle, Music } from 
 const LIMIT_OPTIONS = [10, 20, 50, 100, 999999];
 const DEFAULT_LIMIT = 20;
 
-export function Collections({ navigate }) {
+export function Collections({ navigate, params = {} }) {
   const { t } = useI18n();
   const [albums, setAlbums] = useState([]);
   const [total, setTotal] = useState(0);
@@ -30,13 +30,19 @@ export function Collections({ navigate }) {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [lendTarget, setLendTarget] = useState(null);
   const [lentTo, setLentTo] = useState('');
-  const [toast, setToast] = useState(null);
+  const [toast, setToast] = useState(params.successMessage ? { msg: params.successMessage, type: 'success' } : null);
   const searchRef = useRef();
 
   const showToast = (msg, type = 'success') => {
     setToast({ msg, type });
     setTimeout(() => setToast(null), 3000);
   };
+
+  useEffect(() => {
+    if (params.successMessage) {
+      setTimeout(() => setToast(null), 3000);
+    }
+  }, []);
 
   // Save viewMode to localStorage when it changes
   useEffect(() => {
@@ -129,6 +135,12 @@ export function Collections({ navigate }) {
   if (!activeDatabase) {
     return (
       <div class="page-container">
+        {toast && (
+          <div class={`alert alert-${toast.type} alert-dismissible toast-notification top-0 end-0 m-3`}>
+            {toast.msg}
+            <button type="button" class="btn-close" onClick={() => setToast(null)}></button>
+          </div>
+        )}
         <div class="container-fluid">
           <div class="row">
             <div class="col-12">

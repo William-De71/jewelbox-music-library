@@ -146,7 +146,9 @@
     }
   },
   "albumDetail": {
-    "title": "Détails de l'album",
+    "info": "Informations",
+    "title": "Titre de l'album",
+    "artist": "Artiste",
     "tracks": "Pistes",
     "trackNumber": "#",
     "trackTitle": "Titre",
@@ -168,7 +170,8 @@
     "returned": "Récupéré",
     "markLent": "Marquer comme prêté",
     "markReturned": "Marquer comme récupéré",
-    "confirmDelete": "Voulez-vous vraiment supprimer cet album ?"
+    "confirmDelete": "Voulez-vous vraiment supprimer l'album",
+    "deleteSuccess": "L'album a été supprimé avec succès."
   },
   
   "menu": {

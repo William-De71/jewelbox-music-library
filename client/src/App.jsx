@@ -41,7 +41,7 @@ export function App() {
       {route.page === 'add' && <AlbumForm navigate={navigate} />}
       {route.page === 'edit' && <AlbumForm navigate={navigate} albumId={route.params.id} />}
       {route.page === 'detail' && <AlbumDetail navigate={navigate} albumId={route.params.id} />}
-      {route.page === 'collections' && <Collections navigate={navigate} />}
+      {route.page === 'collections' && <Collections navigate={navigate} params={route.params} />}
       {route.page === 'wantlist' && <WantList />}
       {route.page === 'lend' && <Lend />}
       {route.page === 'stats' && <Stats />}
