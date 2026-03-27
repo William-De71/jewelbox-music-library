@@ -24,6 +24,20 @@ export const albumsApi = {
     return response.json();
   },
 
+  // Update an album (partial update)
+  async update(id, data) {
+    const response = await fetch(`${API_BASE}/albums/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to update album');
+    }
+    return response.json();
+  },
+
   // Get active database info
   async getActiveDatabase() {
     const response = await fetch(`${API_BASE}/database/active`);

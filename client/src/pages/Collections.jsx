@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from 'preact/hooks';
 import { albumsApi } from '../api/albums.js';
+import { api } from '../api/client.js';
 import { AlbumCard } from '../components/AlbumCard.jsx';
 import { AlbumRow } from '../components/AlbumRow.jsx';
 import { Pagination } from '../components/Pagination.jsx';
-import { StatsCard } from '../components/StatsCard.jsx';
 import { useI18n } from '../config/i18n/index.js';
 import { Search, Grid, List, X, Plus, Disc, Database, AlertCircle, Music } from 'lucide-preact';
 
@@ -113,21 +113,40 @@ export function Collections({ navigate, params = {} }) {
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
-    // TODO: Implement delete
-    showToast('Delete not implemented yet', 'danger');
-    setDeleteTarget(null);
+    try {
+      await api.deleteAlbum(deleteTarget.id);
+      setAlbums(prev => prev.filter(a => a.id !== deleteTarget.id));
+      setTotal(prev => prev - 1);
+      showToast(t('messages.albumDeleted').replace('{title}', deleteTarget.title), 'success');
+    } catch (e) {
+      showToast(e.message, 'danger');
+    } finally {
+      setDeleteTarget(null);
+    }
   };
 
   const handleLend = async () => {
     if (!lendTarget) return;
-    // TODO: Implement lend
-    showToast('Lend not implemented yet', 'danger');
-    setLendTarget(null);
+    try {
+      const isLent = !lendTarget.is_lent;
+      const updated = await api.lendAlbum(lendTarget.id, isLent, isLent ? lentTo || null : null);
+      setAlbums(prev => prev.map(a => a.id === lendTarget.id ? { ...a, is_lent: updated.is_lent, lent_to: updated.lent_to } : a));
+      showToast(isLent ? t('messages.albumLent').replace('{title}', lendTarget.title) : t('messages.albumReturned').replace('{title}', lendTarget.title), 'success');
+    } catch (e) {
+      showToast(e.message, 'danger');
+    } finally {
+      setLendTarget(null);
+      setLentTo('');
+    }
   };
 
   const handleRate = async (album, rating) => {
-    // TODO: Implement rate
-    showToast('Rate not implemented yet', 'danger');
+    try {
+      const updated = await albumsApi.update(album.id, { rating });
+      setAlbums(prev => prev.map(a => a.id === album.id ? { ...a, rating: updated.rating } : a));
+    } catch (e) {
+      showToast(e.message, 'danger');
+    }
   };
 
   const stats = { total, lent: albums.filter(a => a.is_lent).length };
@@ -176,34 +195,6 @@ export function Collections({ navigate, params = {} }) {
       )}
 
       <div class="header-container">
-        {/* Stats Cards Section */}
-        <div class="row g-3 mb-4">
-          <StatsCard 
-            icon="disc" 
-            title={total !== 1 ? t('stats.albumsLabel') : t('stats.albumLabel')}
-            value={total}
-            color="primary"
-          />
-          <StatsCard 
-            icon="user-share" 
-            title={stats.lent !== 1 ? t('stats.lentLabelPlural') : t('stats.lentLabel')}
-            value={stats.lent}
-            color="warning"
-          />
-          <StatsCard 
-            icon="music" 
-            title={t('stats.genresLabel')}
-            value={genres.length}
-            color="info"
-          />
-          <StatsCard 
-            icon="star-filled" 
-            title={t('stats.ratedLabel')}
-            value={albums.filter(a => a.rating > 0).length}
-            color="success"
-          />
-        </div>
-
         {/* Action Button */}
         <div class="mb-3">
           <button class="btn btn-primary" onClick={() => navigate('add')}>
