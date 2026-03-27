@@ -45,7 +45,7 @@ export function App() {
       {route.page === 'wantlist' && <WantList />}
       {route.page === 'lend' && <Lend />}
       {route.page === 'stats' && <Stats />}
-      {route.page === 'settings' && <Settings />}
+      {route.page === 'settings' && <Settings navigate={navigate} />}
     </Layout>
   );
 }
