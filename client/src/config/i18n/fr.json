@@ -34,6 +34,18 @@
     "genres": "Genres",
     "rated": "Notés"
   },
+  "home": {
+    "searchPlaceholder": "Rechercher un album, un artiste...",
+    "recentAlbums": "Derniers ajouts",
+    "randomAlbum": "Et si vous écoutiez ceci ?",
+    "shuffle": "Autre album",
+    "currentlyLent": "En ce moment",
+    "lentTo": "Prêté à",
+    "albumsTotal": "albums dans votre collection",
+    "noAlbums": "Aucun album",
+    "noActiveDatabase": "Aucune base de données active. Activez-en une dans les paramètres.",
+    "goToSettings": "Aller aux paramètres"
+  },
   "dashboard": {
     "searchPlaceholder": "Rechercher un album, un artiste...",
     "noAlbums": "Aucun album trouvé",

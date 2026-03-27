@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'preact/hooks';
+import { useState } from 'preact/hooks';
 import { Layout } from './components/Layout.jsx';
 import { Dashboard } from './pages/Dashboard.jsx';
 import { AlbumForm } from './pages/AlbumForm.jsx';
@@ -8,32 +8,11 @@ import { WantList } from './pages/WantList.jsx';
 import { Lend } from './pages/Lend.jsx';
 import { Stats } from './pages/Stats.jsx';
 import { Settings } from './pages/Settings.jsx';
-import { databasesApi } from './api/databases.js';
 
 export function App() {
   const [route, setRoute] = useState({ page: 'dashboard', params: {} });
-  const [initializing, setInitializing] = useState(true);
 
   const navigate = (page, params = {}) => setRoute({ page, params });
-
-  // Check for active database on mount and redirect to collections if exists
-  useEffect(() => {
-    const checkActiveDatabase = async () => {
-      try {
-        const response = await databasesApi.getAll();
-        if (response.active) {
-          // Active database exists, redirect to collections
-          setRoute({ page: 'collections', params: {} });
-        }
-      } catch (err) {
-        console.error('Failed to check active database:', err);
-      } finally {
-        setInitializing(false);
-      }
-    };
-    
-    checkActiveDatabase();
-  }, []);
 
   return (
     <Layout navigate={navigate} currentPage={route.page}>

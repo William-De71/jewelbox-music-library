@@ -62,7 +62,7 @@ function mapAlbum(row) {
   };
 }
 
-export function getAlbums({ page = 1, limit = 24, genre, rating, sort = 'title', order = 'asc', search } = {}) {
+export function getAlbums({ page = 1, limit = 24, genre, rating, sort = 'title', order = 'asc', search, lent } = {}) {
   const db = getDb();
   const offset = (page - 1) * limit;
   const conditions = [];
@@ -74,9 +74,10 @@ export function getAlbums({ page = 1, limit = 24, genre, rating, sort = 'title',
     conditions.push('(a.title LIKE ? OR ar.name LIKE ?)');
     params.push(`%${search}%`, `%${search}%`);
   }
+  if (lent === 'true' || lent === true) { conditions.push('a.is_lent = 1'); }
 
   const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
-  const validSorts = { title: 'a.title', artist: 'ar.name', year: 'a.year', rating: 'a.rating' };
+  const validSorts = { title: 'a.title', artist: 'ar.name', year: 'a.year', rating: 'a.rating', created_at: 'a.created_at' };
   const sortCol = validSorts[sort] || 'a.title';
   const sortDir = order === 'desc' ? 'DESC' : 'ASC';
 

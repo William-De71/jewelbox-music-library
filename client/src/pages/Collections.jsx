@@ -26,7 +26,7 @@ export function Collections({ navigate, params = {} }) {
     return saved ? Number(saved) : DEFAULT_LIMIT;
   });
   const [genres, setGenres] = useState([]);
-  const [filters, setFilters] = useState({ genre: '', rating: '', search: '', sort: 'artist', order: 'asc' });
+  const [filters, setFilters] = useState({ genre: '', rating: '', search: params.search || '', sort: 'artist', order: 'asc' });
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [lendTarget, setLendTarget] = useState(null);
   const [lentTo, setLentTo] = useState('');
