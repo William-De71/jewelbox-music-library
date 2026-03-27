@@ -186,7 +186,7 @@ export function Collections({ navigate, params = {} }) {
   }
 
   return (
-    <div>
+    <div class="page-container">
       {toast && (
         <div class={`alert alert-${toast.type} alert-dismissible toast-notification top-0 end-0 m-3`}>
           {toast.msg}
@@ -194,26 +194,29 @@ export function Collections({ navigate, params = {} }) {
         </div>
       )}
 
-      <div class="header-container">
-        {/* Action Button */}
-        <div class="mb-3">
-          <button class="btn btn-primary" onClick={() => navigate('add')}>
-            <Plus size={16} class="me-1" />
-            {t('common.addAlbum')}
-          </button>
-        </div>
-
-        
-          {loading && (
-            <div class="text-center py-5">
-              <div class="spinner-border" role="status"></div>
-            </div>
-          )}
-
-          
-          {!loading && (
-            <div class="card mb-3">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-header d-flex justify-content-between align-items-center">
+                <h2 class="card-title mb-0">
+                  <Disc size={24} class="me-2 text-primary" />
+                  {t('menu.collections')}
+                </h2>
+                <button class="btn btn-primary btn-sm" onClick={() => navigate('add')}>
+                  <Plus size={16} class="me-1" />
+                  {t('common.addAlbum')}
+                </button>
+              </div>
               <div class="card-body">
+                {loading && (
+                  <div class="text-center py-5">
+                    <div class="spinner-border" role="status"></div>
+                  </div>
+                )}
+
+                {!loading && (
+                  <>
                 {/* Top controls */}
                 <div class="row g-2 align-items-center mb-4">
                   <div class="col-md-3">
@@ -374,9 +377,12 @@ export function Collections({ navigate, params = {} }) {
                     </div>
                   </div>
                 )}
+                  </>
+                )}
               </div>
             </div>
-          )}
+          </div>
+        </div>
       </div>
 
       {deleteTarget && (
