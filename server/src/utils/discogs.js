@@ -7,7 +7,7 @@ const DISCOGS_SECRET = process.env.DISCOGS_SECRET || '';
 
 // Base headers without authentication
 const DISCOGS_HEADERS = {
-  'User-Agent': 'JewelBox-Music-Library/1.0 ( https://github.com/william/jewelbox-music-library )',
+  'User-Agent': 'JewelBox-Music-Library/1.0',
   'Accept': 'application/json',
 };
 

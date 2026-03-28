@@ -26,6 +26,7 @@ export function AlbumForm({ navigate, albumId, params = {} }) {
   const [uploadingCover, setUploadingCover] = useState(false);
   const [searchPage, setSearchPage] = useState(1);
   const [searchResultsPerPage] = useState(10);
+  const [toast, setToast] = useState(null);
   const coverInputRef = useRef();
 
   // Load existing album for edit
@@ -92,12 +93,18 @@ export function AlbumForm({ navigate, albumId, params = {} }) {
       } else {
         const results = await api.search(searchQuery.trim(), searchSource);
         setSearchResults(results);
+        if (!results || results.length === 0) showToast(t('albumForm.searchNoResults'));
       }
     } catch (e) {
       setSearchError(e.message);
     } finally {
       setSearching(false);
     }
+  };
+
+  const showToast = (msg, type = 'warning') => {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 3000);
   };
 
   const applyResult = (r) => {
@@ -183,6 +190,12 @@ export function AlbumForm({ navigate, albumId, params = {} }) {
 
   return (
     <div class="container-xl">
+      {toast && (
+        <div class={`alert alert-${toast.type} alert-dismissible toast-notification top-0 end-0 m-3`}>
+          {toast.msg}
+          <button type="button" class="btn-close" onClick={() => setToast(null)} />
+        </div>
+      )}
       <div class="page-header d-print-none mb-3">
         <div class="row align-items-center">
           <div class="col-auto">

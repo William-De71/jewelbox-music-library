@@ -113,6 +113,7 @@
     "musicbrainz": "MusicBrainz",
     "discogs": "Discogs",
     "search": "Rechercher",
+    "searchNoResults": "Aucun résultat trouvé pour cette recherche.",
     "clear": "Effacer",
     "infoTitle": "Informations",
     "tracksTitle": "Pistes",

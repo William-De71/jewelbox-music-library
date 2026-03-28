@@ -52,7 +52,7 @@ export async function downloadCover(imageUrl) {
     
     // Add headers for Discogs and other external sites
     const headers = {
-      'User-Agent': 'JewelBox-Music-Library/1.0 ( https://github.com/william/jewelbox-music-library )',
+      'User-Agent': 'JewelBox-Music-Library/1.0',
     };
     
     // Add Discogs authentication if this is a Discogs URL

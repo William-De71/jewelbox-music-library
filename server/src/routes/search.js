@@ -1,6 +1,6 @@
 const MB_BASE = 'https://musicbrainz.org/ws/2';
 const MB_HEADERS = {
-  'User-Agent': 'JewelBox-Music-Library/1.0 ( https://github.com/william/jewelbox-music-library )',
+  'User-Agent': 'JewelBox-Music-Library/1.0',
   'Accept': 'application/json',
   'Accept-Language': 'en-US,en;q=0.9',
   'Connection': 'keep-alive',
