@@ -7,8 +7,8 @@ import { Pagination } from '../components/Pagination.jsx';
 import { useI18n } from '../config/i18n/index.js';
 import { Search, Grid, List, X, Plus, Disc, Database, AlertCircle, Music } from 'lucide-preact';
 
-const LIMIT_OPTIONS = [10, 20, 50, 100, 999999];
-const DEFAULT_LIMIT = 20;
+const LIMIT_OPTIONS = [12, 24, 48, 96, 999999];
+const DEFAULT_LIMIT = 24;
 
 export function Collections({ navigate, params = {} }) {
   const { t } = useI18n();
@@ -223,10 +223,10 @@ export function Collections({ navigate, params = {} }) {
                     <div class="d-flex align-items-center gap-2">
                       <span class="text-muted me-2">{t('dashboard.pagination.itemsPerPage')}</span>
                       <select class="form-select form-select-sm" style="width: auto;" value={limit} onChange={(e) => handleLimitChange(e.target.value)}>
-                        <option value="10">10</option>
-                        <option value="20">20</option>
-                        <option value="50">50</option>
-                        <option value="100">100</option>
+                        <option value="12">12</option>
+                        <option value="24">24</option>
+                        <option value="48">48</option>
+                        <option value="96">96</option>
                         <option value="999999">{t('common.all')}</option>
                       </select>
                     </div>
