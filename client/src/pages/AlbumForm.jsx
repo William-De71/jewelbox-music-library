@@ -5,6 +5,68 @@ import { Plus, ArrowLeft, Pencil, AlertCircle, Search, ChevronRight, Upload, Inf
 //import { CoverImage } from '../components/CoverImage.jsx';
 import { useI18n } from '../config/i18n/index.js';
 
+function Combobox({ value, onChange, options = [], placeholder, required, id }) {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState(value || '');
+  const wrapperRef = useRef();
+
+  useEffect(() => { setQuery(value || ''); }, [value]);
+
+  useEffect(() => {
+    const handler = (e) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target)) setOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  const filtered = options.filter(o =>
+    !query || o.toLowerCase().includes(query.toLowerCase())
+  );
+
+  const handleInput = (e) => {
+    setQuery(e.target.value);
+    onChange(e.target.value);
+    setOpen(true);
+  };
+
+  const select = (opt) => {
+    setQuery(opt);
+    onChange(opt);
+    setOpen(false);
+  };
+
+  return (
+    <div class="position-relative" ref={wrapperRef}>
+      <input
+        type="text"
+        id={id}
+        class="form-select"
+        value={query}
+        onInput={handleInput}
+        onFocus={() => setOpen(true)}
+        placeholder={placeholder}
+        required={required}
+        autocomplete="off"
+      />
+      {open && filtered.length > 0 && (
+        <div class="dropdown-menu show w-100" style={{ maxHeight: '220px', overflowY: 'auto', zIndex: 1050 }}>
+          {filtered.map((opt, i) => (
+            <button
+              key={i}
+              type="button"
+              class={`dropdown-item${opt === value ? ' active' : ''}`}
+              onMouseDown={() => select(opt)}
+            >
+              {opt}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 const EMPTY_FORM = {
   title: '', artist_name: '', label_name: '', year: '', genre: '',
   total_duration: '', ean: '', rating: 0, cover_url: '', notes: '', tracks: [], is_wanted: false,
@@ -24,10 +86,26 @@ export function AlbumForm({ navigate, albumId, params = {} }) {
   const [searchError, setSearchError] = useState(null);
   const [searchSource, setSearchSource] = useState(params.initialSource || 'musicbrainz');
   const [uploadingCover, setUploadingCover] = useState(false);
+  const [knownArtists, setKnownArtists] = useState([]);
+  const [knownLabels, setKnownLabels] = useState([]);
+  const [knownGenres, setKnownGenres] = useState([]);
   const [searchPage, setSearchPage] = useState(1);
   const [searchResultsPerPage] = useState(10);
   const [toast, setToast] = useState(null);
   const coverInputRef = useRef();
+
+  // Load known artists, labels, genres for datalists
+  useEffect(() => {
+    Promise.all([
+      api.getArtists().catch(() => []),
+      api.getLabels().catch(() => []),
+      api.getGenres().catch(() => []),
+    ]).then(([artists, labels, genres]) => {
+      setKnownArtists(artists);
+      setKnownLabels(labels);
+      setKnownGenres(genres);
+    });
+  }, []);
 
   // Auto-trigger search if launched from quick add
   useEffect(() => {
@@ -463,33 +541,30 @@ export function AlbumForm({ navigate, albumId, params = {} }) {
                   </div>
                   <div class="col-12 col-sm-6">
                     <label class="form-label required">{t('albumForm.form.artist')}</label>
-                    <input
-                      type="text"
-                      class="form-control"
+                    <Combobox
+                      value={form.artist_name}
+                      onChange={(v) => set('artist_name', v)}
+                      options={knownArtists.map(a => a.name)}
                       placeholder={t('albumForm.form.artistPlaceholder')}
                       required
-                      value={form.artist_name}
-                      onInput={(e) => set('artist_name', e.target.value)}
                     />
                   </div>
                   <div class="col-12 col-sm-6">
                     <label class="form-label">{t('albumForm.form.label')}</label>
-                    <input
-                      type="text"
-                      class="form-control"
-                      placeholder={t('albumForm.form.labelPlaceholder')}
+                    <Combobox
                       value={form.label_name}
-                      onInput={(e) => set('label_name', e.target.value)}
+                      onChange={(v) => set('label_name', v)}
+                      options={knownLabels.map(l => l.name)}
+                      placeholder={t('albumForm.form.labelPlaceholder')}
                     />
                   </div>
                   <div class="col-12 col-sm-4">
                     <label class="form-label">{t('albumForm.form.genre')}</label>
-                    <input
-                      type="text"
-                      class="form-control"
-                      placeholder={t('albumForm.form.genrePlaceholder')}
+                    <Combobox
                       value={form.genre}
-                      onInput={(e) => set('genre', e.target.value)}
+                      onChange={(v) => set('genre', v)}
+                      options={knownGenres}
+                      placeholder={t('albumForm.form.genrePlaceholder')}
                     />
                   </div>
                   <div class="col-12 col-sm-4">

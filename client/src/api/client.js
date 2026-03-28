@@ -29,8 +29,8 @@ export const api = {
 
   // Metadata
   getGenres: () => request('GET', '/albums/genres'),
-  getArtists: () => request('GET', '/artists'),
-  getLabels: () => request('GET', '/labels'),
+  getArtists: () => request('GET', '/albums/artists'),
+  getLabels: () => request('GET', '/albums/labels'),
 
   // External search
   search: (q, source = 'musicbrainz') => request('GET', `/search?q=${encodeURIComponent(q)}&source=${source}`),

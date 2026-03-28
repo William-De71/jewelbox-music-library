@@ -24,6 +24,20 @@ export const albumsApi = {
     return response.json();
   },
 
+  // Get artists from active database
+  async getArtists() {
+    const response = await fetch(`${API_BASE}/albums/artists`);
+    if (!response.ok) return [];
+    return response.json();
+  },
+
+  // Get labels from active database
+  async getLabels() {
+    const response = await fetch(`${API_BASE}/albums/labels`);
+    if (!response.ok) return [];
+    return response.json();
+  },
+
   // Update an album (partial update)
   async update(id, data) {
     const response = await fetch(`${API_BASE}/albums/${id}`, {

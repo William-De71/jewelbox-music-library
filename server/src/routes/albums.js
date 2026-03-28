@@ -1,5 +1,5 @@
 import {
-  getAlbums, getAlbumById, createAlbum, updateAlbum, deleteAlbum, getGenres,
+  getAlbums, getAlbumById, createAlbum, updateAlbum, deleteAlbum, getGenres, getAllArtists, getAllLabels,
 } from '../db/queries.js';
 import { downloadCover } from '../utils/downloadCover.js';
 
@@ -23,6 +23,16 @@ export async function albumRoutes(fastify) {
   // GET /api/albums/genres
   fastify.get('/albums/genres', async (req, reply) => {
     return getGenres();
+  });
+
+  // GET /api/albums/artists
+  fastify.get('/albums/artists', async (req, reply) => {
+    return getAllArtists();
+  });
+
+  // GET /api/albums/labels
+  fastify.get('/albums/labels', async (req, reply) => {
+    return getAllLabels();
   });
 
   // GET /api/albums/:id
