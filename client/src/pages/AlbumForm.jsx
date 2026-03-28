@@ -18,16 +18,45 @@ export function AlbumForm({ navigate, albumId, params = {} }) {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState(params.initialSearch || '');
   const [searchResults, setSearchResults] = useState([]);
   const [searching, setSearching] = useState(false);
   const [searchError, setSearchError] = useState(null);
-  const [searchSource, setSearchSource] = useState('musicbrainz');
+  const [searchSource, setSearchSource] = useState(params.initialSource || 'musicbrainz');
   const [uploadingCover, setUploadingCover] = useState(false);
   const [searchPage, setSearchPage] = useState(1);
   const [searchResultsPerPage] = useState(10);
   const [toast, setToast] = useState(null);
   const coverInputRef = useRef();
+
+  // Auto-trigger search if launched from quick add
+  useEffect(() => {
+    if (!params.initialSearch) return;
+    const query = params.initialSearch.trim();
+    const source = params.initialSource || 'musicbrainz';
+    if (!query) return;
+    setSearching(true);
+    setSearchError(null);
+    setSearchResults([]);
+    const isEAN = /^\d{8,13}$/.test(query);
+    if (isEAN) {
+      api.searchByEan(query, source)
+        .then(result => applyResult(result))
+        .catch(e => setSearchError(e.message))
+        .finally(() => setSearching(false));
+    } else {
+      api.search(query, source)
+        .then(results => {
+          setSearchResults(results || []);
+          if (!results || results.length === 0) {
+            setToast({ msg: t('albumForm.searchNoResults'), type: 'warning' });
+            setTimeout(() => setToast(null), 3000);
+          }
+        })
+        .catch(e => setSearchError(e.message))
+        .finally(() => setSearching(false));
+    }
+  }, []);
 
   // Load existing album for edit
   useEffect(() => {

@@ -44,7 +44,15 @@
     "albumsTotal": "albums dans votre collection",
     "noAlbums": "Aucun album",
     "noActiveDatabase": "Aucune base de données active. Activez-en une dans les paramètres.",
-    "goToSettings": "Aller aux paramètres"
+    "goToSettings": "Aller aux paramètres",
+    "quickAdd": "Ajout rapide",
+    "quickAddPlaceholder": "Titre, artiste ou EAN...",
+    "quickAddSearch": "Rechercher & ajouter",
+    "addManually": "Ajouter manuellement",
+    "addToWishlist": "Ajouter un souhait",
+    "recentOwned": "Collection",
+    "recentWantedSection": "Liste de souhaits",
+    "wantedTotal": "souhaits dans votre liste"
   },
   "dashboard": {
     "searchPlaceholder": "Rechercher un album, un artiste...",
