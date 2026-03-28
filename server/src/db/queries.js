@@ -32,7 +32,7 @@ export function getAllLabels() {
 const ALBUM_SELECT = `
   SELECT
     a.id, a.title, a.year, a.genre, a.total_duration, a.ean,
-    a.rating, a.cover_url, a.notes, a.is_lent, a.lent_to,
+    a.rating, a.cover_url, a.notes, a.is_lent, a.lent_to, a.is_wanted,
     a.created_at, a.updated_at,
     ar.id   AS artist_id,   ar.name  AS artist_name,
     l.id    AS label_id,    l.name   AS label_name
@@ -55,6 +55,7 @@ function mapAlbum(row) {
     notes: row.notes,
     is_lent: Boolean(row.is_lent),
     lent_to: row.lent_to,
+    is_wanted: Boolean(row.is_wanted),
     created_at: row.created_at,
     updated_at: row.updated_at,
     artist: { id: row.artist_id, name: row.artist_name },
@@ -62,7 +63,7 @@ function mapAlbum(row) {
   };
 }
 
-export function getAlbums({ page = 1, limit = 24, genre, rating, sort = 'title', order = 'asc', search, lent } = {}) {
+export function getAlbums({ page = 1, limit = 24, genre, rating, sort = 'title', order = 'asc', search, lent, wanted } = {}) {
   const db = getDb();
   const offset = (page - 1) * limit;
   const conditions = [];
@@ -75,6 +76,8 @@ export function getAlbums({ page = 1, limit = 24, genre, rating, sort = 'title',
     params.push(`%${search}%`, `%${search}%`);
   }
   if (lent === 'true' || lent === true) { conditions.push('a.is_lent = 1'); }
+  if (wanted === 'true' || wanted === true) { conditions.push('a.is_wanted = 1'); }
+  if (wanted === 'false' || wanted === false) { conditions.push('a.is_wanted = 0'); }
 
   const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
   const validSorts = { title: 'a.title', artist: 'ar.name', year: 'a.year', rating: 'a.rating', created_at: 'a.created_at' };
@@ -115,8 +118,8 @@ export function createAlbum(data) {
   const label_id = data.label_name ? upsertLabel(data.label_name) : null;
 
   const insert = db.prepare(`
-    INSERT INTO albums (title, artist_id, label_id, year, genre, total_duration, ean, rating, cover_url, notes)
-    VALUES (@title, @artist_id, @label_id, @year, @genre, @total_duration, @ean, @rating, @cover_url, @notes)
+    INSERT INTO albums (title, artist_id, label_id, year, genre, total_duration, ean, rating, cover_url, notes, is_wanted)
+    VALUES (@title, @artist_id, @label_id, @year, @genre, @total_duration, @ean, @rating, @cover_url, @notes, @is_wanted)
   `);
 
   const insertTrack = db.prepare(
@@ -135,6 +138,7 @@ export function createAlbum(data) {
       rating: data.rating ?? null,
       cover_url: data.cover_url ?? null,
       notes: data.notes ?? null,
+      is_wanted: data.is_wanted ? 1 : 0,
     });
     (data.tracks || []).forEach((t, i) => insertTrack.run(lastInsertRowid, t.position ?? i + 1, t.title, t.duration || null));
     return lastInsertRowid;
@@ -157,7 +161,7 @@ export function updateAlbum(id, data) {
   const fieldMap = {
     title: 'title', year: 'year', genre: 'genre',
     total_duration: 'total_duration', ean: 'ean', rating: 'rating',
-    cover_url: 'cover_url', notes: 'notes', is_lent: 'is_lent', lent_to: 'lent_to',
+    cover_url: 'cover_url', notes: 'notes', is_lent: 'is_lent', lent_to: 'lent_to', is_wanted: 'is_wanted',
   };
 
   for (const [key, col] of Object.entries(fieldMap)) {

@@ -16,6 +16,14 @@ function getManagerDb() {
   return managerDb;
 }
 
+function runMigrations(database) {
+  const cols = database.prepare("PRAGMA table_info(albums)").all().map(c => c.name);
+  if (!cols.includes('is_wanted')) {
+    database.exec("ALTER TABLE albums ADD COLUMN is_wanted INTEGER NOT NULL DEFAULT 0 CHECK(is_wanted IN (0,1))");
+    console.log('[Migration] Added is_wanted column to albums');
+  }
+}
+
 export function getDb() {
   // Get active database from manager
   const managerDb = getManagerDb();
@@ -38,6 +46,7 @@ export function getDb() {
     
     db = new Database(activeDb.path);
     currentDbPath = activeDb.path;
+    runMigrations(db);
   }
   
   return db;

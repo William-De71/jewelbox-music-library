@@ -17,11 +17,11 @@ export function App() {
   return (
     <Layout navigate={navigate} currentPage={route.page}>
       {route.page === 'dashboard' && <Dashboard navigate={navigate} />}
-      {route.page === 'add' && <AlbumForm navigate={navigate} />}
+      {route.page === 'add' && <AlbumForm navigate={navigate} params={route.params} />}
       {route.page === 'edit' && <AlbumForm navigate={navigate} albumId={route.params.id} />}
       {route.page === 'detail' && <AlbumDetail navigate={navigate} albumId={route.params.id} />}
       {route.page === 'collections' && <Collections navigate={navigate} params={route.params} />}
-      {route.page === 'wantlist' && <WantList />}
+      {route.page === 'wantlist' && <WantList navigate={navigate} params={route.params} />}
       {route.page === 'lend' && <Lend />}
       {route.page === 'stats' && <Stats />}
       {route.page === 'settings' && <Settings navigate={navigate} />}

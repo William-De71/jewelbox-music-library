@@ -7,13 +7,14 @@ import { useI18n } from '../config/i18n/index.js';
 
 const EMPTY_FORM = {
   title: '', artist_name: '', label_name: '', year: '', genre: '',
-  total_duration: '', ean: '', rating: 0, cover_url: '', notes: '', tracks: [],
+  total_duration: '', ean: '', rating: 0, cover_url: '', notes: '', tracks: [], is_wanted: false,
 };
 
-export function AlbumForm({ navigate, albumId }) {
+export function AlbumForm({ navigate, albumId, params = {} }) {
   const { t } = useI18n();
   const isEdit = Boolean(albumId);
-  const [form, setForm] = useState(EMPTY_FORM);
+  const fromWantList = Boolean(params.fromWantList);
+  const [form, setForm] = useState({ ...EMPTY_FORM, is_wanted: fromWantList });
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
@@ -44,6 +45,7 @@ export function AlbumForm({ navigate, albumId }) {
         cover_url: album.cover_url || '',
         notes: album.notes || '',
         tracks: album.tracks || [],
+        is_wanted: Boolean(album.is_wanted),
       });
     }).catch((e) => setError(e.message))
       .finally(() => setLoading(false));
@@ -67,7 +69,7 @@ export function AlbumForm({ navigate, albumId }) {
       } else {
         await api.createAlbum(payload);
       }
-      navigate('collections');
+      navigate(fromWantList ? 'wantlist' : 'collections');
     } catch (e) {
       setError(e.message);
     } finally {
@@ -110,6 +112,7 @@ export function AlbumForm({ navigate, albumId }) {
       rating: form.rating,
       cover_url: r.cover_url || '',
       notes: '',
+      is_wanted: fromWantList || Boolean(r.is_wanted),
       tracks: r.tracks || [],
     });
     setSearchResults([]);
@@ -183,7 +186,7 @@ export function AlbumForm({ navigate, albumId }) {
       <div class="page-header d-print-none mb-3">
         <div class="row align-items-center">
           <div class="col-auto">
-            <button class="btn btn-outline-secondary" onClick={() => navigate('collections')}>
+            <button class="btn btn-outline-secondary" onClick={() => navigate(fromWantList ? 'wantlist' : 'collections')}>
               <ArrowLeft size={16} class="me-1" />{t('common.back')}
             </button>
           </div>
@@ -477,6 +480,18 @@ export function AlbumForm({ navigate, albumId }) {
                       onInput={(e) => set('notes', e.target.value)}
                     />
                   </div>
+                  <div class="col-12">
+                    <label class="form-check">
+                      <input
+                        type="checkbox"
+                        class="form-check-input"
+                        checked={form.is_wanted}
+                        onChange={(e) => set('is_wanted', e.target.checked)}
+                      />
+                      <span class="form-check-label">{t('albumForm.form.isWanted')}</span>
+                    </label>
+                    <div class="form-hint">{t('albumForm.form.isWantedHint')}</div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -557,7 +572,7 @@ export function AlbumForm({ navigate, albumId }) {
 
           {/* Form actions */}
           <div class="col-12 d-flex gap-2 justify-content-end mb-4">
-            <button type="button" class="btn" onClick={() => navigate('collections')}>
+            <button type="button" class="btn" onClick={() => navigate(fromWantList ? 'wantlist' : 'collections')}>
               {t('albumForm.actions.cancel')}
             </button>
             <button type="submit" class="btn btn-primary btn-fixed-height" disabled={saving}>

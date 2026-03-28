@@ -71,7 +71,7 @@ export function Collections({ navigate, params = {} }) {
       
       setLoading(true);
       try {
-        const result = await albumsApi.getAll({ page, limit, ...filters });
+        const result = await albumsApi.getAll({ page, limit, ...filters, wanted: 'false' });
         setAlbums(result.data);
         setTotal(result.pagination.total);
       } catch (e) {

@@ -170,6 +170,7 @@ function initializeCollectionDatabase(db) {
       notes          TEXT,
       is_lent        INTEGER NOT NULL DEFAULT 0 CHECK(is_lent IN (0,1)),
       lent_to        TEXT,
+      is_wanted      INTEGER NOT NULL DEFAULT 0 CHECK(is_wanted IN (0,1)),
       created_at     TEXT NOT NULL DEFAULT (datetime('now')),
       updated_at     TEXT NOT NULL DEFAULT (datetime('now'))
     );

@@ -7,11 +7,11 @@ export async function albumRoutes(fastify) {
   // GET /api/albums?page=1&limit=24&genre=Rock&rating=5&sort=title&order=asc&search=
   fastify.get('/albums', async (req, reply) => {
     try {
-      const { page, limit, genre, rating, sort, order, search, lent } = req.query;
+      const { page, limit, genre, rating, sort, order, search, lent, wanted } = req.query;
       const result = getAlbums({
         page: page ? Number(page) : 1,
         limit: limit ? Math.min(Number(limit), 100) : 24,
-        genre, rating, sort, order, search, lent,
+        genre, rating, sort, order, search, lent, wanted,
       });
       return result;
     } catch (err) {
@@ -49,6 +49,7 @@ export async function albumRoutes(fastify) {
           rating:         { type: 'integer', minimum: 1, maximum: 5 },
           cover_url:      { type: 'string' },
           notes:          { type: 'string' },
+          is_wanted:      { type: 'boolean' },
           tracks: {
             type: 'array',
             items: {

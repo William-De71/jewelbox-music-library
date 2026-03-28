@@ -144,7 +144,9 @@
       "addTrack": "Ajouter une piste",
       "removeTrack": "Supprimer",
       "noTracks": "Aucune piste ajoutée.",
-      "addFirstTrack": "Ajouter la première"
+      "addFirstTrack": "Ajouter la première",
+      "isWanted": "Ajouter à la liste de souhaits",
+      "isWantedHint": "Cochez si vous souhaitez cet album mais ne le possédez pas encore"
     },
     "actions": {
       "save": "Enregistrer",
@@ -156,6 +158,15 @@
       "lentTo": "Prêté à",
       "uploadCover": "Uploader une pochette"
     }
+  },
+  "wantlist": {
+    "addToWishlist": "Ajouter un souhait",
+    "empty": "Votre liste de souhaits est vide",
+    "emptySubtitle": "Ajoutez des albums que vous souhaitez acquérir",
+    "acquireTitle": "Marquer comme acquis",
+    "acquireMessage": "Déplacer \"{title}\" vers votre collection ?",
+    "acquireConfirm": "Oui, c'est acquis !",
+    "acquired": "\"{title}\" ajouté à votre collection"
   },
   "albumDetail": {
     "info": "Informations",
