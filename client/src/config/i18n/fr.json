@@ -193,6 +193,7 @@
     "returned": "Récupéré",
     "markLent": "Marquer comme prêté",
     "markReturned": "Marquer comme récupéré",
+    "wanted": "Dans la liste de souhaits",
     "confirmDelete": "Voulez-vous vraiment supprimer l'album",
     "deleteSuccess": "L'album a été supprimé avec succès."
   },

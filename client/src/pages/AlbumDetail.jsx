@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'preact/hooks';
 import { api } from '../api/client.js';
 import { StarRating } from '../components/StarRating.jsx';
-import { ArrowLeft, UserCheck, UserPlus, Pencil, Trash2, Disc, StickyNote, ListOrdered, Clock, Music2, AlertCircle, Info } from 'lucide-preact';
+import { ArrowLeft, UserCheck, UserPlus, Pencil, Trash2, Disc, StickyNote, ListOrdered, Clock, Music2, AlertCircle, Info, Heart } from 'lucide-preact';
 import { useI18n } from '../config/i18n/index.js';
 import '../styles/AlbumDetail.css';
 
@@ -24,7 +24,7 @@ export function AlbumDetail({ navigate, albumId }) {
     setDeleting(true);
     try {
       await api.deleteAlbum(albumId);
-      navigate('collections', { successMessage: t('albumDetail.deleteSuccess') });
+      navigate(album?.is_wanted ? 'wantlist' : 'collections', { successMessage: t('albumDetail.deleteSuccess') });
     } catch (e) {
       setError(e.message);
       setDeleting(false);
@@ -68,7 +68,7 @@ export function AlbumDetail({ navigate, albumId }) {
       <div class="page-header d-print-none mb-3">
         <div class="row align-items-center">
           <div class="col-auto">
-            <button class="btn btn-outline-secondary" onClick={() => navigate('collections')}>
+            <button class="btn btn-outline-secondary" onClick={() => navigate(album?.is_wanted ? 'wantlist' : 'collections')}>
               <ArrowLeft size={16} class="me-1" />{t('common.back')}
             </button>
           </div>
@@ -154,6 +154,14 @@ export function AlbumDetail({ navigate, albumId }) {
                       <UserPlus size={16} class="me-1" />
                       <strong>{t('albumDetail.lent')}</strong>
                       {album.lent_to && <> à <strong>{album.lent_to}</strong></>}
+                    </div>
+                  </div>
+                )}
+                {album.is_wanted && (
+                  <div class="col-12">
+                    <div class="alert alert-danger p-2 mb-0">
+                      <Heart size={16} class="me-1" />
+                      <strong>{t('albumDetail.wanted')}</strong>
                     </div>
                   </div>
                 )}
