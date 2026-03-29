@@ -27,6 +27,13 @@ export function getAllLabels() {
   return getDb().prepare('SELECT * FROM labels ORDER BY name COLLATE NOCASE').all();
 }
 
+export function getBorrowers() {
+  return getDb()
+    .prepare('SELECT DISTINCT lent_to FROM albums WHERE lent_to IS NOT NULL AND lent_to != \'\' ORDER BY lent_to COLLATE NOCASE')
+    .all()
+    .map(r => r.lent_to);
+}
+
 // ── Albums ───────────────────────────────────────────────────────────────────
 
 const ALBUM_SELECT = `

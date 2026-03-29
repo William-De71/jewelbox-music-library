@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'preact/hooks';
 import { api } from '../api/client.js';
 import { StarRating } from '../components/StarRating.jsx';
-import { ArrowLeft, UserCheck, UserPlus, Pencil, Trash2, Disc, StickyNote, ListOrdered, Clock, Music2, AlertCircle, Info, Heart } from 'lucide-preact';
+import { ArrowLeft, UserCheck, UserPlus, User, Pencil, Trash2, Disc, StickyNote, ListOrdered, Clock, Music2, AlertCircle, Info, Heart } from 'lucide-preact';
 import { useI18n } from '../config/i18n/index.js';
 import '../styles/AlbumDetail.css';
 
@@ -12,12 +12,17 @@ export function AlbumDetail({ navigate, albumId }) {
   const [error, setError] = useState(null);
   const [deleting, setDeleting] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [lendModalOpen, setLendModalOpen] = useState(false);
+  const [lentToInput, setLentToInput] = useState('');
+  const [borrowers, setBorrowers] = useState([]);
+  const [showBorrowerSuggestions, setShowBorrowerSuggestions] = useState(false);
 
   useEffect(() => {
     api.getAlbum(albumId)
       .then(setAlbum)
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
+    api.getBorrowers().then(setBorrowers).catch(() => {});
   }, [albumId]);
 
   const handleDelete = async () => {
@@ -31,12 +36,23 @@ export function AlbumDetail({ navigate, albumId }) {
     }
   };
 
-  const handleLend = async () => {
+  const handleLend = () => {
+    if (album.is_lent) {
+      handleConfirmLend(false, null);
+    } else {
+      setLentToInput('');
+      setLendModalOpen(true);
+    }
+  };
+
+  const handleConfirmLend = async (isLent, name) => {
     try {
-      const updated = await api.lendAlbum(albumId, !album.is_lent, null);
+      const updated = await api.lendAlbum(albumId, isLent, name);
       setAlbum(updated);
     } catch (e) {
       setError(e.message);
+    } finally {
+      setLendModalOpen(false);
     }
   };
 
@@ -241,14 +257,16 @@ export function AlbumDetail({ navigate, albumId }) {
 
       {/* Action buttons */}
       <div class="d-flex gap-2 justify-content-end mt-3 mb-4">
-        <button
-          class={`btn ${album.is_lent ? 'btn-success' : 'btn-warning'}`}
-          onClick={handleLend}
-          title={album.is_lent ? t('albumDetail.markReturned') : t('albumDetail.markLent')}
-        >
-          {album.is_lent ? <UserCheck size={16} class="me-1" /> : <UserPlus size={16} class="me-1" />}
-          {album.is_lent ? t('albumDetail.returned') : t('common.lend')}
-        </button>
+        {!album.is_wanted && (
+          <button
+            class={`btn ${album.is_lent ? 'btn-success' : 'btn-warning'}`}
+            onClick={handleLend}
+            title={album.is_lent ? t('albumDetail.markReturned') : t('albumDetail.markLent')}
+          >
+            {album.is_lent ? <UserCheck size={16} class="me-1" /> : <UserPlus size={16} class="me-1" />}
+            {album.is_lent ? t('albumDetail.returned') : t('common.lend')}
+          </button>
+        )}
         <button class="btn btn-primary" onClick={() => navigate('edit', { id: albumId })}>
           <Pencil size={16} class="me-1" />{t('albumDetail.edit')}
         </button>
@@ -256,6 +274,56 @@ export function AlbumDetail({ navigate, albumId }) {
           <Trash2 size={16} class="me-1" />{t('albumDetail.delete')}
         </button>
       </div>
+
+      {/* Lend modal */}
+      {lendModalOpen && (
+        <div
+          style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}
+          onClick={() => setLendModalOpen(false)}
+        >
+          <div
+            style={{ backgroundColor: 'var(--tblr-bg-surface)', borderRadius: 8, padding: 0, maxWidth: 400, width: '90%', boxShadow: '0 10px 40px rgba(0,0,0,0.3)' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ padding: '1.5rem 1.5rem 1rem' }}>
+              <h5 style={{ margin: '0 0 1rem 0', fontSize: '1.1rem', fontWeight: 600 }}>{t('modals.lendTitle')}</h5>
+              <p class="mb-2 text-muted">{album.title}</p>
+              <div style={{ position: 'relative' }}>
+                <input
+                  type="text"
+                  class="form-control"
+                  placeholder={t('modals.lendPlaceholder')}
+                  value={lentToInput}
+                  onInput={(e) => { setLentToInput(e.target.value); setShowBorrowerSuggestions(true); }}
+                  onFocus={() => setShowBorrowerSuggestions(true)}
+                  onBlur={() => setTimeout(() => setShowBorrowerSuggestions(false), 150)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleConfirmLend(true, lentToInput || null)}
+                  autoFocus
+                />
+                {showBorrowerSuggestions && borrowers.filter(n => n.toLowerCase().includes(lentToInput.toLowerCase())).length > 0 && (
+                  <div class="dropdown-menu show w-100" style={{ top: '100%', left: 0, zIndex: 1100 }}>
+                    {borrowers
+                      .filter(n => n.toLowerCase().includes(lentToInput.toLowerCase()))
+                      .map(name => (
+                        <button key={name} type="button" class="dropdown-item d-flex align-items-center gap-2 py-2"
+                          onMouseDown={() => { setLentToInput(name); setShowBorrowerSuggestions(false); }}>
+                          <User size={14} class="text-muted flex-shrink-0" />
+                          <span>{name}</span>
+                        </button>
+                      ))}
+                  </div>
+                )}
+              </div>
+            </div>
+            <div style={{ padding: '1rem 1.5rem', borderTop: '1px solid var(--tblr-border-color)', display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+              <button class="btn btn-outline-secondary me-auto" onClick={() => setLendModalOpen(false)}>{t('modals.cancel')}</button>
+              <button class="btn btn-warning" onClick={() => handleConfirmLend(true, lentToInput || null)}>
+                <UserPlus size={15} class="me-1" />{t('modals.lendTitle')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Confirm delete modal */}
       {confirmDelete && (

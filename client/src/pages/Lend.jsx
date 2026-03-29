@@ -4,7 +4,7 @@ import { api } from '../api/client.js';
 import { useI18n } from '../config/i18n/index.js';
 import { ArrowRightLeft, Music2, Search, User, Check, X, Database, RotateCcw } from 'lucide-preact';
 
-export function Lend() {
+export function Lend({ navigate }) {
   const { t } = useI18n();
   const [lentAlbums, setLentAlbums] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -17,6 +17,8 @@ export function Lend() {
   const [selectedAlbum, setSelectedAlbum] = useState(null);
   const [borrowerName, setBorrowerName] = useState('');
   const [returnTarget, setReturnTarget] = useState(null);
+  const [borrowers, setBorrowers] = useState([]);
+  const [showBorrowerSuggestions, setShowBorrowerSuggestions] = useState(false);
   const searchTimeout = useRef(null);
 
   const showToast = (msg, type = 'success') => {
@@ -37,7 +39,10 @@ export function Lend() {
     const init = async () => {
       const dbData = await albumsApi.getActiveDatabase().catch(() => null);
       setActiveDatabase(dbData?.database);
-      if (dbData?.database) await loadLent();
+      if (dbData?.database) {
+        await loadLent();
+        api.getBorrowers().then(setBorrowers).catch(() => {});
+      }
       setLoading(false);
     };
     init();
@@ -206,17 +211,34 @@ export function Lend() {
                       </div>
                       <div class="col-md-4">
                         <label class="form-label">{t('lend.borrower')}</label>
-                        <div class="input-group">
-                          <span class="input-group-text"><User size={16} /></span>
-                          <input
-                            type="text"
-                            class="form-control"
-                            placeholder={t('lend.borrowerPlaceholder')}
-                            value={borrowerName}
-                            onInput={(e) => setBorrowerName(e.target.value)}
-                            onKeyDown={(e) => e.key === 'Enter' && handleLend()}
-                            disabled={!selectedAlbum}
-                          />
+                        <div class="position-relative">
+                          <div class="input-group">
+                            <span class="input-group-text"><User size={16} /></span>
+                            <input
+                              type="text"
+                              class="form-control"
+                              placeholder={t('lend.borrowerPlaceholder')}
+                              value={borrowerName}
+                              onInput={(e) => { setBorrowerName(e.target.value); setShowBorrowerSuggestions(true); }}
+                              onFocus={() => setShowBorrowerSuggestions(true)}
+                              onBlur={() => setTimeout(() => setShowBorrowerSuggestions(false), 150)}
+                              onKeyDown={(e) => e.key === 'Enter' && handleLend()}
+                              disabled={!selectedAlbum}
+                            />
+                          </div>
+                          {showBorrowerSuggestions && borrowers.filter(n => n.toLowerCase().includes(borrowerName.toLowerCase())).length > 0 && (
+                            <div class="dropdown-menu show w-100" style={{ top: '100%', left: 0, zIndex: 1050 }}>
+                              {borrowers
+                                .filter(n => n.toLowerCase().includes(borrowerName.toLowerCase()))
+                                .map(name => (
+                                  <button key={name} type="button" class="dropdown-item d-flex align-items-center gap-2 py-2"
+                                    onMouseDown={() => { setBorrowerName(name); setShowBorrowerSuggestions(false); }}>
+                                    <User size={14} class="text-muted flex-shrink-0" />
+                                    <span>{name}</span>
+                                  </button>
+                                ))}
+                            </div>
+                          )}
                         </div>
                       </div>
                       <div class="col-md-3">
@@ -257,7 +279,8 @@ export function Lend() {
                               <Music2 size={22} class="text-muted" />
                             </div>
                         }
-                        <div class="flex-grow-1 overflow-hidden">
+                        <div class="flex-grow-1 overflow-hidden" style={{ cursor: 'pointer' }}
+                          onClick={() => navigate('detail', { id: album.id })}>
                           <div class="fw-semibold text-truncate">{album.title}</div>
                           <div class="text-muted small">{album.artist?.name}</div>
                         </div>
@@ -285,30 +308,30 @@ export function Lend() {
 
       {/* ── Modal retour ────────────────────────────────────────────────── */}
       {returnTarget && (
-        <div class="modal modal-blur show d-block modal-backdrop-dark">
-          <div class="modal-dialog modal-sm modal-dialog-centered">
-            <div class="modal-content">
-              <div class="modal-body">
-                <div class="modal-title mb-2">
-                  <RotateCcw size={18} class="me-2 text-success" />
-                  {t('lend.returnTitle')}
-                </div>
-                <div>{t('lend.returnMessage').replace('{title}', returnTarget.title)}</div>
-                {returnTarget.lent_to && (
-                  <div class="text-muted small mt-1">
-                    {t('lend.lentTo')} <strong>{returnTarget.lent_to}</strong>
-                  </div>
-                )}
-              </div>
-              <div class="modal-footer">
-                <button class="btn me-auto" onClick={() => setReturnTarget(null)}>
-                  {t('modals.cancel')}
-                </button>
-                <button class="btn btn-success" onClick={handleReturn}>
-                  <Check size={15} class="me-1" />
-                  {t('lend.returnConfirm')}
-                </button>
-              </div>
+        <div
+          style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}
+          onClick={() => setReturnTarget(null)}
+        >
+          <div
+            style={{ backgroundColor: 'var(--tblr-bg-surface)', borderRadius: 8, padding: 0, maxWidth: 400, width: '90%', boxShadow: '0 10px 40px rgba(0,0,0,0.3)' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ padding: '1.5rem' }}>
+              <h5 style={{ margin: '0 0 0.75rem 0', fontSize: '1.1rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <RotateCcw size={18} class="text-success" />
+                {t('lend.returnTitle')}
+              </h5>
+              <p style={{ margin: 0 }}>{t('lend.returnMessage').replace('{title}', returnTarget.title)}</p>
+              {returnTarget.lent_to && (
+                <p class="text-muted small mt-1 mb-0">{t('lend.lentTo')} <strong>{returnTarget.lent_to}</strong></p>
+              )}
+            </div>
+            <div style={{ padding: '1rem 1.5rem', borderTop: '1px solid var(--tblr-border-color)', display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+              <button class="btn btn-outline-secondary me-auto" onClick={() => setReturnTarget(null)}>{t('modals.cancel')}</button>
+              <button class="btn btn-success" onClick={handleReturn}>
+                <Check size={15} class="me-1" />
+                {t('lend.returnConfirm')}
+              </button>
             </div>
           </div>
         </div>

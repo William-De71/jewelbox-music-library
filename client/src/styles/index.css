@@ -9,7 +9,6 @@
 /* Component styles */
 @import './Header.css';
 @import './TopMenu.css';
-@import './StatsCard.css';
 @import './StarRating.css';
 @import './AlbumForm.css';
 @import './AlbumDetail.css';

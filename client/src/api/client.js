@@ -32,6 +32,7 @@ export const api = {
   getArtists: () => request('GET', '/albums/artists'),
   getLabels: () => request('GET', '/albums/labels'),
   getStats: () => request('GET', '/stats'),
+  getBorrowers: () => request('GET', '/albums/borrowers'),
 
   // External search
   search: (q, source = 'musicbrainz') => request('GET', `/search?q=${encodeURIComponent(q)}&source=${source}`),
