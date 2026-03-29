@@ -1,6 +1,7 @@
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import staticFiles from '@fastify/static';
+import multipart from '@fastify/multipart';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
@@ -49,6 +50,9 @@ const fastify = Fastify({
 
 // Register CORS
 await fastify.register(cors);
+
+// Register multipart (for CSV import)
+await fastify.register(multipart, { limits: { fileSize: 10 * 1024 * 1024 } });
 
 // Register static files plugin for sendFile support
 await fastify.register(staticFiles, {

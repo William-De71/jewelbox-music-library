@@ -34,6 +34,24 @@ export const api = {
   getStats: () => request('GET', '/stats'),
   getBorrowers: () => request('GET', '/albums/borrowers'),
 
+  // Loan history
+  getLoanHistory: (id) => request('GET', `/albums/${id}/loans`),
+
+  // Export / Import
+  exportCollection: (format = 'csv') => `${BASE}/albums/export?format=${format}`,
+  importCSV: async (file) => {
+    const fd = new FormData();
+    fd.append('file', file);
+    const res = await fetch(`${BASE}/albums/import`, { method: 'POST', body: fd });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error || 'Import failed');
+    return json;
+  },
+
+  // Duplicate check
+  checkDuplicate: (title, artistName) =>
+    request('GET', `/albums/duplicate?title=${encodeURIComponent(title)}&artist=${encodeURIComponent(artistName)}`),
+
   // Settings
   getSettings: () => request('GET', '/settings'),
   saveSettings: (data) => request('PUT', '/settings', data),

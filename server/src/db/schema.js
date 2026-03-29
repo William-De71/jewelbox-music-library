@@ -28,6 +28,7 @@ export const SCHEMA = `
     notes          TEXT,
     is_lent        INTEGER NOT NULL DEFAULT 0 CHECK(is_lent IN (0,1)),
     lent_to        TEXT,
+    lent_at        TEXT,
     is_wanted      INTEGER NOT NULL DEFAULT 0 CHECK(is_wanted IN (0,1)),
     created_at     TEXT NOT NULL DEFAULT (datetime('now')),
     updated_at     TEXT NOT NULL DEFAULT (datetime('now'))
@@ -46,4 +47,14 @@ export const SCHEMA = `
   CREATE INDEX IF NOT EXISTS idx_albums_genre   ON albums(genre);
   CREATE INDEX IF NOT EXISTS idx_albums_rating  ON albums(rating);
   CREATE INDEX IF NOT EXISTS idx_tracks_album   ON tracks(album_id);
+
+  CREATE TABLE IF NOT EXISTS loan_history (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    album_id    INTEGER NOT NULL REFERENCES albums(id) ON DELETE CASCADE,
+    lent_to     TEXT NOT NULL,
+    lent_at     TEXT NOT NULL DEFAULT (datetime('now')),
+    returned_at TEXT
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_loan_history_album ON loan_history(album_id);
 `;

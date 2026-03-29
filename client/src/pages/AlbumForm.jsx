@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'preact/hooks';
 import { api } from '../api/client.js';
 import { StarRating } from '../components/StarRating.jsx';
-import { Plus, ArrowLeft, Pencil, AlertCircle, Search, ChevronRight, Upload, Info, ListOrdered, X, Music2, Save, ImageIcon } from 'lucide-preact';
+import { Plus, ArrowLeft, Pencil, AlertCircle, Search, ChevronRight, Upload, Info, ListOrdered, X, Music2, Save, ImageIcon, CopyX } from 'lucide-preact';
 import { useI18n } from '../config/i18n/index.js';
 
 function Combobox({ value, onChange, options = [], placeholder, required, id }) {
@@ -91,6 +91,7 @@ export function AlbumForm({ navigate, albumId, params = {} }) {
   const [searchPage, setSearchPage] = useState(1);
   const [searchResultsPerPage] = useState(10);
   const [toast, setToast] = useState(null);
+  const [duplicateWarning, setDuplicateWarning] = useState(null);
   const coverInputRef = useRef();
 
   // Load known artists, labels, genres for datalists
@@ -159,6 +160,14 @@ export function AlbumForm({ navigate, albumId, params = {} }) {
   }, [albumId]);
 
   const set = (key, value) => setForm((f) => ({ ...f, [key]: value }));
+
+  const checkDuplicate = async (title, artist) => {
+    if (isEdit || !title.trim() || !artist.trim()) { setDuplicateWarning(null); return; }
+    try {
+      const res = await api.checkDuplicate(title.trim(), artist.trim());
+      setDuplicateWarning(res.duplicate ? res.album : null);
+    } catch { setDuplicateWarning(null); }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -322,6 +331,20 @@ export function AlbumForm({ navigate, albumId, params = {} }) {
         <div class="alert alert-danger mb-3">
           <AlertCircle size={16} class="me-2" />{error}
           <button class="btn-close" onClick={() => setError(null)}></button>
+        </div>
+      )}
+
+      {duplicateWarning && (
+        <div class="alert alert-warning mb-3 d-flex align-items-center gap-2">
+          <CopyX size={18} class="flex-shrink-0" />
+          <span>
+            <strong>{t('albumForm.duplicateWarning')}</strong>{' '}
+            <button class="btn btn-sm btn-link p-0 ms-1 fw-semibold"
+              onClick={() => navigate('detail', { id: duplicateWarning.id })}>
+              {t('albumForm.viewExisting')}
+            </button>
+          </span>
+          <button class="btn-close ms-auto" onClick={() => setDuplicateWarning(null)} />
         </div>
       )}
 
@@ -524,6 +547,7 @@ export function AlbumForm({ navigate, albumId, params = {} }) {
                       required
                       value={form.title}
                       onInput={(e) => set('title', e.target.value)}
+                      onBlur={(e) => checkDuplicate(e.target.value, form.artist_name)}
                     />
                   </div>
                   <div class="col-12 col-sm-4">
@@ -542,7 +566,7 @@ export function AlbumForm({ navigate, albumId, params = {} }) {
                     <label class="form-label required">{t('albumForm.form.artist')}</label>
                     <Combobox
                       value={form.artist_name}
-                      onChange={(v) => set('artist_name', v)}
+                      onChange={(v) => { set('artist_name', v); checkDuplicate(form.title, v); }}
                       options={knownArtists.map(a => a.name)}
                       placeholder={t('albumForm.form.artistPlaceholder')}
                       required

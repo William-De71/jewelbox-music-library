@@ -39,7 +39,7 @@ export function getBorrowers() {
 const ALBUM_SELECT = `
   SELECT
     a.id, a.title, a.year, a.genre, a.total_duration, a.ean,
-    a.rating, a.cover_url, a.notes, a.is_lent, a.lent_to, a.is_wanted,
+    a.rating, a.cover_url, a.notes, a.is_lent, a.lent_to, a.lent_at, a.is_wanted,
     a.created_at, a.updated_at,
     ar.id   AS artist_id,   ar.name  AS artist_name,
     l.id    AS label_id,    l.name   AS label_name
@@ -62,6 +62,7 @@ function mapAlbum(row) {
     notes: row.notes,
     is_lent: Boolean(row.is_lent),
     lent_to: row.lent_to,
+    lent_at: row.lent_at ?? null,
     is_wanted: Boolean(row.is_wanted),
     created_at: row.created_at,
     updated_at: row.updated_at,
@@ -168,7 +169,7 @@ export function updateAlbum(id, data) {
   const fieldMap = {
     title: 'title', year: 'year', genre: 'genre',
     total_duration: 'total_duration', ean: 'ean', rating: 'rating',
-    cover_url: 'cover_url', notes: 'notes', is_lent: 'is_lent', lent_to: 'lent_to', is_wanted: 'is_wanted',
+    cover_url: 'cover_url', notes: 'notes', is_lent: 'is_lent', lent_to: 'lent_to', lent_at: 'lent_at', is_wanted: 'is_wanted',
   };
 
   for (const [key, col] of Object.entries(fieldMap)) {
@@ -260,4 +261,25 @@ export function getStats() {
     total_duration_mins:  Math.round(total_minutes % 60),
     by_genre, by_decade, top_artists, top_labels,
   };
+}
+
+// ── Loan History ──────────────────────────────────────────────────────────────
+
+export function getLoanHistory(albumId) {
+  return getDb()
+    .prepare('SELECT * FROM loan_history WHERE album_id = ? ORDER BY lent_at DESC')
+    .all(albumId);
+}
+
+export function addLoanHistory(albumId, lentTo, lentAt) {
+  return getDb()
+    .prepare('INSERT INTO loan_history (album_id, lent_to, lent_at) VALUES (?, ?, ?)')
+    .run(albumId, lentTo, lentAt || new Date().toISOString());
+}
+
+export function closeLoan(albumId) {
+  return getDb()
+    .prepare(`UPDATE loan_history SET returned_at = datetime('now')
+              WHERE album_id = ? AND returned_at IS NULL`)
+    .run(albumId);
 }

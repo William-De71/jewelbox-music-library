@@ -1,9 +1,14 @@
 import { useState, useEffect } from 'preact/hooks';
 import { api } from '../api/client.js';
 import { StarRating } from '../components/StarRating.jsx';
-import { ArrowLeft, UserCheck, UserPlus, User, Pencil, Trash2, Disc, StickyNote, ListOrdered, Clock, Music2, AlertCircle, Info, Heart } from 'lucide-preact';
+import { ArrowLeft, UserCheck, UserPlus, User, Pencil, Trash2, Disc, StickyNote, ListOrdered, Clock, Music2, AlertCircle, Info, Heart, History } from 'lucide-preact';
 import { useI18n } from '../config/i18n/index.js';
 import '../styles/AlbumDetail.css';
+
+function fmt(dateStr) {
+  if (!dateStr) return '—';
+  return new Date(dateStr).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
+}
 
 export function AlbumDetail({ navigate, albumId }) {
   const { t } = useI18n();
@@ -16,6 +21,7 @@ export function AlbumDetail({ navigate, albumId }) {
   const [lentToInput, setLentToInput] = useState('');
   const [borrowers, setBorrowers] = useState([]);
   const [showBorrowerSuggestions, setShowBorrowerSuggestions] = useState(false);
+  const [loanHistory, setLoanHistory] = useState([]);
 
   useEffect(() => {
     api.getAlbum(albumId)
@@ -23,6 +29,7 @@ export function AlbumDetail({ navigate, albumId }) {
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
     api.getBorrowers().then(setBorrowers).catch(() => {});
+    api.getLoanHistory(albumId).then(r => setLoanHistory(r.data || [])).catch(() => {});
   }, [albumId]);
 
   const handleDelete = async () => {
@@ -166,10 +173,11 @@ export function AlbumDetail({ navigate, albumId }) {
                 </div>
                 {album.is_lent && (
                   <div class="col-12">
-                    <div class="alert alert-warning p-2 mb-0">
-                      <UserPlus size={16} class="me-1" />
+                    <div class="alert alert-warning p-2 mb-0 d-flex align-items-center gap-2">
+                      <UserPlus size={16} class="flex-shrink-0" />
                       <strong>{t('albumDetail.lent')}</strong>
-                      {album.lent_to && <> à <strong>{album.lent_to}</strong></>}
+                      {album.lent_to && <strong>{album.lent_to}</strong>}
+                      {album.lent_at && <span class="text-muted small">({fmt(album.lent_at)})</span>}
                     </div>
                   </div>
                 )}
@@ -254,6 +262,43 @@ export function AlbumDetail({ navigate, albumId }) {
           )}
         </div>
       </div>
+
+      {/* Loan history section */}
+      {loanHistory.length > 0 && (
+        <div class="row g-3 mt-0">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title"><History size={18} class="me-2" />{t('lend.loanHistory')}</h3>
+              </div>
+              <div class="table-responsive">
+                <table class="table table-sm card-table">
+                  <thead>
+                    <tr>
+                      <th><User size={14} class="me-1" />{t('lend.borrower')}</th>
+                      <th><Clock size={14} class="me-1" />{t('lend.lentSince')}</th>
+                      <th>{t('lend.returnedOn')}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {loanHistory.map(h => (
+                      <tr key={h.id}>
+                        <td class="fw-semibold">{h.lent_to}</td>
+                        <td class="text-muted">{fmt(h.lent_at)}</td>
+                        <td>
+                          {h.returned_at
+                            ? <span class="text-success">{fmt(h.returned_at)}</span>
+                            : <span class="badge bg-warning-lt text-warning">{t('lend.stillLent')}</span>}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Action buttons */}
       <div class="d-flex gap-2 justify-content-end mt-3 mb-4">

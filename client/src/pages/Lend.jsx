@@ -2,7 +2,13 @@ import { useState, useEffect, useRef } from 'preact/hooks';
 import { albumsApi } from '../api/albums.js';
 import { api } from '../api/client.js';
 import { useI18n } from '../config/i18n/index.js';
-import { ArrowRightLeft, Music2, Search, User, Check, X, Database, RotateCcw } from 'lucide-preact';
+import { ArrowRightLeft, Music2, Search, User, Check, X, Database, RotateCcw, Clock } from 'lucide-preact';
+
+function daysAgo(dateStr) {
+  if (!dateStr) return null;
+  const diff = Date.now() - new Date(dateStr).getTime();
+  return Math.max(0, Math.floor(diff / 86400000));
+}
 
 export function Lend({ navigate }) {
   const { t } = useI18n();
@@ -285,10 +291,18 @@ export function Lend({ navigate }) {
                           <div class="text-muted small">{album.artist?.name}</div>
                         </div>
                         <div class="d-flex align-items-center gap-3 flex-shrink-0">
-                          <span class="d-flex align-items-center gap-1">
-                            <User size={14} class="text-warning" />
-                            <span class="small fw-semibold">{album.lent_to || '—'}</span>
-                          </span>
+                          <div class="text-end">
+                            <div class="d-flex align-items-center gap-1">
+                              <User size={14} class="text-warning" />
+                              <span class="small fw-semibold">{album.lent_to || '—'}</span>
+                            </div>
+                            {album.lent_at && (
+                              <div class="d-flex align-items-center gap-1 text-muted" style={{ fontSize: '0.72rem' }}>
+                                <Clock size={11} />
+                                {t('lend.lentSince')} {daysAgo(album.lent_at)} {t('lend.days')}
+                              </div>
+                            )}
+                          </div>
                           <button class="btn btn-sm btn-outline-success"
                             onClick={() => setReturnTarget(album)}>
                             <RotateCcw size={14} class="me-1" />

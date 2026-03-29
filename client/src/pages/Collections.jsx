@@ -5,7 +5,7 @@ import { AlbumCard } from '../components/AlbumCard.jsx';
 import { AlbumRow } from '../components/AlbumRow.jsx';
 import { Pagination } from '../components/Pagination.jsx';
 import { useI18n } from '../config/i18n/index.js';
-import { Search, Grid, List, X, Plus, Disc, Database, AlertCircle, Music } from 'lucide-preact';
+import { Search, Grid, List, X, Plus, Disc, Database, AlertCircle, Music, CheckSquare, Square, Trash2 } from 'lucide-preact';
 
 const DEFAULT_LIMIT = 24;
 
@@ -28,6 +28,9 @@ export function Collections({ navigate, params = {} }) {
   const [filters, setFilters] = useState({ genre: '', rating: '', search: params.search || '', sort: 'artist', order: 'asc' });
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [lendTarget, setLendTarget] = useState(null);
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState(new Set());
+  const [bulkDeleteConfirm, setBulkDeleteConfirm] = useState(false);
   const [lentTo, setLentTo] = useState('');
   const [toast, setToast] = useState(params.successMessage ? { msg: params.successMessage, type: 'success' } : null);
   const searchRef = useRef();
@@ -150,6 +153,41 @@ export function Collections({ navigate, params = {} }) {
 
   const stats = { total, lent: albums.filter(a => a.is_lent).length };
 
+  const toggleSelect = (id) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === albums.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(albums.map(a => a.id)));
+    }
+  };
+
+  const exitSelectionMode = () => {
+    setSelectionMode(false);
+    setSelectedIds(new Set());
+  };
+
+  const handleBulkDelete = async () => {
+    try {
+      await Promise.all([...selectedIds].map(id => api.deleteAlbum(id)));
+      setAlbums(prev => prev.filter(a => !selectedIds.has(a.id)));
+      setTotal(prev => prev - selectedIds.size);
+      showToast(`${selectedIds.size} album(s) supprimé(s)`, 'success');
+      exitSelectionMode();
+    } catch (e) {
+      showToast(e.message, 'danger');
+    } finally {
+      setBulkDeleteConfirm(false);
+    }
+  };
+
   if (!activeDatabase) {
     return (
       <div class="page-container">
@@ -202,10 +240,34 @@ export function Collections({ navigate, params = {} }) {
                   <Disc size={24} class="me-2 text-primary" />
                   {t('menu.collections')}
                 </h2>
-                <button class="btn btn-primary btn-sm" onClick={() => navigate('add')}>
-                  <Plus size={16} class="me-1" />
-                  {t('common.addAlbum')}
-                </button>
+                <div class="d-flex gap-2">
+                  {selectionMode ? (
+                    <>
+                      <button class="btn btn-sm btn-outline-secondary" onClick={toggleSelectAll}>
+                        {selectedIds.size === albums.length
+                          ? <><Square size={14} class="me-1" />{t('common.deselectAll')}</>
+                          : <><CheckSquare size={14} class="me-1" />{t('common.selectAll')}</>}
+                      </button>
+                      {selectedIds.size > 0 && (
+                        <button class="btn btn-sm btn-danger" onClick={() => setBulkDeleteConfirm(true)}>
+                          <Trash2 size={14} class="me-1" />{t('common.deleteSelected')} ({selectedIds.size})
+                        </button>
+                      )}
+                      <button class="btn btn-sm btn-outline-secondary" onClick={exitSelectionMode}>
+                        <X size={14} class="me-1" />{t('common.cancel')}
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button class="btn btn-outline-secondary btn-sm" onClick={() => setSelectionMode(true)}>
+                        <CheckSquare size={16} class="me-1" />{t('common.select')}
+                      </button>
+                      <button class="btn btn-primary btn-sm" onClick={() => navigate('add')}>
+                        <Plus size={16} class="me-1" />{t('common.addAlbum')}
+                      </button>
+                    </>
+                  )}
+                </div>
               </div>
               <div class="card-body">
                 {loading && (
@@ -282,15 +344,28 @@ export function Collections({ navigate, params = {} }) {
                     {viewMode === 'grid' && (
                       <div class="row row-cards">
                         {albums.map(album => (
-                          <div class="col-sm-6 col-lg-2 album-grid-item" key={album.id}>
-                            <AlbumCard
-                              album={album}
-                              onClick={(a) => navigate('detail', { id: a.id })}
-                              onEdit={(a) => navigate('edit', { id: a.id })}
-                              onDelete={(a) => setDeleteTarget(a)}
-                              onLend={(a) => { setLendTarget(a); setLentTo(a.lent_to || ''); }}
-                              onRate={handleRate}
-                            />
+                          <div class="col-sm-6 col-lg-2 album-grid-item" key={album.id}
+                            style={{ position: 'relative' }}>
+                            {selectionMode && (
+                              <div
+                                style={{ position: 'absolute', top: 8, left: 20, zIndex: 10, cursor: 'pointer' }}
+                                onClick={() => toggleSelect(album.id)}>
+                                {selectedIds.has(album.id)
+                                  ? <CheckSquare size={22} class="text-primary" style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.5))' }} />
+                                  : <Square size={22} class="text-white" style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.5))' }} />}
+                              </div>
+                            )}
+                            <div style={selectionMode ? { opacity: selectedIds.has(album.id) ? 1 : 0.6, cursor: 'pointer' } : {}}
+                              onClick={selectionMode ? () => toggleSelect(album.id) : undefined}>
+                              <AlbumCard
+                                album={album}
+                                onClick={selectionMode ? () => toggleSelect(album.id) : (a) => navigate('detail', { id: a.id })}
+                                onEdit={selectionMode ? undefined : (a) => navigate('edit', { id: a.id })}
+                                onDelete={selectionMode ? undefined : (a) => setDeleteTarget(a)}
+                                onLend={selectionMode ? undefined : (a) => { setLendTarget(a); setLentTo(a.lent_to || ''); }}
+                                onRate={selectionMode ? undefined : handleRate}
+                              />
+                            </div>
                           </div>
                         ))}
                       </div>
@@ -302,6 +377,7 @@ export function Collections({ navigate, params = {} }) {
                           <table class="table table-vcenter card-table">
                             <thead>
                               <tr>
+                                {selectionMode && <th style={{ width: 40 }}></th>}
                                 <th>{t('table.cover')}</th>
                                 <th>{t('table.title')}</th>
                                 <th>{t('table.artist')}</th>
@@ -313,15 +389,24 @@ export function Collections({ navigate, params = {} }) {
                             </thead>
                             <tbody>
                               {albums.map(album => (
-                                <AlbumRow
-                                  key={album.id}
-                                  album={album}
-                                  onClick={(a) => navigate('detail', { id: a.id })}
-                                  onEdit={(a) => navigate('edit', { id: a.id })}
-                                  onDelete={(a) => setDeleteTarget(a)}
-                                  onLend={(a) => { setLendTarget(a); setLentTo(a.lent_to || ''); }}
-                                  onRate={handleRate}
-                                />
+                                <>
+                                  {selectionMode && (
+                                    <td style={{ cursor: 'pointer' }} onClick={() => toggleSelect(album.id)}>
+                                      {selectedIds.has(album.id)
+                                        ? <CheckSquare size={18} class="text-primary" />
+                                        : <Square size={18} class="text-muted" />}
+                                    </td>
+                                  )}
+                                  <AlbumRow
+                                    key={album.id}
+                                    album={album}
+                                    onClick={selectionMode ? () => toggleSelect(album.id) : (a) => navigate('detail', { id: a.id })}
+                                    onEdit={selectionMode ? undefined : (a) => navigate('edit', { id: a.id })}
+                                    onDelete={selectionMode ? undefined : (a) => setDeleteTarget(a)}
+                                    onLend={selectionMode ? undefined : (a) => { setLendTarget(a); setLentTo(a.lent_to || ''); }}
+                                    onRate={selectionMode ? undefined : handleRate}
+                                  />
+                                </>
                               ))}
                             </tbody>
                           </table>
@@ -383,6 +468,25 @@ export function Collections({ navigate, params = {} }) {
           </div>
         </div>
       </div>
+
+      {bulkDeleteConfirm && (
+        <div class="modal modal-blur show d-block modal-backdrop-dark">
+          <div class="modal-dialog modal-sm modal-dialog-centered">
+            <div class="modal-content">
+              <div class="modal-body">
+                <div class="modal-title">{t('common.deleteSelected')} ({selectedIds.size})</div>
+                <div class="mt-2 text-muted small">{t('modals.bulkDeleteMessage', { n: selectedIds.size })}</div>
+              </div>
+              <div class="modal-footer">
+                <button class="btn me-auto" onClick={() => setBulkDeleteConfirm(false)}>{t('modals.cancel')}</button>
+                <button class="btn btn-danger" onClick={handleBulkDelete}>
+                  <Trash2 size={14} class="me-1" />{t('common.deleteSelected')}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {deleteTarget && (
         <div class="modal modal-blur show d-block modal-backdrop-dark">

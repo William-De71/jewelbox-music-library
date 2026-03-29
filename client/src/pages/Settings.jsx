@@ -2,7 +2,7 @@ import { useState, useEffect } from 'preact/hooks';
 import { databasesApi } from '../api/databases.js';
 import { useI18n } from '../config/i18n/index.js';
 import { api } from '../api/client.js';
-import { Database, Plus, Play, Trash2, Edit, Check, X, Settings as SettingsIcon, Disc, Key, ExternalLink, ShieldCheck, ShieldOff } from 'lucide-preact';
+import { Database, Plus, Play, Trash2, Edit, Check, X, Settings as SettingsIcon, Disc, Key, ExternalLink, ShieldCheck, ShieldOff, Download, Upload, FileText } from 'lucide-preact';
 
 export function Settings({ navigate }) {
   const { t } = useI18n();
@@ -17,6 +17,7 @@ export function Settings({ navigate }) {
   const [toast, setToast] = useState(null);
   const [discogsForm, setDiscogsForm] = useState({ discogs_key: '', discogs_secret: '' });
   const [discogsSaving, setDiscogsSaving] = useState(false);
+  const [importing, setImporting] = useState(false);
 
   const showToast = (msg, type = 'success') => {
     setToast({ msg, type });
@@ -43,6 +44,21 @@ export function Settings({ navigate }) {
       setDiscogsForm({ discogs_key: s.discogs_key || '', discogs_secret: s.discogs_secret || '' });
     }).catch(() => {});
   }, []);
+
+  const handleImport = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImporting(true);
+    try {
+      const result = await api.importCSV(file);
+      showToast(t('exportImport.importSuccess').replace('{n}', result.imported).replace('{s}', result.skipped), 'success');
+    } catch (err) {
+      showToast(err.message, 'danger');
+    } finally {
+      setImporting(false);
+      e.target.value = '';
+    }
+  };
 
   const handleSaveDiscogs = async (e) => {
     e.preventDefault();
@@ -319,6 +335,46 @@ export function Settings({ navigate }) {
                     </button>
                   </div>
                 </form>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Export / Import section */}
+        <div class="row mt-4">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title fs-5 mb-0">
+                  <FileText size={18} class="me-2" />
+                  {t('exportImport.title')}
+                </h3>
+              </div>
+              <div class="card-body">
+                <div class="row g-4">
+                  <div class="col-md-6">
+                    <h5 class="fw-semibold mb-1">{t('exportImport.exportTitle')}</h5>
+                    <p class="text-muted small mb-3">{t('exportImport.exportDesc')}</p>
+                    <div class="d-flex gap-2">
+                      <a href={api.exportCollection('csv')} download class="btn btn-outline-primary">
+                        <Download size={16} class="me-1" />{t('exportImport.exportCsv')}
+                      </a>
+                      <a href={api.exportCollection('json')} download class="btn btn-outline-secondary">
+                        <Download size={16} class="me-1" />{t('exportImport.exportJson')}
+                      </a>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <h5 class="fw-semibold mb-1">{t('exportImport.importTitle')}</h5>
+                    <p class="text-muted small mb-3">{t('exportImport.importDesc')}</p>
+                    <label class="btn btn-outline-success" style={{ cursor: 'pointer' }}>
+                      {importing
+                        ? <><span class="spinner-border spinner-border-sm me-2" />{t('exportImport.importing')}</>
+                        : <><Upload size={16} class="me-1" />{t('exportImport.importBtn')}</>}
+                      <input type="file" accept=".csv" class="d-none" onInput={handleImport} disabled={importing} />
+                    </label>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

@@ -21,6 +21,10 @@
     "grid": "Grille",
     "list": "Liste",
     "addAlbum": "Ajouter un album",
+    "select": "Sélectionner",
+    "selectAll": "Tout sélectionner",
+    "deselectAll": "Tout désélectionner",
+    "deleteSelected": "Supprimer la sélection",
     "back": "Retour",
     "home": "Accueil",
     "lightMode": "Mode clair",
@@ -122,6 +126,8 @@
     "discogs": "Discogs",
     "search": "Rechercher",
     "searchNoResults": "Aucun résultat trouvé pour cette recherche.",
+    "duplicateWarning": "Cet album existe peut-être déjà dans votre collection.",
+    "viewExisting": "Voir l'album existant →",
     "clear": "Effacer",
     "infoTitle": "Informations",
     "tracksTitle": "Pistes",
@@ -263,6 +269,7 @@
   "modals": {
     "deleteTitle": "Supprimer l'album ?",
     "deleteMessage": "Voulez-vous vraiment supprimer \"{title}\" ?",
+    "bulkDeleteMessage": "Supprimer définitivement les {n} album(s) sélectionné(s) ?",
     "lendTitle": "Prêter",
     "returnTitle": "Récupérer",
     "lendPlaceholder": "Prêté à...",
@@ -301,7 +308,13 @@
     "return": "Récupérer",
     "returnTitle": "Confirmer le retour",
     "returnMessage": "Marquer \"{title}\" comme récupéré ?",
-    "returnConfirm": "Oui, récupéré !"
+    "returnConfirm": "Oui, récupéré !",
+    "lentSince": "Prêté depuis",
+    "days": "jour(s)",
+    "loanHistory": "Historique des prêts",
+    "noHistory": "Aucun prêt enregistré",
+    "returnedOn": "Rendu le",
+    "stillLent": "En cours"
   },
   "stats": {
     "totalOwned": "Albums possédés",
@@ -330,5 +343,18 @@
     "optional": "Optionnel — fonctionne sans clé (limites réduites)",
     "authenticated": "Authentifié",
     "unauthenticated": "Non authentifié (limites réduites)"
+  },
+  "exportImport": {
+    "title": "Export / Import",
+    "exportTitle": "Exporter la collection",
+    "exportDesc": "Télécharger toute votre collection en CSV (tableur) ou JSON (sauvegarde complète).",
+    "exportCsv": "Exporter CSV",
+    "exportJson": "Exporter JSON",
+    "importTitle": "Importer un CSV",
+    "importDesc": "Importer des albums depuis un fichier CSV. Colonnes requises : title, artist. Optionnelles : label, year, genre, rating, ean, notes.",
+    "importBtn": "Importer",
+    "importSuccess": "{n} album(s) importé(s), {s} ignoré(s)",
+    "importing": "Import en cours…",
+    "noActiveDb": "Aucune base de données active"
   }
 }

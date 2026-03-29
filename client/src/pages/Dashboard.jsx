@@ -1,7 +1,13 @@
 import { useState, useEffect } from 'preact/hooks';
 import { albumsApi } from '../api/albums.js';
 import { useI18n } from '../config/i18n/index.js';
-import { Home, Search, Music2, Shuffle, Clock, BarChart3, Settings, Plus, Heart, PenLine, Disc } from 'lucide-preact';
+import { Home, Search, Music2, Shuffle, Clock, BarChart3, Settings, Plus, Heart, PenLine, Disc, User } from 'lucide-preact';
+
+function daysAgo(dateStr) {
+  if (!dateStr) return null;
+  const diff = Date.now() - new Date(dateStr).getTime();
+  return Math.max(0, Math.floor(diff / 86400000));
+}
 
 export function Dashboard({ navigate }) {
   const { t } = useI18n();
@@ -336,9 +342,16 @@ export function Dashboard({ navigate }) {
                                 <strong class="text-truncate d-block">{album.title}</strong>
                                 <span class="text-muted small">{album.artist?.name}</span>
                               </div>
-                              <span class="badge bg-warning-lt text-warning flex-shrink-0">
-                                {t('home.lentTo')} {album.lent_to}
-                              </span>
+                              <div class="flex-shrink-0 text-end">
+                                <div class="badge bg-warning-lt text-warning">
+                                  <User size={11} class="me-1" />{album.lent_to}
+                                </div>
+                                {album.lent_at && (
+                                  <div class="text-muted mt-1" style={{ fontSize: '0.7rem' }}>
+                                    <Clock size={10} class="me-1" />{daysAgo(album.lent_at)} {t('lend.days')}
+                                  </div>
+                                )}
+                              </div>
                             </div>
                           ))}
                         </div>

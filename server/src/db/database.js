@@ -22,6 +22,24 @@ function runMigrations(database) {
     database.exec("ALTER TABLE albums ADD COLUMN is_wanted INTEGER NOT NULL DEFAULT 0 CHECK(is_wanted IN (0,1))");
     console.log('[Migration] Added is_wanted column to albums');
   }
+  if (!cols.includes('lent_at')) {
+    database.exec("ALTER TABLE albums ADD COLUMN lent_at TEXT");
+    console.log('[Migration] Added lent_at column to albums');
+  }
+  const tables = database.prepare("SELECT name FROM sqlite_master WHERE type='table'").all().map(t => t.name);
+  if (!tables.includes('loan_history')) {
+    database.exec(`
+      CREATE TABLE loan_history (
+        id          INTEGER PRIMARY KEY AUTOINCREMENT,
+        album_id    INTEGER NOT NULL REFERENCES albums(id) ON DELETE CASCADE,
+        lent_to     TEXT NOT NULL,
+        lent_at     TEXT NOT NULL DEFAULT (datetime('now')),
+        returned_at TEXT
+      );
+      CREATE INDEX idx_loan_history_album ON loan_history(album_id);
+    `);
+    console.log('[Migration] Created loan_history table');
+  }
 }
 
 export function getDb() {
