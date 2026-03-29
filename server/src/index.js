@@ -368,9 +368,14 @@ fastify.get('/api/database/active', async (req, reply) => {
   }
 });
 
+// Health check
+fastify.get('/api/health', async (req, reply) => {
+  return { status: 'ok' };
+});
+
 // Start server
 try {
-  await fastify.listen({ port: 3001, host: '0.0.0.0' });
+  await fastify.listen({ port: parseInt(process.env.PORT) || 3001, host: process.env.HOST || '0.0.0.0' });
   console.log('Server listening at http://0.0.0.0:3001');
 } catch (err) {
   console.error('Error starting server:', err);

@@ -264,5 +264,6 @@ export function isDiscogsConfigured() {
 }
 
 export function isDiscogsAuthenticated() {
-  return Boolean(DISCOGS_KEY && DISCOGS_SECRET);
+  const { key, secret } = getDiscogsCredentials();
+  return Boolean(key && secret);
 }
