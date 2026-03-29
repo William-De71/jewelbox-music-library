@@ -286,6 +286,23 @@
     "country": "Country",
     "other": "Autre"
   },
+  "lend": {
+    "lendNew": "Prêter un album",
+    "searchAlbum": "Album à prêter",
+    "searchPlaceholder": "Rechercher dans votre collection...",
+    "borrower": "Emprunteur",
+    "borrowerPlaceholder": "Nom de la personne",
+    "confirmLend": "Confirmer le prêt",
+    "empty": "Aucun album prêté en ce moment",
+    "emptySubtitle": "Utilisez la recherche ci-dessus pour prêter un album",
+    "albumLent": "album prêté",
+    "albumsLent": "albums prêtés",
+    "lentTo": "Prêté à",
+    "return": "Récupérer",
+    "returnTitle": "Confirmer le retour",
+    "returnMessage": "Marquer \"{title}\" comme récupéré ?",
+    "returnConfirm": "Oui, récupéré !"
+  },
   "stats": {
     "totalOwned": "Albums possédés",
     "totalWanted": "Souhaits",
