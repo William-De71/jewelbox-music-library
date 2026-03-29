@@ -197,3 +197,56 @@ export function deleteAlbum(id) {
 export function getGenres() {
   return getDb().prepare('SELECT DISTINCT genre FROM albums WHERE genre IS NOT NULL ORDER BY genre COLLATE NOCASE').all().map(r => r.genre);
 }
+
+export function getStats() {
+  const db = getDb();
+
+  const total_owned   = db.prepare('SELECT COUNT(*) AS c FROM albums WHERE is_wanted = 0').get().c;
+  const total_wanted  = db.prepare('SELECT COUNT(*) AS c FROM albums WHERE is_wanted = 1').get().c;
+  const total_lent    = db.prepare('SELECT COUNT(*) AS c FROM albums WHERE is_lent = 1 AND is_wanted = 0').get().c;
+  const total_artists = db.prepare('SELECT COUNT(DISTINCT artist_id) AS c FROM albums WHERE is_wanted = 0').get().c;
+
+  const by_genre = db.prepare(`
+    SELECT genre, COUNT(*) AS count FROM albums
+    WHERE genre IS NOT NULL AND genre != '' AND is_wanted = 0
+    GROUP BY genre ORDER BY count DESC LIMIT 12
+  `).all();
+
+  const by_decade = db.prepare(`
+    SELECT (year / 10 * 10) AS decade, COUNT(*) AS count FROM albums
+    WHERE year IS NOT NULL AND year > 1900 AND is_wanted = 0
+    GROUP BY decade ORDER BY decade ASC
+  `).all();
+
+  const top_artists = db.prepare(`
+    SELECT ar.name, COUNT(*) AS count FROM albums a
+    JOIN artists ar ON ar.id = a.artist_id
+    WHERE a.is_wanted = 0
+    GROUP BY ar.id ORDER BY count DESC LIMIT 10
+  `).all();
+
+  const top_labels = db.prepare(`
+    SELECT l.name, COUNT(*) AS count FROM albums a
+    JOIN labels l ON l.id = a.label_id
+    WHERE a.label_id IS NOT NULL AND a.is_wanted = 0
+    GROUP BY l.id ORDER BY count DESC LIMIT 10
+  `).all();
+
+  const durations = db.prepare(
+    'SELECT total_duration FROM albums WHERE total_duration IS NOT NULL AND is_wanted = 0'
+  ).all();
+
+  let total_minutes = 0;
+  for (const { total_duration } of durations) {
+    const parts = String(total_duration).trim().split(':').map(Number);
+    if (parts.length === 3) total_minutes += parts[0] * 60 + parts[1] + parts[2] / 60;
+    else if (parts.length === 2) total_minutes += parts[0] + parts[1] / 60;
+  }
+
+  return {
+    total_owned, total_wanted, total_lent, total_artists,
+    total_duration_hours: Math.floor(total_minutes / 60),
+    total_duration_mins:  Math.round(total_minutes % 60),
+    by_genre, by_decade, top_artists, top_labels,
+  };
+}

@@ -285,5 +285,18 @@
     "funk": "Funk",
     "country": "Country",
     "other": "Autre"
+  },
+  "stats": {
+    "totalOwned": "Albums possédés",
+    "totalWanted": "Souhaits",
+    "totalLent": "Albums prêtés",
+    "totalArtists": "Artistes",
+    "totalDuration": "Durée d'écoute",
+    "byGenre": "Par genre",
+    "byDecade": "Par décennie",
+    "topArtists": "Top artistes",
+    "topLabels": "Top labels",
+    "noData": "Aucune donnée",
+    "noActiveDb": "Aucune base de données active."
   }
 }
