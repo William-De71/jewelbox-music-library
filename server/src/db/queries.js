@@ -205,6 +205,10 @@ export function getStats() {
   const total_wanted  = db.prepare('SELECT COUNT(*) AS c FROM albums WHERE is_wanted = 1').get().c;
   const total_lent    = db.prepare('SELECT COUNT(*) AS c FROM albums WHERE is_lent = 1 AND is_wanted = 0').get().c;
   const total_artists = db.prepare('SELECT COUNT(DISTINCT artist_id) AS c FROM albums WHERE is_wanted = 0').get().c;
+  const avg_rating_row = db.prepare(
+    'SELECT ROUND(AVG(CAST(rating AS REAL)), 1) AS avg FROM albums WHERE rating IS NOT NULL AND rating > 0 AND is_wanted = 0'
+  ).get();
+  const avg_rating = avg_rating_row?.avg ?? null;
 
   const by_genre = db.prepare(`
     SELECT genre, COUNT(*) AS count FROM albums
@@ -244,7 +248,7 @@ export function getStats() {
   }
 
   return {
-    total_owned, total_wanted, total_lent, total_artists,
+    total_owned, total_wanted, total_lent, total_artists, avg_rating,
     total_duration_hours: Math.floor(total_minutes / 60),
     total_duration_mins:  Math.round(total_minutes % 60),
     by_genre, by_decade, top_artists, top_labels,

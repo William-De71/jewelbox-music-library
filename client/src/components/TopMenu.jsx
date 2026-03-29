@@ -1,4 +1,4 @@
-import { Home, Disc, Heart, HandHeart, BarChart3, Settings } from 'lucide-preact';
+import { Home, Disc, Heart, ArrowRightLeft, BarChart3, Settings } from 'lucide-preact';
 import { useI18n } from '../config/i18n/index.js';
 import '../styles/topmenu.css';
 
@@ -45,7 +45,7 @@ export function TopMenu({ currentPage, navigate }) {
               href="#"
               onClick={(e) => { e.preventDefault(); navigate('lend'); }}
             >
-              <HandHeart size={20} class="me-2" />
+              <ArrowRightLeft size={20} class="me-2" />
               {t('menu.lend')}
             </a>
           </li>
