@@ -1,3 +1,4 @@
+import { Globe } from 'lucide-preact';
 import { useI18n } from '../config/i18n/index.js';
 
 export function LanguageSelector({ className = '' }) {
@@ -10,7 +11,7 @@ export function LanguageSelector({ className = '' }) {
         type="button" 
         data-bs-toggle="dropdown"
       >
-        <i class="ti ti-language me-1"></i>
+        <Globe size={14} class="me-1" />
         {currentLocale === 'fr' ? 'Français' : 'English'}
       </button>
       <ul class="dropdown-menu">

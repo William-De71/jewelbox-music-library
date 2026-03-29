@@ -1,5 +1,5 @@
 import { useI18n } from '../config/i18n/index.js';
-import { Sun, Moon, Disc } from 'lucide-preact';
+import { Sun, Moon } from 'lucide-preact';
 
 export function Header({ onThemeToggle, isDark }) {
   const { t } = useI18n();
@@ -10,7 +10,7 @@ export function Header({ onThemeToggle, isDark }) {
         <div class="d-flex align-items-center justify-content-between py-3">
           <div class="header-brand">
             <div class="d-flex align-items-center gap-2">
-              <Disc size={32} class="text-primary" />
+              <img src="/icons/icon-192.png" width="36" height="36" alt="JewelBox" style={{ borderRadius: '8px' }} />
               <div>
                 <h1 class="header-title mb-0">{t('common.title')}</h1>
                 <p class="header-subtitle mb-0 text-muted small"><em>{t('common.subtitle')}</em></p>
