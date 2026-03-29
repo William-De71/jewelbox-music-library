@@ -7,7 +7,6 @@ import { Pagination } from '../components/Pagination.jsx';
 import { useI18n } from '../config/i18n/index.js';
 import { Search, Grid, List, X, Plus, Disc, Database, AlertCircle, Music } from 'lucide-preact';
 
-const LIMIT_OPTIONS = [12, 24, 48, 96, 999999];
 const DEFAULT_LIMIT = 24;
 
 export function Collections({ navigate, params = {} }) {

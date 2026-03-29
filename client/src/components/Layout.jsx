@@ -15,13 +15,11 @@ export function Layout({ children, navigate, currentPage }) {
 
   useEffect(() => {
     const theme = isDark ? 'dark' : 'light';
-    console.log('Setting theme to:', theme);
     document.documentElement.setAttribute('data-bs-theme', theme);
     localStorage.setItem('jewelbox-theme', theme);
   }, [isDark]);
 
   const toggleTheme = () => {
-    console.log('Toggle theme clicked, current isDark:', isDark);
     setIsDark(!isDark);
   };
 

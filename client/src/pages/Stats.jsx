@@ -98,9 +98,8 @@ export function Stats() {
       .finally(() => setLoading(false));
   }, []);
 
-  const genreData  = stats?.by_genre?.map(g => ({ label: g.genre,         count: g.count })) || [];
-  const decadeData = stats?.by_decade?.map(d => ({ label: `${d.decade}s`, count: d.count })) || [];
-  const artistData = stats?.top_artists?.map(a => ({ label: a.name,       count: a.count })) || [];
+  const genreData  = stats?.by_genre?.map(g => ({ label: g.genre,   count: g.count })) || [];
+  const artistData = stats?.top_artists?.map(a => ({ label: a.name, count: a.count })) || [];
 
   const hasDuration = stats && (stats.total_duration_hours > 0 || stats.total_duration_mins > 0);
 
