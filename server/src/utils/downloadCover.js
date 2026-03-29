@@ -57,10 +57,20 @@ export async function downloadCover(imageUrl) {
     
     // Add Discogs authentication if this is a Discogs URL
     if (imageUrl.includes('discogs.com')) {
-      const DISCOGS_KEY = process.env.DISCOGS_KEY;
-      const DISCOGS_SECRET = process.env.DISCOGS_SECRET;
-      if (DISCOGS_KEY && DISCOGS_SECRET) {
-        headers['Authorization'] = `Discogs key=${DISCOGS_KEY}, secret=${DISCOGS_SECRET}`;
+      let dKey = '', dSecret = '';
+      try {
+        const mDb = new Database(MANAGER_DB_PATH);
+        const kr = mDb.prepare("SELECT value FROM settings WHERE key = 'discogs_key'").get();
+        const sr = mDb.prepare("SELECT value FROM settings WHERE key = 'discogs_secret'").get();
+        mDb.close();
+        dKey = (kr?.value?.trim()) || process.env.DISCOGS_KEY || '';
+        dSecret = (sr?.value?.trim()) || process.env.DISCOGS_SECRET || '';
+      } catch {
+        dKey = process.env.DISCOGS_KEY || '';
+        dSecret = process.env.DISCOGS_SECRET || '';
+      }
+      if (dKey && dSecret) {
+        headers['Authorization'] = `Discogs key=${dKey}, secret=${dSecret}`;
         console.log(`[DownloadCover] Using Discogs authentication for image`);
       }
     }

@@ -316,5 +316,19 @@
     "avgRating": "Note moyenne",
     "noData": "Aucune donnée",
     "noActiveDb": "Aucune base de données active."
+  },
+  "discogs": {
+    "title": "API Discogs",
+    "description": "Discogs vous permet de rechercher des albums par titre ou code-barres. Sans clé, les requêtes sont limitées à 25/minute. Avec une clé d'authentification, vous bénéficiez de 60 requêtes/minute.",
+    "howTo": "Obtenez vos clés sur discogs.com → Paramètres → Développeurs → Créer une application",
+    "consumerKey": "Consumer Key",
+    "consumerSecret": "Consumer Secret",
+    "keyPlaceholder": "Votre Consumer Key Discogs",
+    "secretPlaceholder": "Votre Consumer Secret Discogs",
+    "save": "Enregistrer",
+    "saved": "Paramètres Discogs enregistrés",
+    "optional": "Optionnel — fonctionne sans clé (limites réduites)",
+    "authenticated": "Authentifié",
+    "unauthenticated": "Non authentifié (limites réduites)"
   }
 }

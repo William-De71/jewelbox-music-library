@@ -1,46 +1,49 @@
 // Discogs API service for JewelBox Music Library
 // Note: Discogs works without authentication but with lower rate limits
 
+import { getManagerDb } from '../db/manager.js';
+
 const DISCOGS_BASE = 'https://api.discogs.com';
-const DISCOGS_KEY = process.env.DISCOGS_KEY || '';
-const DISCOGS_SECRET = process.env.DISCOGS_SECRET || '';
 
-// Base headers without authentication
-const DISCOGS_HEADERS = {
-  'User-Agent': 'JewelBox-Music-Library/1.0',
-  'Accept': 'application/json',
-};
-
-// Add Authorization header only if key/secret are provided (optional)
-if (DISCOGS_KEY && DISCOGS_SECRET) {
-  // Discogs Consumer Key/Secret authentication (optional, for higher limits)
-  DISCOGS_HEADERS['Authorization'] = `Discogs key=${DISCOGS_KEY}, secret=${DISCOGS_SECRET}`;
+function getDiscogsCredentials() {
+  try {
+    const db = getManagerDb();
+    const keyRow = db.prepare("SELECT value FROM settings WHERE key = 'discogs_key'").get();
+    const secretRow = db.prepare("SELECT value FROM settings WHERE key = 'discogs_secret'").get();
+    const key = (keyRow?.value && keyRow.value.trim()) || process.env.DISCOGS_KEY || '';
+    const secret = (secretRow?.value && secretRow.value.trim()) || process.env.DISCOGS_SECRET || '';
+    return { key, secret };
+  } catch {
+    return { key: process.env.DISCOGS_KEY || '', secret: process.env.DISCOGS_SECRET || '' };
+  }
 }
-
-// Use different rate limits based on authentication
-const MIN_DISCOGS_REQUEST_INTERVAL = (DISCOGS_KEY && DISCOGS_SECRET) ? 1000 : 2000; // 1s auth, 2s non-auth
 
 let lastDiscogsRequestTime = 0;
 
 async function fetchDiscogsJson(url, retries = 3) {
+  const { key, secret } = getDiscogsCredentials();
+  const headers = { 'User-Agent': 'JewelBox-Music-Library/1.0', 'Accept': 'application/json' };
+  if (key && secret) headers['Authorization'] = `Discogs key=${key}, secret=${secret}`;
+  const interval = (key && secret) ? 1000 : 2000;
+
   // Respect Discogs rate limit
   const now = Date.now();
   const timeSinceLastRequest = now - lastDiscogsRequestTime;
-  if (timeSinceLastRequest < MIN_DISCOGS_REQUEST_INTERVAL) {
-    const waitTime = MIN_DISCOGS_REQUEST_INTERVAL - timeSinceLastRequest;
+  if (timeSinceLastRequest < interval) {
+    const waitTime = interval - timeSinceLastRequest;
     console.log(`[Discogs] Waiting ${waitTime}ms before next request`);
     await new Promise(resolve => setTimeout(resolve, waitTime));
   }
   lastDiscogsRequestTime = Date.now();
-  
-  const authMode = (DISCOGS_KEY && DISCOGS_SECRET) ? 'authenticated' : 'unauthenticated';
+
+  const authMode = (key && secret) ? 'authenticated' : 'unauthenticated';
   console.log(`[Discogs] Using ${authMode} mode`);
-  
+
   for (let attempt = 0; attempt < retries; attempt++) {
     try {
       console.log(`[Discogs] Attempt ${attempt + 1}/${retries}: ${url}`);
       const res = await fetch(url, { 
-        headers: DISCOGS_HEADERS,
+        headers,
         signal: AbortSignal.timeout(10000) // 10 second timeout
       });
       

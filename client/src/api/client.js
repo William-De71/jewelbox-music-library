@@ -34,6 +34,10 @@ export const api = {
   getStats: () => request('GET', '/stats'),
   getBorrowers: () => request('GET', '/albums/borrowers'),
 
+  // Settings
+  getSettings: () => request('GET', '/settings'),
+  saveSettings: (data) => request('PUT', '/settings', data),
+
   // External search
   search: (q, source = 'musicbrainz') => request('GET', `/search?q=${encodeURIComponent(q)}&source=${source}`),
   searchByEan: (ean, source = 'musicbrainz') => request('GET', `/search?ean=${encodeURIComponent(ean)}&source=${source}`),

@@ -23,7 +23,6 @@ let managerDb = null;
 function getManagerDb() {
   if (!managerDb) {
     managerDb = new Database(MANAGER_DB_PATH);
-    // Initialize tables
     managerDb.exec(`
       CREATE TABLE IF NOT EXISTS databases (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -33,7 +32,12 @@ function getManagerDb() {
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         is_active BOOLEAN DEFAULT 0
-      )
+      );
+      CREATE TABLE IF NOT EXISTS settings (
+        key TEXT PRIMARY KEY,
+        value TEXT NOT NULL,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      );
     `);
   }
   return managerDb;
@@ -315,6 +319,35 @@ fastify.delete('/api/databases/:id', async (req, reply) => {
   } catch (err) {
     console.error('[DB] Error deleting database:', err);
     return reply.code(500).send({ error: 'Failed to delete database' });
+  }
+});
+
+// Get settings
+fastify.get('/api/settings', async (req, reply) => {
+  try {
+    const db = getManagerDb();
+    const rows = db.prepare('SELECT key, value FROM settings').all();
+    const settings = {};
+    rows.forEach(r => { settings[r.key] = r.value; });
+    return settings;
+  } catch (err) {
+    return reply.code(500).send({ error: err.message });
+  }
+});
+
+// Save settings
+fastify.put('/api/settings', async (req, reply) => {
+  try {
+    const db = getManagerDb();
+    const stmt = db.prepare(`
+      INSERT INTO settings (key, value, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP)
+      ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = CURRENT_TIMESTAMP
+    `);
+    const entries = Object.entries(req.body);
+    entries.forEach(([key, value]) => stmt.run(key, value ?? ''));
+    return { message: 'Settings saved' };
+  } catch (err) {
+    return reply.code(500).send({ error: err.message });
   }
 });
 

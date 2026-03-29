@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'preact/hooks';
 import { databasesApi } from '../api/databases.js';
 import { useI18n } from '../config/i18n/index.js';
-import { Database, Plus, Play, Trash2, Edit, Check, X, Settings as SettingsIcon, Disc } from 'lucide-preact';
+import { api } from '../api/client.js';
+import { Database, Plus, Play, Trash2, Edit, Check, X, Settings as SettingsIcon, Disc, Key, ExternalLink, ShieldCheck, ShieldOff } from 'lucide-preact';
 
 export function Settings({ navigate }) {
   const { t } = useI18n();
@@ -14,6 +15,8 @@ export function Settings({ navigate }) {
   const [deleteConfirmTarget, setDeleteConfirmTarget] = useState(null);
   const [formData, setFormData] = useState({ name: '', description: '' });
   const [toast, setToast] = useState(null);
+  const [discogsForm, setDiscogsForm] = useState({ discogs_key: '', discogs_secret: '' });
+  const [discogsSaving, setDiscogsSaving] = useState(false);
 
   const showToast = (msg, type = 'success') => {
     setToast({ msg, type });
@@ -36,7 +39,23 @@ export function Settings({ navigate }) {
 
   useEffect(() => {
     loadDatabases();
+    api.getSettings().then(s => {
+      setDiscogsForm({ discogs_key: s.discogs_key || '', discogs_secret: s.discogs_secret || '' });
+    }).catch(() => {});
   }, []);
+
+  const handleSaveDiscogs = async (e) => {
+    e.preventDefault();
+    setDiscogsSaving(true);
+    try {
+      await api.saveSettings(discogsForm);
+      showToast(t('discogs.saved'), 'success');
+    } catch (err) {
+      showToast(err.message, 'danger');
+    } finally {
+      setDiscogsSaving(false);
+    }
+  };
 
   const handleCreateDatabase = async (e) => {
     e.preventDefault();
@@ -227,6 +246,79 @@ export function Settings({ navigate }) {
                   </div>
                 )}
 
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Discogs API section */}
+        <div class="row mt-4">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title fs-5 mb-0">
+                  <Key size={18} class="me-2" />
+                  {t('discogs.title')}
+                </h3>
+              </div>
+              <div class="card-body">
+                <div class="alert alert-info d-flex gap-2 align-items-start mb-4">
+                  <div>
+                    <p class="mb-1">{t('discogs.description')}</p>
+                    <p class="mb-1 text-muted small">
+                      <ExternalLink size={13} class="me-1" />
+                      {t('discogs.howTo')}
+                    </p>
+                    <span class="badge bg-secondary-lt text-muted">{t('discogs.optional')}</span>
+                  </div>
+                </div>
+
+                {(discogsForm.discogs_key && discogsForm.discogs_secret) ? (
+                  <div class="mb-3 d-flex align-items-center gap-2">
+                    <ShieldCheck size={16} class="text-success" />
+                    <span class="text-success small fw-semibold">{t('discogs.authenticated')}</span>
+                  </div>
+                ) : (
+                  <div class="mb-3 d-flex align-items-center gap-2">
+                    <ShieldOff size={16} class="text-muted" />
+                    <span class="text-muted small">{t('discogs.unauthenticated')}</span>
+                  </div>
+                )}
+
+                <form onSubmit={handleSaveDiscogs}>
+                  <div class="row g-3">
+                    <div class="col-md-6">
+                      <label class="form-label">{t('discogs.consumerKey')}</label>
+                      <input
+                        type="text"
+                        class="form-control font-monospace"
+                        placeholder={t('discogs.keyPlaceholder')}
+                        value={discogsForm.discogs_key}
+                        onInput={(e) => setDiscogsForm({ ...discogsForm, discogs_key: e.target.value })}
+                        autocomplete="off"
+                      />
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label">{t('discogs.consumerSecret')}</label>
+                      <input
+                        type="password"
+                        class="form-control font-monospace"
+                        placeholder={t('discogs.secretPlaceholder')}
+                        value={discogsForm.discogs_secret}
+                        onInput={(e) => setDiscogsForm({ ...discogsForm, discogs_secret: e.target.value })}
+                        autocomplete="off"
+                      />
+                    </div>
+                  </div>
+                  <div class="mt-3">
+                    <button type="submit" class="btn btn-primary" disabled={discogsSaving}>
+                      {discogsSaving
+                        ? <span class="spinner-border spinner-border-sm me-2" />
+                        : <Check size={16} class="me-1" />}
+                      {t('discogs.save')}
+                    </button>
+                  </div>
+                </form>
               </div>
             </div>
           </div>
