@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'preact/hooks';
 import { albumsApi } from '../api/albums.js';
 import { useI18n } from '../config/i18n/index.js';
-import { Home, Search, Music2, Shuffle, Clock, BarChart3, Settings, Play, Plus, Heart, PenLine } from 'lucide-preact';
+import { Home, Search, Music2, Shuffle, Clock, BarChart3, Settings, Plus, Heart, PenLine } from 'lucide-preact';
 
 export function Dashboard({ navigate }) {
   const { t } = useI18n();
@@ -106,23 +106,6 @@ export function Dashboard({ navigate }) {
                   </div>
                 </form>
 
-                {/* Active database bar */}
-                {activeDb && (
-                  <div class="d-flex align-items-center justify-content-between px-3 py-2 mb-4 rounded border" style={{ borderColor: 'var(--tblr-success)' }}>
-                    <div class="d-flex align-items-center gap-2">
-                      <Play size={16} class="text-success flex-shrink-0" />
-                      <span>
-                        <strong>{t('database.activeDatabase')} :</strong>
-                        <span class="ms-1">{activeDb.name}</span>
-                        {activeDb.description && <span class="text-muted ms-2">— {activeDb.description}</span>}
-                      </span>
-                    </div>
-                    <button class="btn btn-sm btn-outline-success" onClick={() => navigate('collections')}>
-                      {t('database.viewCollection')}
-                    </button>
-                  </div>
-                )}
-
                 {/* Quick add */}
                 {activeDb && (
                   <div class="card mb-4">
@@ -193,25 +176,19 @@ export function Dashboard({ navigate }) {
                   </div>
                 ) : (
                   <>
-                    {/* Recent + Random */}
-                    <div class="row mb-4">
+                    {/* Recent + Random — 3 colonnes */}
+                    <div class="row mb-4 g-3">
 
-                      {/* Recent albums */}
-                      <div class="col-md-7 mb-3 mb-md-0">
+                      {/* Colonne 1 : Collection */}
+                      <div class="col-12 col-md-4">
                         <div class="card h-100">
                           <div class="card-header">
                             <h3 class="card-title fs-5 mb-0">
-                              <Clock size={17} class="me-2 text-primary" />
-                              {t('home.recentAlbums')}
+                              <Clock size={16} class="me-2 text-primary" />
+                              {t('home.recentOwned')}
                             </h3>
                           </div>
                           <div class="list-group list-group-flush">
-                            {/* Owned section */}
-                            <div class="list-group-item py-1 px-3 bg-secondary-lt">
-                              <small class="fw-semibold text-muted text-uppercase" style={{ fontSize: '0.7rem', letterSpacing: '0.05em' }}>
-                                🎵 {t('home.recentOwned')}
-                              </small>
-                            </div>
                             {recentAlbums.length === 0 ? (
                               <div class="list-group-item text-muted text-center py-3 small">
                                 {t('home.noAlbums')}
@@ -237,47 +214,55 @@ export function Dashboard({ navigate }) {
                                 {album.year && <span class="text-muted flex-shrink-0" style={{ fontSize: '0.75rem' }}>{album.year}</span>}
                               </div>
                             ))}
-                            {/* Wanted section */}
-                            {recentWanted.length > 0 && (
-                              <>
-                                <div class="list-group-item py-1 px-3 bg-secondary-lt">
-                                  <small class="fw-semibold text-muted text-uppercase" style={{ fontSize: '0.7rem', letterSpacing: '0.05em' }}>
-                                    ❤️ {t('home.recentWantedSection')}
-                                  </small>
-                                </div>
-                                {recentWanted.map(album => (
-                                  <div
-                                    key={album.id}
-                                    class="list-group-item list-group-item-action d-flex align-items-center gap-3"
-                                    style={{ cursor: 'pointer' }}
-                                    onClick={() => navigate('detail', { id: album.id })}
-                                  >
-                                    {album.cover_url ? (
-                                      <img src={album.cover_url} alt="" style={{ width: 40, height: 40, objectFit: 'cover', borderRadius: 4, flexShrink: 0 }} />
-                                    ) : (
-                                      <div class="d-flex align-items-center justify-content-center bg-secondary-lt rounded" style={{ width: 40, height: 40, flexShrink: 0 }}>
-                                        <Music2 size={18} class="text-muted" />
-                                      </div>
-                                    )}
-                                    <div class="flex-grow-1 overflow-hidden">
-                                      <div class="fw-semibold text-truncate small">{album.title}</div>
-                                      <div class="text-muted" style={{ fontSize: '0.75rem' }}>{album.artist?.name}</div>
-                                    </div>
-                                    {album.year && <span class="text-muted flex-shrink-0" style={{ fontSize: '0.75rem' }}>{album.year}</span>}
-                                  </div>
-                                ))}
-                              </>
-                            )}
                           </div>
                         </div>
                       </div>
 
-                      {/* Random album */}
-                      <div class="col-md-5">
+                      {/* Colonne 2 : Liste de souhaits */}
+                      <div class="col-12 col-md-4">
+                        <div class="card h-100">
+                          <div class="card-header">
+                            <h3 class="card-title fs-5 mb-0">
+                              <Heart size={16} class="me-2 text-danger" />
+                              {t('home.recentWantedSection')}
+                            </h3>
+                          </div>
+                          <div class="list-group list-group-flush">
+                            {recentWanted.length === 0 ? (
+                              <div class="list-group-item text-muted text-center py-3 small">
+                                {t('home.noAlbums')}
+                              </div>
+                            ) : recentWanted.map(album => (
+                              <div
+                                key={album.id}
+                                class="list-group-item list-group-item-action d-flex align-items-center gap-3"
+                                style={{ cursor: 'pointer' }}
+                                onClick={() => navigate('detail', { id: album.id })}
+                              >
+                                {album.cover_url ? (
+                                  <img src={album.cover_url} alt="" style={{ width: 40, height: 40, objectFit: 'cover', borderRadius: 4, flexShrink: 0 }} />
+                                ) : (
+                                  <div class="d-flex align-items-center justify-content-center bg-secondary-lt rounded" style={{ width: 40, height: 40, flexShrink: 0 }}>
+                                    <Music2 size={18} class="text-muted" />
+                                  </div>
+                                )}
+                                <div class="flex-grow-1 overflow-hidden">
+                                  <div class="fw-semibold text-truncate small">{album.title}</div>
+                                  <div class="text-muted" style={{ fontSize: '0.75rem' }}>{album.artist?.name}</div>
+                                </div>
+                                {album.year && <span class="text-muted flex-shrink-0" style={{ fontSize: '0.75rem' }}>{album.year}</span>}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Colonne 3 : Proposition d'écoute */}
+                      <div class="col-12 col-md-4">
                         <div class="card h-100">
                           <div class="card-header d-flex justify-content-between align-items-center">
                             <h3 class="card-title fs-5 mb-0">
-                              <Shuffle size={17} class="me-2 text-warning" />
+                              <Shuffle size={16} class="me-2 text-warning" />
                               {t('home.randomAlbum')}
                             </h3>
                             <button
@@ -285,14 +270,13 @@ export function Dashboard({ navigate }) {
                               onClick={shuffleRandom}
                               title={t('home.shuffle')}
                             >
-                              <Shuffle size={14} class="me-1" />
-                              {t('home.shuffle')}
+                              <Shuffle size={13} />
                             </button>
                           </div>
-                          <div class="card-body d-flex flex-column align-items-center justify-content-center text-center gap-3">
+                          <div class="card-body d-flex flex-column align-items-center justify-content-center text-center gap-2">
                             {randomAlbum ? (
                               <div
-                                class="d-flex flex-column align-items-center gap-3"
+                                class="d-flex flex-column align-items-center gap-2"
                                 style={{ cursor: 'pointer' }}
                                 onClick={() => navigate('detail', { id: randomAlbum.id })}
                               >
@@ -300,24 +284,24 @@ export function Dashboard({ navigate }) {
                                   <img
                                     src={randomAlbum.cover_url}
                                     alt=""
-                                    style={{ width: 190, height: 190, objectFit: 'cover', borderRadius: 8, boxShadow: '0 4px 16px rgba(0,0,0,0.25)' }}
+                                    style={{ width: 180, height: 180, objectFit: 'cover', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.25)' }}
                                   />
                                 ) : (
                                   <div
                                     class="d-flex align-items-center justify-content-center bg-secondary-lt rounded"
-                                    style={{ width: 190, height: 190 }}
+                                    style={{ width: 180, height: 180 }}
                                   >
-                                    <Music2 size={64} class="text-muted" />
+                                    <Music2 size={56} class="text-muted" />
                                   </div>
                                 )}
                                 <div>
-                                  <div class="fw-bold">{randomAlbum.title}</div>
-                                  <div class="text-muted">{randomAlbum.artist?.name}</div>
-                                  {randomAlbum.year && <div class="text-muted small">{randomAlbum.year}</div>}
+                                  <div class="fw-bold small">{randomAlbum.title}</div>
+                                  <div class="text-muted small">{randomAlbum.artist?.name}</div>
+                                  {randomAlbum.year && <div class="text-muted" style={{ fontSize: '0.75rem' }}>{randomAlbum.year}</div>}
                                 </div>
                               </div>
                             ) : (
-                              <p class="text-muted">{t('home.noAlbums')}</p>
+                              <p class="text-muted small">{t('home.noAlbums')}</p>
                             )}
                           </div>
                         </div>
