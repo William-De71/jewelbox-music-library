@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'preact/hooks';
 import { albumsApi } from '../api/albums.js';
 import { useI18n } from '../config/i18n/index.js';
-import { Home, Search, Music2, Shuffle, Clock, BarChart3, Settings, Plus, Heart, PenLine } from 'lucide-preact';
+import { Home, Search, Music2, Shuffle, Clock, BarChart3, Settings, Plus, Heart, PenLine, Disc } from 'lucide-preact';
 
 export function Dashboard({ navigate }) {
   const { t } = useI18n();
@@ -314,22 +314,29 @@ export function Dashboard({ navigate }) {
                         <div class="card-header">
                           <h3 class="card-title fs-5 mb-0">
                             📤 {t('home.currentlyLent')}
-                            <span class="badge bg-warning-lt text-warning ms-2">{lentAlbums.length}</span>
                           </h3>
                         </div>
                         <div class="list-group list-group-flush">
                           {lentAlbums.map(album => (
                             <div
                               key={album.id}
-                              class="list-group-item list-group-item-action d-flex align-items-center justify-content-between"
+                              class="list-group-item list-group-item-action d-flex align-items-center gap-3"
                               style={{ cursor: 'pointer' }}
                               onClick={() => navigate('detail', { id: album.id })}
                             >
-                              <div>
-                                <strong>{album.title}</strong>
-                                <span class="text-muted ms-2">— {album.artist?.name}</span>
+                              {album.cover_url
+                                ? <img src={album.cover_url} alt=""
+                                    style={{ width: 40, height: 40, objectFit: 'cover', borderRadius: 4, flexShrink: 0 }} />
+                                : <div class="bg-secondary-lt rounded d-flex align-items-center justify-content-center flex-shrink-0"
+                                    style={{ width: 40, height: 40 }}>
+                                    <Disc size={18} class="text-muted" />
+                                  </div>
+                              }
+                              <div class="flex-grow-1 overflow-hidden">
+                                <strong class="text-truncate d-block">{album.title}</strong>
+                                <span class="text-muted small">{album.artist?.name}</span>
                               </div>
-                              <span class="badge bg-warning-lt text-warning">
+                              <span class="badge bg-warning-lt text-warning flex-shrink-0">
                                 {t('home.lentTo')} {album.lent_to}
                               </span>
                             </div>
