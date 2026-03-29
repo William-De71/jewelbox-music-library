@@ -1,98 +1,12 @@
-# 💿 JewelBox Music Library
+<div align="center">
+  <img src="client/public/icons/icon-192.png" width="80" alt="JewelBox" />
 
-> *Parce que vos albums méritent mieux qu'une simple étagère.*
+  # JewelBox Music Library
 
-Application web progressive (PWA) de gestion de collection de CDs physiques, construite avec **Preact**, **Fastify** et **SQLite**.
+  *Parce que vos albums méritent mieux qu'une simple étagère.*
+</div>
 
----
-
-## ✨ Fonctionnalités
-
-- **Gestion complète** : Ajouter, modifier, supprimer des albums
-- **Multiples bases de données** : Gérez plusieurs collections séparées (famille, bureau…)
-- **Liste de souhaits** : Suivez les albums que vous souhaitez acquérir
-- **Prêt de CD** : Marquer un album comme prêté et noter à qui
-- **Vue Grille / Liste** : Basculez entre les deux modes d'affichage
-- **Filtres & Tri** : Par genre, note, titre, artiste, année
-- **Recherche** : Recherche sur titre et artiste
-- **Recherche externe (MusicBrainz & Discogs)** : Pré-remplissage automatique via titre, artiste ou EAN/code-barres
-- **Gestion des pistes** : Titre + durée par piste
-- **Pochettes** : Upload local ou URL distante, téléchargement automatique depuis CoverArtArchive
-- **Statistiques** : Vue d'ensemble de votre collection
-- **Internationalisation** : Interface en français
-- **PWA** : Installable sur mobile et desktop
-
----
-
-## 🗂️ Structure du projet
-
-```text
-JewelBox-Music-Library/
-├── client/                        # Frontend Preact
-│   ├── public/
-│   │   ├── favicon.svg            # Icône de l'application
-│   │   ├── manifest.webmanifest   # Manifest PWA
-│   │   └── icons/                 # Icônes PWA
-│   ├── src/
-│   │   ├── api/                   # Fonctions d'appel à l'API REST
-│   │   ├── components/            # Composants réutilisables
-│   │   ├── config/i18n/           # Traductions (fr.json)
-│   │   ├── pages/                 # Pages de l'application
-│   │   │   ├── Dashboard.jsx      # Tableau de bord (page d'accueil)
-│   │   │   ├── Collections.jsx    # Collection (albums possédés)
-│   │   │   ├── WantList.jsx       # Liste de souhaits
-│   │   │   ├── AlbumForm.jsx      # Formulaire ajout/modification
-│   │   │   ├── AlbumDetail.jsx    # Détail d'un album
-│   │   │   ├── Stats.jsx          # Statistiques
-│   │   │   └── Settings.jsx       # Paramètres et bases de données
-│   │   ├── styles/                # Fichiers CSS
-│   │   ├── App.jsx
-│   │   └── main.jsx
-│   ├── index.html
-│   ├── vite.config.js
-│   └── package.json
-├── server/                        # Backend Fastify
-│   ├── src/
-│   │   ├── db/
-│   │   │   ├── schema.js          # Schéma SQLite
-│   │   │   ├── database.js        # Connexion + migrations automatiques
-│   │   │   ├── manager.js         # Gestion multi-bases
-│   │   │   └── queries.js         # Requêtes SQL
-│   │   ├── routes/
-│   │   │   ├── albums.js          # CRUD albums + prêt
-│   │   │   ├── search.js          # Recherche MusicBrainz / Discogs
-│   │   │   ├── database.js        # Gestion des bases de données
-│   │   │   └── uploads.js         # Upload de pochettes
-│   │   └── index.js               # Point d'entrée Fastify
-│   ├── data/                      # Bases SQLite + pochettes (ignoré par git)
-│   ├── .env.example
-│   └── package.json
-├── .gitignore
-├── package.json                   # Workspaces npm
-└── README.md
-```
-
----
-
-## 🗄️ Schéma de la base de données
-
-```sql
-artists  (id, name UNIQUE, created_at)
-labels   (id, name UNIQUE, created_at)
-albums   (id, title, artist_id → artists, label_id → labels,
-          year, genre, total_duration, ean UNIQUE,
-          rating 1-5, cover_url, notes,
-          is_lent, lent_to,
-          is_wanted,
-          created_at, updated_at)
-tracks   (id, album_id → albums CASCADE, position, title, duration)
-```
-
-> Les migrations sont appliquées automatiquement à l'ouverture d'une base existante.
-
----
-
-## 🚀 Démarrage rapide
+## 🚀 Démarrage rapide (développement)
 
 ### Prérequis
 
@@ -107,21 +21,79 @@ cd JewelBox-Music-Library
 npm install
 ```
 
-### Configuration
+### Lancement
 
 ```bash
-cp server/.env.example server/.env
+# Démarre le backend (port 3001) et le frontend (port 5173) simultanément
+npm run dev
 ```
 
-### Lancement en développement
+Ouvrir [http://localhost:5173](http://localhost:5173)
+
+---
+
+## 🐳 Docker
+
+### Lancement avec Docker Compose (recommandé)
 
 ```bash
-# Depuis la racine (démarre serveur + client simultanément)
-npm run dev
+cd docker
+docker compose up -d
+```
 
-# Séparément :
-cd server && node src/index.js          # http://localhost:3001
-cd client && node ../node_modules/vite/bin/vite.js   # http://localhost:5173
+L'application est accessible sur [http://localhost:3001](http://localhost:3001).  
+Les bases de données et les pochettes sont persistées dans le volume `jewelbox_data`.
+
+### Sans Docker Compose (Docker seul)
+
+```bash
+# 1. Build de l'image depuis la racine du projet
+docker build -f docker/Dockerfile -t jewelbox .
+
+# 2. Créer le volume pour persister les données
+docker volume create jewelbox_data
+
+# 3. Lancer le conteneur
+docker run -d \
+  -p 3001:3001 \
+  -v jewelbox_data:/app/server/data \
+  -e NODE_ENV=production \
+  --name jewelbox-app \
+  --restart unless-stopped \
+  jewelbox
+```
+
+L'application est accessible sur [http://localhost:3001](http://localhost:3001).
+
+```bash
+# Arrêter / relancer
+docker stop jewelbox-app
+docker start jewelbox-app
+
+# Voir les logs
+docker logs -f jewelbox-app
+
+# Mettre à jour (rebuild)
+docker stop jewelbox-app && docker rm jewelbox-app
+docker build -f docker/Dockerfile -t jewelbox .
+docker run -d -p 3001:3001 -v jewelbox_data:/app/server/data \
+  -e NODE_ENV=production --name jewelbox-app --restart unless-stopped jewelbox
+```
+
+### Données persistantes
+
+Le volume Docker monte `/app/server/data` qui contient :
+
+- les bases SQLite (`.db`)
+- les pochettes téléchargées (`covers/`)
+
+```bash
+# Voir les données persistées
+docker volume inspect jewelbox_data
+
+# Sauvegarder les données
+docker run --rm -v jewelbox_data:/data -v $(pwd):/backup \
+  alpine tar czf /backup/jewelbox-backup.tar.gz /data
 ```
 
 ---
@@ -129,7 +101,6 @@ cd client && node ../node_modules/vite/bin/vite.js   # http://localhost:5173
 ## 🧪 Tests
 
 ```bash
-# Tests du serveur (Vitest)
 cd server && node ../node_modules/vitest/vitest.mjs run
 ```
 
@@ -145,6 +116,10 @@ cd server && node ../node_modules/vitest/vitest.mjs run
 | `PATCH`  | `/api/albums/:id`            | Modifier un album                        |
 | `DELETE` | `/api/albums/:id`            | Supprimer un album                       |
 | `PATCH`  | `/api/albums/:id/lend`       | Prêter / récupérer                       |
+| `GET`    | `/api/albums/:id/loans`      | Historique des prêts                     |
+| `GET`    | `/api/albums/export`         | Exporter la collection (CSV ou JSON)     |
+| `POST`   | `/api/albums/import`         | Importer depuis un CSV                   |
+| `GET`    | `/api/albums/duplicate`      | Vérifier si un doublon existe            |
 | `GET`    | `/api/albums/genres`         | Liste des genres                         |
 | `GET`    | `/api/search?q=`             | Recherche MusicBrainz par titre/artiste  |
 | `GET`    | `/api/search?ean=`           | Recherche par EAN/code-barres            |
@@ -168,5 +143,12 @@ cd server && node ../node_modules/vitest/vitest.mjs run
 | `search`  | texte   | Recherche sur titre et artiste          |
 | `wanted`  | booléen | `true` = liste de souhaits uniquement   |
 | `lent`    | booléen | `true` = albums prêtés uniquement       |
+
+---
+
+## 📄 Licence
+
+Ce projet est distribué sous licence **MIT**.  
+Voir le fichier [LICENSE](LICENSE) pour le texte complet.
 
 ---
