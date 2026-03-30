@@ -138,3 +138,95 @@ describe('Rating constraint', () => {
     }).toThrow();
   });
 });
+
+// ── Loan history helpers ──────────────────────────────────────────────────────
+
+function addLoanHistory(albumId, lentTo, lentAt) {
+  return db.prepare('INSERT INTO loan_history (album_id, lent_to, lent_at) VALUES (?, ?, ?)')
+    .run(albumId, lentTo, lentAt || new Date().toISOString());
+}
+
+function closeLoan(albumId) {
+  return db.prepare(`UPDATE loan_history SET returned_at = datetime('now')
+    WHERE album_id = ? AND returned_at IS NULL`)
+    .run(albumId);
+}
+
+function getLoanHistory(albumId) {
+  return db.prepare('SELECT * FROM loan_history WHERE album_id = ? ORDER BY lent_at DESC')
+    .all(albumId);
+}
+
+// ── Tests ─────────────────────────────────────────────────────────────────────
+
+describe('lent_at tracking', () => {
+  let id;
+
+  beforeAll(() => {
+    id = createAlbum({ title: 'Blue Lines', artist_name: 'Massive Attack', year: 1991 });
+  });
+
+  it('defaults to null when album is created', () => {
+    const row = db.prepare('SELECT lent_at FROM albums WHERE id = ?').get(id);
+    expect(row.lent_at).toBeNull();
+  });
+
+  it('stores lent_at and lent_to when lending', () => {
+    const now = new Date().toISOString();
+    db.prepare('UPDATE albums SET is_lent=1, lent_to=?, lent_at=? WHERE id=?').run('Alice', now, id);
+    const row = db.prepare('SELECT is_lent, lent_to, lent_at FROM albums WHERE id=?').get(id);
+    expect(row.is_lent).toBe(1);
+    expect(row.lent_to).toBe('Alice');
+    expect(row.lent_at).toBe(now);
+  });
+
+  it('clears lent_at and lent_to when returned', () => {
+    db.prepare('UPDATE albums SET is_lent=0, lent_to=NULL, lent_at=NULL WHERE id=?').run(id);
+    const row = db.prepare('SELECT is_lent, lent_to, lent_at FROM albums WHERE id=?').get(id);
+    expect(row.is_lent).toBe(0);
+    expect(row.lent_to).toBeNull();
+    expect(row.lent_at).toBeNull();
+  });
+});
+
+describe('Loan history', () => {
+  let albumId;
+
+  beforeAll(() => {
+    albumId = createAlbum({ title: 'Nevermind', artist_name: 'Nirvana', year: 1991 });
+  });
+
+  it('adds a loan history entry', () => {
+    addLoanHistory(albumId, 'Bob', '2024-01-10T12:00:00.000Z');
+    const history = getLoanHistory(albumId);
+    expect(history).toHaveLength(1);
+    expect(history[0].lent_to).toBe('Bob');
+    expect(history[0].lent_at).toBe('2024-01-10T12:00:00.000Z');
+    expect(history[0].returned_at).toBeNull();
+  });
+
+  it('closes an open loan and sets returned_at', () => {
+    closeLoan(albumId);
+    const history = getLoanHistory(albumId);
+    expect(history[0].returned_at).not.toBeNull();
+  });
+
+  it('does not close already returned loans', () => {
+    addLoanHistory(albumId, 'Carol', '2024-06-01T10:00:00.000Z');
+    closeLoan(albumId);
+    const history = getLoanHistory(albumId);
+    expect(history).toHaveLength(2);
+    expect(history.every(h => h.returned_at !== null)).toBe(true);
+  });
+
+  it('returns history ordered by lent_at descending', () => {
+    const history = getLoanHistory(albumId);
+    expect(history[0].lent_at > history[1].lent_at).toBe(true);
+  });
+
+  it('cascades loan_history deletion when album is deleted', () => {
+    db.prepare('DELETE FROM albums WHERE id = ?').run(albumId);
+    const remaining = db.prepare('SELECT * FROM loan_history WHERE album_id = ?').all(albumId);
+    expect(remaining).toHaveLength(0);
+  });
+});
