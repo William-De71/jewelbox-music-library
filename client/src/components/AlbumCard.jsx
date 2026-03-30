@@ -9,7 +9,7 @@ export function AlbumCard({ album, onClick, onEdit, onDelete, onLend, onRate }) 
   
   return (
     <div class="card shadow-sm h-100">
-      {/* Header avec l'image et badge "prêté" */}
+      {/* Header with cover image and "lent" badge */}
       <div class="position-relative" onClick={() => onClick(album)}>
         <div class="ratio ratio-1x1 bg-transparent d-flex align-items-center justify-content-center">
           {album.cover_url ? (

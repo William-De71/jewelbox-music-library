@@ -263,7 +263,7 @@ export function Dashboard({ navigate }) {
                         </div>
                       </div>
 
-                      {/* Colonne 3 : Proposition d'écoute */}
+                      {/* Column 3: Listening suggestion */}
                       <div class="col-12 col-md-4">
                         <div class="card h-100">
                           <div class="card-header d-flex justify-content-between align-items-center">

@@ -1,4 +1,4 @@
-// Placeholder SVG partagé pour éviter la duplication
+// Shared placeholder SVG to avoid duplication
 export function getPlaceholderSVG() {
   return `
     <svg class="text-muted opacity-50" width="20" height="20" fill="currentColor" viewBox="0 0 24 24">

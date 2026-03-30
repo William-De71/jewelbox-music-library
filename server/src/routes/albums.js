@@ -118,7 +118,7 @@ export async function albumRoutes(fastify) {
       console.log(`[CreateAlbum] No external cover URL detected: ${albumData.cover_url}`);
     }
     
-    // Solution 3: Supprimer l'EAN s'il est vide pour éviter les conflits UNIQUE
+    // Strip empty EAN to avoid UNIQUE constraint conflicts
     if (!albumData.ean || albumData.ean.trim() === '') {
       delete albumData.ean;
     }

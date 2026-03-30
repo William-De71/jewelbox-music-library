@@ -159,7 +159,7 @@ export function Lend({ navigate }) {
               </div>
               <div class="card-body">
 
-                {/* ── Prêter un album ──────────────────────────────────────── */}
+                {/* ── Lend an album ────────────────────────────────────────── */}
                 <div class="card mb-4">
                   <div class="card-header">
                     <h3 class="card-title fs-5 mb-0">
@@ -259,7 +259,7 @@ export function Lend({ navigate }) {
                   </div>
                 </div>
 
-                {/* ── Liste des prêts en cours ──────────────────────────────── */}
+                {/* ── Active loans list ──────────────────────────────────────── */}
                 {loading ? (
                   <div class="text-center py-5">
                     <div class="spinner-border" role="status" />

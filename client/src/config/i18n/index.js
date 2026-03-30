@@ -1,30 +1,30 @@
 import { createContext } from 'preact';
 import { useState, useEffect, useContext } from 'preact/hooks';
 
-// Import des traductions
+// Import translations
 import fr from './fr.json';
 // import en from './en.json'; 
 
-// Langues disponibles
+// Available locales
 const translations = {
   fr,
   // en,
 };
 
-// Langue par défaut
+// Default locale
 const DEFAULT_LOCALE = 'fr';
 
-// Créer le contexte
+// Create the context
 const I18nContext = createContext(null);
 
-// Provider pour le contexte
+// Context provider
 export function I18nProvider({ children }) {
   const [currentLocale, setCurrentLocale] = useState(() => {
     const saved = localStorage.getItem('jewelbox-locale');
     return (saved && translations[saved]) ? saved : DEFAULT_LOCALE;
   });
 
-  // Changer de langue
+  // Change locale
   const changeLocale = (newLocale) => {
     if (translations[newLocale]) {
       setCurrentLocale(newLocale);
@@ -32,7 +32,7 @@ export function I18nProvider({ children }) {
     }
   };
 
-  // Fonction de traduction
+  // Translation function
   const t = (key, params = {}) => {
     const keys = key.split('.');
     let value = translations[currentLocale];
@@ -41,13 +41,13 @@ export function I18nProvider({ children }) {
       if (value && typeof value === 'object' && k in value) {
         value = value[k];
       } else {
-        // Fallback vers le français si la clé n'existe pas
+        // Fall back to French if the key does not exist
         value = translations.fr;
         for (const fallbackKey of keys) {
           if (value && typeof value === 'object' && fallbackKey in value) {
             value = value[fallbackKey];
           } else {
-            return key; // Retourner la clé si rien trouvé
+            return key; // Return the key if nothing found
           }
         }
         break;
@@ -58,7 +58,7 @@ export function I18nProvider({ children }) {
       return key;
     }
 
-    // Remplacer les paramètres {param} dans la chaîne
+    // Replace {param} placeholders in the string
     return value.replace(/\{(\w+)\}/g, (match, param) => params[param] || match);
   };
 
@@ -72,7 +72,7 @@ export function I18nProvider({ children }) {
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
 }
 
-// Hook pour utiliser le contexte
+// Hook to consume the i18n context
 export function useI18n() {
   const context = useContext(I18nContext);
   if (!context) {
