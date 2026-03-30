@@ -147,9 +147,22 @@ export async function albumRoutes(fastify) {
 
   // PATCH /api/albums/:id
   fastify.patch('/albums/:id', async (req, reply) => {
-    const album = updateAlbum(Number(req.params.id), req.body);
-    if (!album) return reply.code(404).send({ error: 'Album not found' });
-    return album;
+    try {
+      const data = { ...req.body };
+      // Strip empty EAN to avoid UNIQUE constraint conflicts
+      if ('ean' in data && (!data.ean || String(data.ean).trim() === '')) {
+        delete data.ean;
+      }
+      const album = updateAlbum(Number(req.params.id), data);
+      if (!album) return reply.code(404).send({ error: 'Album not found' });
+      return album;
+    } catch (err) {
+      console.error('[UpdateAlbum] Error:', err);
+      if (err.code === 'SQLITE_CONSTRAINT_UNIQUE') {
+        return reply.code(409).send({ error: 'An album with this EAN already exists in your collection.' });
+      }
+      return reply.code(500).send({ error: err.message });
+    }
   });
 
   // DELETE /api/albums/:id

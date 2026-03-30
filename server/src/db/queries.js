@@ -173,7 +173,11 @@ export function updateAlbum(id, data) {
   };
 
   for (const [key, col] of Object.entries(fieldMap)) {
-    if (key in data) { fields.push(`${col} = ?`); params.push(data[key]); }
+    if (key in data) {
+      fields.push(`${col} = ?`);
+      const val = data[key];
+      params.push(typeof val === 'boolean' ? (val ? 1 : 0) : val);
+    }
   }
   if (artist_id !== undefined) { fields.push('artist_id = ?'); params.push(artist_id); }
   if (label_id !== undefined) { fields.push('label_id = ?'); params.push(label_id); }

@@ -434,6 +434,49 @@ describe('PATCH /albums/:id with tracks', () => {
     expect(res.statusCode).toBe(200);
     expect(res.json().label.name).toBe('Parlophone');
   });
+
+  it('strips empty ean on update (covers EAN stripping branch)', async () => {
+    const res = await app.inject({
+      method: 'PATCH',
+      url: `/albums/${albumId}`,
+      payload: { ean: '' },
+    });
+    expect(res.statusCode).toBe(200);
+    expect(res.json().ean).toBeNull();
+  });
+
+  it('updates is_wanted as boolean true (covers boolean→1 conversion in updateAlbum)', async () => {
+    const res = await app.inject({
+      method: 'PATCH',
+      url: `/albums/${albumId}`,
+      payload: { is_wanted: true },
+    });
+    expect(res.statusCode).toBe(200);
+  });
+
+  it('updates is_wanted as boolean false (covers boolean→0 conversion in updateAlbum)', async () => {
+    const res = await app.inject({
+      method: 'PATCH',
+      url: `/albums/${albumId}`,
+      payload: { is_wanted: false },
+    });
+    expect(res.statusCode).toBe(200);
+  });
+
+  it('returns 409 when updating EAN to an already existing one', async () => {
+    const created = await app.inject({
+      method: 'POST',
+      url: '/albums',
+      payload: { title: 'EAN Conflict Album', artist_name: 'Test Artist', ean: 'EAN-CONFLICT-001' },
+    });
+    expect(created.statusCode).toBe(201);
+    const res = await app.inject({
+      method: 'PATCH',
+      url: `/albums/${albumId}`,
+      payload: { ean: 'EAN-CONFLICT-001' },
+    });
+    expect(res.statusCode).toBe(409);
+  });
 });
 
 // ── POST /albums/import ───────────────────────────────────────────────────────
@@ -510,6 +553,16 @@ describe('Error handlers (500 coverage)', () => {
   it('GET /albums/duplicate returns 500 on DB error', async () => {
     getDb.mockReturnValueOnce(brokenDb);
     const res = await app.inject({ method: 'GET', url: '/albums/duplicate?title=Test&artist=Test' });
+    expect(res.statusCode).toBe(500);
+  });
+
+  it('PATCH /albums/:id returns 500 on DB error', async () => {
+    getDb.mockReturnValueOnce(brokenDb);
+    const res = await app.inject({
+      method: 'PATCH',
+      url: `/albums/${albumId}`,
+      payload: { genre: 'Rock' },
+    });
     expect(res.statusCode).toBe(500);
   });
 });

@@ -101,7 +101,17 @@ docker run --rm -v jewelbox_data:/data -v $(pwd):/backup \
 ## 🧪 Tests
 
 ```bash
-cd server && node ../node_modules/vitest/vitest.mjs run
+# Run all tests (server + client)
+npm run test
+
+# Server tests only
+npm run test --workspace=server
+
+# Client tests only
+npm run test --workspace=client
+
+# Server tests with coverage report (≥ 98% statements, ≥ 85% branches)
+npm run test:coverage --workspace=server
 ```
 
 ---

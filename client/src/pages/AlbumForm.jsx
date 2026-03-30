@@ -187,7 +187,7 @@ export function AlbumForm({ navigate, albumId, params = {} }) {
       }
       navigate(fromWantList ? 'wantlist' : 'collections');
     } catch (e) {
-      setError(e.message);
+      showToast(e.message, 'danger');
     } finally {
       setSaving(false);
     }
