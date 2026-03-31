@@ -1,10 +1,22 @@
+<!-- markdownlint-disable MD033 MD041-->
 <div align="center">
-  <img src="client/public/icons/icon-192.png" width="80" alt="JewelBox" />
+  <img src="client/public/icons/icon-192.png" width="80" alt="JewelBox icon" />
 
-  # JewelBox Music Library
+# JewelBox Music Library
 
-  *Parce que vos albums méritent mieux qu'une simple étagère.*
+_Parce que vos albums méritent mieux qu'une simple étagère._
 </div>
+
+<div align="center">
+  <img src="client/public/jewelbox-app.png" width="80%" alt="JewelBox Application" />
+</div>
+<!-- markdownlint-enable MD033 MD041 -->
+
+- 🚀 [Démarrage rapide (développement)](#-démarrage-rapide-développement)
+- 🐳 [Deploy with Docker](#-docker)
+- 🧪 [Tests](#-tests)
+- 🌐 [API REST](#-api-rest)
+- 📄 [Licence](#-licence)
 
 ## 🚀 Démarrage rapide (développement)
 
@@ -16,7 +28,7 @@
 ### Installation
 
 ```bash
-git clone https://github.com/ton-user/jewelbox-music-library.git
+git clone https://github.com/William-De71/jewelbox-music-library.git
 cd JewelBox-Music-Library
 npm install
 ```
@@ -41,7 +53,7 @@ cd docker
 docker compose up -d
 ```
 
-L'application est accessible sur [http://localhost:3001](http://localhost:3001).  
+L'application est accessible sur [http://localhost:3001](http://localhost:3001).
 Les bases de données et les pochettes sont persistées dans le volume `jewelbox_data`.
 
 ### Sans Docker Compose (Docker seul)
