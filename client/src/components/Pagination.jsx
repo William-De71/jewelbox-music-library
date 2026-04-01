@@ -1,5 +1,5 @@
 import { ChevronLeft, ChevronRight } from 'lucide-preact';
-import { useI18n } from '../config/i18n/index.js';
+import { useI18n } from '../config/i18n/index.jsx';
 
 export function Pagination({ page, limit, total, onChange }) {
   const { t } = useI18n();

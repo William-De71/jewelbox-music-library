@@ -4,7 +4,7 @@ import { api } from '../api/client.js';
 import { AlbumCard } from '../components/AlbumCard.jsx';
 import { AlbumRow } from '../components/AlbumRow.jsx';
 import { Pagination } from '../components/Pagination.jsx';
-import { useI18n } from '../config/i18n/index.js';
+import { useI18n } from '../config/i18n/index.jsx';
 import { Search, Grid, List, X, Plus, Heart, Database, Music, CheckCheck } from 'lucide-preact';
 
 const DEFAULT_LIMIT = 24;

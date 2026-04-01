@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'preact/hooks';
 import { databasesApi } from '../api/databases.js';
-import { useI18n } from '../config/i18n/index.js';
+import { useI18n } from '../config/i18n/index.jsx';
 import { api } from '../api/client.js';
 import { Database, Plus, Play, Trash2, Edit, Check, X, Settings as SettingsIcon, Disc, Key, ExternalLink, ShieldCheck, ShieldOff, Download, Upload, FileText } from 'lucide-preact';
 

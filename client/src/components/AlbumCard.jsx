@@ -1,5 +1,5 @@
 import { StarRating } from './StarRating.jsx';
-import { useI18n } from '../config/i18n/index.js';
+import { useI18n } from '../config/i18n/index.jsx';
 import { Share } from 'lucide-preact';
 import { getPlaceholderHTML } from '../utils/placeholder.js';
 

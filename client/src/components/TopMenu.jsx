@@ -1,5 +1,5 @@
 import { Home, Disc, Heart, ArrowRightLeft, BarChart3, Settings } from 'lucide-preact';
-import { useI18n } from '../config/i18n/index.js';
+import { useI18n } from '../config/i18n/index.jsx';
 import '../styles/topmenu.css';
 
 export function TopMenu({ currentPage, navigate }) {

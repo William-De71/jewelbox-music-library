@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'preact/hooks';
 import { albumsApi } from '../api/albums.js';
-import { useI18n } from '../config/i18n/index.js';
+import { useI18n } from '../config/i18n/index.jsx';
 import { Home, Search, Music2, Shuffle, Clock, BarChart3, Settings, Plus, Heart, PenLine, Disc, User } from 'lucide-preact';
 
 function daysAgo(dateStr) {

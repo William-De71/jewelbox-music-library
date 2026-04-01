@@ -1,4 +1,4 @@
-import { useI18n } from '../config/i18n/index.js';
+import { useI18n } from '../config/i18n/index.jsx';
 
 export function StarRating({ value, onChange, readOnly = false }) {
   const { t } = useI18n();

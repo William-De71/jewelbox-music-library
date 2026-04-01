@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'preact/hooks';
 import { api } from '../api/client.js';
-import { useI18n } from '../config/i18n/index.js';
+import { useI18n } from '../config/i18n/index.jsx';
 import { BarChart3, Music2, Heart, Clock, User, Star, ArrowRightLeft } from 'lucide-preact';
 
 const PALETTE = [

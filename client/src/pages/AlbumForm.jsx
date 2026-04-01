@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'preact/hooks';
 import { api } from '../api/client.js';
 import { StarRating } from '../components/StarRating.jsx';
 import { Plus, ArrowLeft, Pencil, AlertCircle, Search, ChevronRight, Upload, Info, ListOrdered, X, Music2, Save, ImageIcon, CopyX } from 'lucide-preact';
-import { useI18n } from '../config/i18n/index.js';
+import { useI18n } from '../config/i18n/index.jsx';
 
 function Combobox({ value, onChange, options = [], placeholder, required, id }) {
   const [open, setOpen] = useState(false);

@@ -1,4 +1,4 @@
-import { useI18n } from '../config/i18n/index.js';
+import { useI18n } from '../config/i18n/index.jsx';
 import { Sun, Moon } from 'lucide-preact';
 
 export function Header({ onThemeToggle, isDark }) {

@@ -1,5 +1,5 @@
 import { Globe } from 'lucide-preact';
-import { useI18n } from '../config/i18n/index.js';
+import { useI18n } from '../config/i18n/index.jsx';
 
 export function LanguageSelector({ className = '' }) {
   const { currentLocale, changeLocale, availableLocales } = useI18n();

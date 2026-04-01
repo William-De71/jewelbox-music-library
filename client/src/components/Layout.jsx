@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'preact/hooks';
-import { useI18n } from '../config/i18n/index.js';
+import { useI18n } from '../config/i18n/index.jsx';
 import { Header } from './Header.jsx';
 import { TopMenu } from './TopMenu.jsx';
 

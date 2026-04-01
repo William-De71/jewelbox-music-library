@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/preact';
 import { Pagination } from '../components/Pagination.jsx';
-import { I18nProvider } from '../config/i18n/index.js';
+import { I18nProvider } from '../config/i18n/index.jsx';
 
 const wrap = (ui) => render(<I18nProvider>{ui}</I18nProvider>);
 

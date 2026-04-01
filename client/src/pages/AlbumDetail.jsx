@@ -2,7 +2,7 @@ import { useState, useEffect } from 'preact/hooks';
 import { api } from '../api/client.js';
 import { StarRating } from '../components/StarRating.jsx';
 import { ArrowLeft, UserCheck, UserPlus, User, Pencil, Trash2, Disc, StickyNote, ListOrdered, Clock, Music2, AlertCircle, Info, Heart, History } from 'lucide-preact';
-import { useI18n } from '../config/i18n/index.js';
+import { useI18n } from '../config/i18n/index.jsx';
 import '../styles/AlbumDetail.css';
 
 function fmt(dateStr) {
