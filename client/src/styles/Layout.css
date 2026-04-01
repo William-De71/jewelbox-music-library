@@ -1,0 +1,48 @@
+/* Logo */
+.logo-image {
+  height: 80px;
+  width: auto;
+  object-fit: contain;
+}
+
+.navbar-brand .brand-subtitle {
+  font-size: 0.65rem;
+  line-height: 1;
+}
+
+.layout-horizontal {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.main-content {
+  flex: 1;
+  padding: 1.5rem 0;
+  background: var(--jewelbox-bg-dark);
+}
+
+.main-content .container-fluid {
+  max-width: 1400px;
+}
+
+/* Language selector */
+.language-selector {
+  margin-top: 1rem;
+}
+
+.language-selector .w-100 {
+  width: 100%;
+}
+
+/* Footer */
+.footer {
+  background: var(--jewelbox-bg-darker);
+  border-top: 1px solid rgba(148, 163, 184, 0.1);
+  margin-top: auto;
+}
+
+.footer .copyright {
+  font-size: 0.875rem;
+  color: var(--tblr-muted);
+}

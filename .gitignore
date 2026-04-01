@@ -1,9 +1,37 @@
+# Dépendances
 node_modules/
-dist/
-data/
+
+# Build frontend
+client/dist/
+
+# Données utilisateur (bases SQLite + pochettes uploadées)
+server/data/
+
+# Variables d'environnement
 .env
+server/.env
+
+# Fichiers SQLite
 *.db
 *.db-wal
 *.db-shm
+
+# Logs
+*.log
+npm-debug.log*
+
+# Système
 .DS_Store
+Thumbs.db
+
+# Éditeurs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Tests
 coverage/
+
+# AI assistant context file
+AGENTS.md

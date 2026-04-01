@@ -1,0 +1,63 @@
+/* Responsive grid layout */
+.album-grid-item {
+  flex: 0 0 auto !important;
+}
+
+/* Mobile: 1 card per row */
+@media (max-width: 575px) {
+  .album-grid-item {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
+
+/* Small tablets: 2 cards per row */
+@media (min-width: 576px) and (max-width: 767px) {
+  .album-grid-item {
+    width: 50% !important;
+    max-width: 50% !important;
+  }
+}
+
+/* Tablets: 3 cards per row */
+@media (min-width: 768px) and (max-width: 991px) {
+  .album-grid-item {
+    width: 33.333% !important;
+    max-width: 33.333% !important;
+  }
+}
+
+/* Small desktop: 4 cards per row */
+@media (min-width: 992px) and (max-width: 1199px) {
+  .album-grid-item {
+    width: 25% !important;
+    max-width: 25% !important;
+  }
+}
+
+/* Large desktop: 5 cards per row */
+@media (min-width: 1200px) {
+  .album-grid-item {
+    width: 20% !important;
+    max-width: 20% !important;
+  }
+}
+
+/* Extra large desktop: 6 cards per row */
+@media (min-width: 1400px) {
+  .album-grid-item {
+    width: 16.666% !important;
+    max-width: 16.666% !important;
+  }
+}
+
+/* Modal backdrop */
+.modal-backdrop-dark {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+/* Toast notifications */
+.toast-notification {
+  position: fixed;
+  z-index: 9999;
+}

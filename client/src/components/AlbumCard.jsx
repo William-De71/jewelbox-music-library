@@ -1,55 +1,63 @@
-import { CoverImage } from './CoverImage.jsx';
 import { StarRating } from './StarRating.jsx';
+import { useI18n } from '../config/i18n/index.jsx';
+import { Share } from 'lucide-preact';
+import { getPlaceholderHTML } from '../utils/placeholder.js';
 
-export function AlbumCard({ album, onClick, onEdit, onDelete, onLend }) {
+
+export function AlbumCard({ album, onClick, onEdit, onDelete, onLend, onRate }) {
+  const { t } = useI18n();
+  
   return (
-    <div class="card card-sm h-100 cursor-pointer" style="transition:transform .15s,box-shadow .15s"
-      onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,.4)'; }}
-      onMouseLeave={(e) => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = ''; }}
-    >
-      <div onClick={() => onClick(album)} style="cursor:pointer">
-        <div class="position-relative" style="aspect-ratio:1;overflow:hidden;border-radius:.375rem .375rem 0 0">
+    <div class="card shadow-sm h-100">
+      {/* Header with cover image and "lent" badge */}
+      <div class="position-relative" onClick={() => onClick(album)}>
+        <div class="ratio ratio-1x1 bg-transparent d-flex align-items-center justify-content-center">
           {album.cover_url ? (
-            <img src={album.cover_url} alt={album.title} loading="lazy"
-              class="w-100 h-100 object-fit-cover"
-              onError={(e) => { e.currentTarget.parentElement.innerHTML = `<div class="w-100 h-100 bg-dark d-flex align-items-center justify-content-center"><i class="ti ti-disc text-muted" style="font-size:3rem"></i></div>`; }} />
+            <>
+              <img 
+                src={album.cover_url} 
+                alt={album.title}
+                class="img-fluid w-100 h-100 object-fit-cover p-3"
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                  // Show placeholder by replacing the img
+                  const placeholder = document.createElement('div');
+                  placeholder.className = 'd-flex align-items-center justify-content-center w-100 h-100';
+                  placeholder.innerHTML = getPlaceholderHTML();
+                  e.target.parentNode.replaceChild(placeholder, e.target);
+                }}
+              />
+            </>
           ) : (
-            <div class="w-100 h-100 bg-dark d-flex align-items-center justify-content-center">
-              <i class="ti ti-disc text-muted" style="font-size:3rem"></i>
+            <div class="d-flex align-items-center justify-content-center w-100 h-100" 
+                dangerouslySetInnerHTML={{__html: getPlaceholderHTML()}}>
             </div>
           )}
-          {album.is_lent && (
-            <span class="badge bg-warning text-dark position-absolute top-0 end-0 m-1">
-              <i class="ti ti-user-share me-1"></i>Prêté
-            </span>
-          )}
-        </div>
-        <div class="card-body pb-1">
-          <div class="fw-semibold text-truncate" title={album.title}>{album.title}</div>
-          <div class="text-muted small text-truncate">{album.artist?.name}</div>
-          <div class="d-flex align-items-center justify-content-between mt-1">
-            <StarRating value={album.rating} readOnly />
-            <span class="text-muted small">{album.year || '—'}</span>
-          </div>
-          {album.genre && (
-            <span class="badge bg-blue-lt mt-1" style="font-size:.65rem">{album.genre}</span>
-          )}
-        </div>
+          
       </div>
-      <div class="card-footer pt-0 border-0 d-flex gap-1 justify-content-end">
-        <button class="btn btn-sm btn-ghost-secondary p-1" title="Prêter / Récupérer"
-          onClick={(e) => { e.stopPropagation(); onLend(album); }}>
-          <i class={`ti ${album.is_lent ? 'ti-user-check' : 'ti-user-share'}`}></i>
-        </button>
-        <button class="btn btn-sm btn-ghost-primary p-1" title="Modifier"
-          onClick={(e) => { e.stopPropagation(); onEdit(album); }}>
-          <i class="ti ti-pencil"></i>
-        </button>
-        <button class="btn btn-sm btn-ghost-danger p-1" title="Supprimer"
-          onClick={(e) => { e.stopPropagation(); onDelete(album); }}>
-          <i class="ti ti-trash"></i>
-        </button>
+
+        {album.is_lent && (
+          <span class="badge bg-warning text-dark position-absolute top-0 end-0 m-2">
+            <Share size={16} class="me-1" />
+            {t('card.lentBadge')}{album.lent_to ? ` ${t('card.lentTo', { name: album.lent_to })}` : ''}
+          </span>
+        )}
       </div>
+
+      {/* Corps avec Rating */}
+      <div class="card-body p-3" onClick={(e) => e.stopPropagation()}>
+        <StarRating value={album.rating} onChange={(rating) => onRate && onRate(album, rating)} />
+      </div>
+      
+      {/* Footer avec informations albums */}
+      <div class="card-footer bg-transparent border-0 p-3 pt-0" onClick={() => onClick(album)}>
+        <h5 class="card-title mb-1 text-truncate">{album.title}</h5>
+        <p class="card-text text-muted small mb-2 text-truncate">
+          {album.artist?.name || album.artist}
+        </p>
+      </div>
+
+
     </div>
   );
 }

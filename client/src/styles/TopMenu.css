@@ -1,0 +1,18 @@
+/* TopMenu styles - essentiel uniquement */
+.navbar {
+  background: var(--jewelbox-bg-darker);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+  padding: 0.25rem 0;
+}
+
+/* Theme-aware navbar */
+[data-bs-theme="light"] .navbar {
+  background: #ffffff;
+  border-bottom-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Custom active state for nav-link */
+.nav-link.active {
+  color: var(--tblr-primary) !important;
+  font-weight: 600;
+}

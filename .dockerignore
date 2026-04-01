@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+client/node_modules/
+server/node_modules/
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+
+# Local data (databases, uploads, covers)
+server/data/
+
+# Dev / build artifacts
+client/dist/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Editor / OS
+.DS_Store
+.vscode/
+*.swp

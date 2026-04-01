@@ -1,352 +1,384 @@
-import { useState, useEffect, useCallback, useRef } from 'preact/hooks';
-import { api } from '../api/client.js';
-import { AlbumCard } from '../components/AlbumCard.jsx';
-import { AlbumRow } from '../components/AlbumRow.jsx';
-import { Pagination } from '../components/Pagination.jsx';
+import { useState, useEffect } from 'preact/hooks';
+import { albumsApi } from '../api/albums.js';
+import { useI18n } from '../config/i18n/index.jsx';
+import { Home, Search, Music2, Shuffle, Clock, BarChart3, Settings, Plus, Heart, PenLine, Disc, User } from 'lucide-preact';
 
-const LIMIT = 24;
+function daysAgo(dateStr) {
+  if (!dateStr) return null;
+  const diff = Date.now() - new Date(dateStr).getTime();
+  return Math.max(0, Math.floor(diff / 86400000));
+}
 
 export function Dashboard({ navigate }) {
-  const [albums, setAlbums] = useState([]);
+  const { t } = useI18n();
+  const [recentAlbums, setRecentAlbums] = useState([]);
+  const [recentWanted, setRecentWanted] = useState([]);
+  const [randomAlbum, setRandomAlbum] = useState(null);
+  const [lentAlbums, setLentAlbums] = useState([]);
   const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
-  const [page, setPage] = useState(1);
-  const [genres, setGenres] = useState([]);
-  const [filters, setFilters] = useState({ genre: '', rating: '', search: '', sort: 'title', order: 'asc' });
-  const [deleteTarget, setDeleteTarget] = useState(null);
-  const [lendTarget, setLendTarget] = useState(null);
-  const [lentTo, setLentTo] = useState('');
-  const [toast, setToast] = useState(null);
-  const searchRef = useRef();
+  const [totalWanted, setTotalWanted] = useState(0);
+  const [activeDb, setActiveDb] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [quickSearch, setQuickSearch] = useState('');
+  const [quickSource, setQuickSource] = useState('musicbrainz');
 
-  const showToast = useCallback((msg, type = 'success') => {
-    setToast({ msg, type });
-    setTimeout(() => setToast(null), 3000);
-  }, []);
-
-  const load = useCallback(async (pg = page, f = filters) => {
-    setLoading(true);
+  const loadData = async () => {
     try {
-      const result = await api.getAlbums({ page: pg, limit: LIMIT, ...f });
-      setAlbums(result.data);
-      setTotal(result.total);
+      setLoading(true);
+      const dbData = await albumsApi.getActiveDatabase().catch(() => null);
+      const db = dbData?.database;
+      setActiveDb(db);
+      if (!db) return;
+
+      const [recentData, recentWantedData, countData, countWantedData, lentData] = await Promise.all([
+        albumsApi.getAll({ sort: 'created_at', order: 'desc', limit: 5, wanted: 'false' }),
+        albumsApi.getAll({ sort: 'created_at', order: 'desc', limit: 5, wanted: 'true' }),
+        albumsApi.getAll({ limit: 1, wanted: 'false' }),
+        albumsApi.getAll({ limit: 1, wanted: 'true' }),
+        albumsApi.getAll({ lent: 'true', limit: 50 }),
+      ]);
+
+      setRecentAlbums(recentData.data);
+      setRecentWanted(recentWantedData.data);
+      setTotal(countData.pagination.total);
+      setTotalWanted(countWantedData.pagination.total);
+      setLentAlbums(lentData.data);
+
+      if (countData.pagination.total > 0) {
+        const randomPage = Math.floor(Math.random() * countData.pagination.total) + 1;
+        const randomData = await albumsApi.getAll({ limit: 1, page: randomPage, wanted: 'false' });
+        setRandomAlbum(randomData.data[0] || null);
+      }
     } catch (e) {
-      showToast(e.message, 'danger');
+      console.error('Dashboard load error:', e);
     } finally {
       setLoading(false);
     }
-  }, [page, filters, showToast]);
+  };
 
-  useEffect(() => {
-    api.getGenres().then(setGenres).catch(() => {});
-  }, []);
+  useEffect(() => { loadData(); }, []);
 
-  useEffect(() => {
-    load(page, filters);
-  }, [page, filters]);
-
-  const setFilter = (key, value) => {
-    const next = { ...filters, [key]: value };
-    setFilters(next);
-    setPage(1);
+  const shuffleRandom = async () => {
+    if (total === 0) return;
+    try {
+      const randomPage = Math.floor(Math.random() * total) + 1;
+      const res = await albumsApi.getAll({ limit: 1, page: randomPage });
+      setRandomAlbum(res.data[0] || null);
+    } catch (e) {
+      console.error('Shuffle error:', e);
+    }
   };
 
   const handleSearch = (e) => {
-    if (e.key === 'Enter' || e.type === 'click') {
-      setFilter('search', searchRef.current.value);
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate('collections', { search: searchQuery.trim() });
+    } else {
+      navigate('collections');
     }
   };
-
-  const handleDelete = async () => {
-    if (!deleteTarget) return;
-    try {
-      await api.deleteAlbum(deleteTarget.id);
-      showToast(`"${deleteTarget.title}" supprimé`);
-      setDeleteTarget(null);
-      load(page, filters);
-    } catch (e) {
-      showToast(e.message, 'danger');
-    }
-  };
-
-  const handleLend = async () => {
-    if (!lendTarget) return;
-    try {
-      const is_lent = !lendTarget.is_lent;
-      await api.lendAlbum(lendTarget.id, is_lent, lentTo);
-      showToast(is_lent ? `"${lendTarget.title}" marqué comme prêté` : `"${lendTarget.title}" récupéré`);
-      setLendTarget(null);
-      setLentTo('');
-      load(page, filters);
-    } catch (e) {
-      showToast(e.message, 'danger');
-    }
-  };
-
-  const stats = { total, lent: albums.filter((a) => a.is_lent).length };
 
   return (
-    <>
-      {/* Toast */}
-      {toast && (
-        <div class={`alert alert-${toast.type} alert-dismissible position-fixed top-0 end-0 m-3`}
-          style="z-index:9999;min-width:280px">
-          {toast.msg}
-          <button type="button" class="btn-close" onClick={() => setToast(null)}></button>
-        </div>
-      )}
+    <div class="page-container">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-header">
+                <h2 class="card-title">
+                  <Home size={24} class="me-2 text-primary" />
+                  {t('common.home')}
+                </h2>
+              </div>
+              <div class="card-body">
 
-      {/* Header */}
-      <div class="page-header d-print-none">
-        <div class="row align-items-center">
-          <div class="col">
-            <h2 class="page-title">
-              <i class="ti ti-library me-2 text-primary"></i>
-              Ma Bibliothèque
-            </h2>
-            <div class="text-muted mt-1">
-              <span class="badge bg-blue-lt me-1">{total} album{total !== 1 ? 's' : ''}</span>
-              {stats.lent > 0 && <span class="badge bg-warning-lt">{stats.lent} prêté{stats.lent !== 1 ? 's' : ''}</span>}
+                {/* Search bar */}
+                <form onSubmit={handleSearch} class="mb-4">
+                  <div class="input-group">
+                    <span class="input-group-text bg-transparent">
+                      <Search size={20} class="text-muted" />
+                    </span>
+                    <input
+                      type="text"
+                      class="form-control"
+                      placeholder={t('home.searchPlaceholder')}
+                      value={searchQuery}
+                      onInput={(e) => setSearchQuery(e.target.value)}
+                    />
+                    <button class="btn btn-primary" type="submit">
+                      {t('common.search')}
+                    </button>
+                  </div>
+                </form>
+
+                {/* Quick add */}
+                {activeDb && (
+                  <div class="card mb-4">
+                    <div class="card-header">
+                      <h3 class="card-title fs-5 mb-0">
+                        <Plus size={17} class="me-2 text-success" />
+                        {t('home.quickAdd')}
+                      </h3>
+                    </div>
+                    <div class="card-body">
+                      <div class="row g-2 align-items-end">
+                        <div class="col-md-3">
+                          <select
+                            class="form-select"
+                            value={quickSource}
+                            onChange={(e) => setQuickSource(e.target.value)}
+                          >
+                            <option value="musicbrainz">{t('albumForm.musicbrainz')}</option>
+                            <option value="discogs">{t('albumForm.discogs')}</option>
+                          </select>
+                        </div>
+                        <div class="col-md-5">
+                          <input
+                            type="text"
+                            class="form-control"
+                            placeholder={t('home.quickAddPlaceholder')}
+                            value={quickSearch}
+                            onInput={(e) => setQuickSearch(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && quickSearch.trim() && navigate('add', { initialSearch: quickSearch.trim(), initialSource: quickSource })}
+                          />
+                        </div>
+                        <div class="col-md-4 d-flex gap-2">
+                          <button
+                            class="btn btn-success flex-grow-1"
+                            disabled={!quickSearch.trim()}
+                            onClick={() => navigate('add', { initialSearch: quickSearch.trim(), initialSource: quickSource })}
+                          >
+                            <Search size={15} class="me-1" />{t('home.quickAddSearch')}
+                          </button>
+                        </div>
+                      </div>
+                      <div class="d-flex gap-2 mt-2">
+                        <button class="btn btn-outline-primary btn-sm" onClick={() => navigate('add', {})}>
+                          <PenLine size={14} class="me-1" />{t('home.addManually')}
+                        </button>
+                        <button class="btn btn-outline-danger btn-sm" onClick={() => navigate('add', { fromWantList: true })}>
+                          <Heart size={14} class="me-1" />{t('home.addToWishlist')}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {!activeDb ? (
+                  <div class="text-center py-5">
+                    <Music2 size={48} class="text-muted mb-3" />
+                    <p class="text-muted mb-3">{t('home.noActiveDatabase')}</p>
+                    <button class="btn btn-primary" onClick={() => navigate('settings')}>
+                      <Settings size={16} class="me-2" />
+                      {t('home.goToSettings')}
+                    </button>
+                  </div>
+                ) : loading ? (
+                  <div class="text-center py-5">
+                    <div class="spinner-border" role="status">
+                      <span class="visually-hidden">{t('common.loading')}</span>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    {/* Recent + Random — 3 colonnes */}
+                    <div class="row mb-4 g-3">
+
+                      {/* Colonne 1 : Collection */}
+                      <div class="col-12 col-md-4">
+                        <div class="card h-100">
+                          <div class="card-header">
+                            <h3 class="card-title fs-5 mb-0">
+                              <Clock size={16} class="me-2 text-primary" />
+                              {t('home.recentOwned')}
+                            </h3>
+                          </div>
+                          <div class="list-group list-group-flush">
+                            {recentAlbums.length === 0 ? (
+                              <div class="list-group-item text-muted text-center py-3 small">
+                                {t('home.noAlbums')}
+                              </div>
+                            ) : recentAlbums.map(album => (
+                              <div
+                                key={album.id}
+                                class="list-group-item list-group-item-action d-flex align-items-center gap-3"
+                                style={{ cursor: 'pointer' }}
+                                onClick={() => navigate('detail', { id: album.id })}
+                              >
+                                {album.cover_url ? (
+                                  <img src={album.cover_url} alt="" style={{ width: 40, height: 40, objectFit: 'cover', borderRadius: 4, flexShrink: 0 }} />
+                                ) : (
+                                  <div class="d-flex align-items-center justify-content-center bg-secondary-lt rounded" style={{ width: 40, height: 40, flexShrink: 0 }}>
+                                    <Music2 size={18} class="text-muted" />
+                                  </div>
+                                )}
+                                <div class="flex-grow-1 overflow-hidden">
+                                  <div class="fw-semibold text-truncate small">{album.title}</div>
+                                  <div class="text-muted" style={{ fontSize: '0.75rem' }}>{album.artist?.name}</div>
+                                </div>
+                                {album.year && <span class="text-muted flex-shrink-0" style={{ fontSize: '0.75rem' }}>{album.year}</span>}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Colonne 2 : Liste de souhaits */}
+                      <div class="col-12 col-md-4">
+                        <div class="card h-100">
+                          <div class="card-header">
+                            <h3 class="card-title fs-5 mb-0">
+                              <Heart size={16} class="me-2 text-danger" />
+                              {t('home.recentWantedSection')}
+                            </h3>
+                          </div>
+                          <div class="list-group list-group-flush">
+                            {recentWanted.length === 0 ? (
+                              <div class="list-group-item text-muted text-center py-3 small">
+                                {t('home.noAlbums')}
+                              </div>
+                            ) : recentWanted.map(album => (
+                              <div
+                                key={album.id}
+                                class="list-group-item list-group-item-action d-flex align-items-center gap-3"
+                                style={{ cursor: 'pointer' }}
+                                onClick={() => navigate('detail', { id: album.id })}
+                              >
+                                {album.cover_url ? (
+                                  <img src={album.cover_url} alt="" style={{ width: 40, height: 40, objectFit: 'cover', borderRadius: 4, flexShrink: 0 }} />
+                                ) : (
+                                  <div class="d-flex align-items-center justify-content-center bg-secondary-lt rounded" style={{ width: 40, height: 40, flexShrink: 0 }}>
+                                    <Music2 size={18} class="text-muted" />
+                                  </div>
+                                )}
+                                <div class="flex-grow-1 overflow-hidden">
+                                  <div class="fw-semibold text-truncate small">{album.title}</div>
+                                  <div class="text-muted" style={{ fontSize: '0.75rem' }}>{album.artist?.name}</div>
+                                </div>
+                                {album.year && <span class="text-muted flex-shrink-0" style={{ fontSize: '0.75rem' }}>{album.year}</span>}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Column 3: Listening suggestion */}
+                      <div class="col-12 col-md-4">
+                        <div class="card h-100">
+                          <div class="card-header d-flex justify-content-between align-items-center">
+                            <h3 class="card-title fs-5 mb-0">
+                              <Shuffle size={16} class="me-2 text-warning" />
+                              {t('home.randomAlbum')}
+                            </h3>
+                            <button
+                              class="btn btn-sm btn-outline-secondary"
+                              onClick={shuffleRandom}
+                              title={t('home.shuffle')}
+                            >
+                              <Shuffle size={13} />
+                            </button>
+                          </div>
+                          <div class="card-body d-flex flex-column align-items-center justify-content-center text-center gap-2">
+                            {randomAlbum ? (
+                              <div
+                                class="d-flex flex-column align-items-center gap-2"
+                                style={{ cursor: 'pointer' }}
+                                onClick={() => navigate('detail', { id: randomAlbum.id })}
+                              >
+                                {randomAlbum.cover_url ? (
+                                  <img
+                                    src={randomAlbum.cover_url}
+                                    alt=""
+                                    style={{ width: 180, height: 180, objectFit: 'cover', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.25)' }}
+                                  />
+                                ) : (
+                                  <div
+                                    class="d-flex align-items-center justify-content-center bg-secondary-lt rounded"
+                                    style={{ width: 180, height: 180 }}
+                                  >
+                                    <Music2 size={56} class="text-muted" />
+                                  </div>
+                                )}
+                                <div>
+                                  <div class="fw-bold small">{randomAlbum.title}</div>
+                                  <div class="text-muted small">{randomAlbum.artist?.name}</div>
+                                  {randomAlbum.year && <div class="text-muted" style={{ fontSize: '0.75rem' }}>{randomAlbum.year}</div>}
+                                </div>
+                              </div>
+                            ) : (
+                              <p class="text-muted small">{t('home.noAlbums')}</p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Lent albums */}
+                    {lentAlbums.length > 0 && (
+                      <div class="card mb-4">
+                        <div class="card-header">
+                          <h3 class="card-title fs-5 mb-0">
+                            📤 {t('home.currentlyLent')}
+                          </h3>
+                        </div>
+                        <div class="list-group list-group-flush">
+                          {lentAlbums.map(album => (
+                            <div
+                              key={album.id}
+                              class="list-group-item list-group-item-action d-flex align-items-center gap-3"
+                              style={{ cursor: 'pointer' }}
+                              onClick={() => navigate('detail', { id: album.id })}
+                            >
+                              {album.cover_url
+                                ? <img src={album.cover_url} alt=""
+                                    style={{ width: 40, height: 40, objectFit: 'cover', borderRadius: 4, flexShrink: 0 }} />
+                                : <div class="bg-secondary-lt rounded d-flex align-items-center justify-content-center flex-shrink-0"
+                                    style={{ width: 40, height: 40 }}>
+                                    <Disc size={18} class="text-muted" />
+                                  </div>
+                              }
+                              <div class="flex-grow-1 overflow-hidden">
+                                <strong class="text-truncate d-block">{album.title}</strong>
+                                <span class="text-muted small">{album.artist?.name}</span>
+                              </div>
+                              <div class="flex-shrink-0 text-end">
+                                <div class="badge bg-warning-lt text-warning">
+                                  <User size={11} class="me-1" />{album.lent_to}
+                                </div>
+                                {album.lent_at && (
+                                  <div class="text-muted mt-1" style={{ fontSize: '0.7rem' }}>
+                                    <Clock size={10} class="me-1" />{daysAgo(album.lent_at)} {t('lend.days')}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Totals */}
+                    <div class="d-flex justify-content-center gap-4 text-muted small pt-2">
+                      <span>
+                        <BarChart3 size={15} class="me-1" />
+                        <strong>{total}</strong> {t('home.albumsTotal')}
+                      </span>
+                      {totalWanted > 0 && (
+                        <span>
+                          <Heart size={14} class="me-1 text-danger" />
+                          <strong>{totalWanted}</strong> {t('home.wantedTotal')}
+                        </span>
+                      )}
+                    </div>
+                  </>
+                )}
+
+              </div>
             </div>
-          </div>
-          <div class="col-auto ms-auto">
-            <button class="btn btn-primary" onClick={() => navigate('add')}>
-              <i class="ti ti-plus me-1"></i>Ajouter un CD
-            </button>
           </div>
         </div>
       </div>
-
-      {/* Filters bar */}
-      <div class="card mb-3">
-        <div class="card-body py-2">
-          <div class="row g-2 align-items-center">
-            {/* Search */}
-            <div class="col-12 col-md-4">
-              <div class="input-group">
-                <input ref={searchRef} type="text" class="form-control" placeholder="Rechercher titre, artiste…"
-                  defaultValue={filters.search}
-                  onKeyDown={handleSearch}
-                />
-                <button class="btn btn-outline-secondary" type="button" onClick={handleSearch}>
-                  <i class="ti ti-search"></i>
-                </button>
-                {filters.search && (
-                  <button class="btn btn-outline-danger" type="button" onClick={() => {
-                    searchRef.current.value = '';
-                    setFilter('search', '');
-                  }}>
-                    <i class="ti ti-x"></i>
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* Genre filter */}
-            <div class="col-6 col-md-2">
-              <select class="form-select" value={filters.genre} onChange={(e) => setFilter('genre', e.target.value)}>
-                <option value="">Tous les genres</option>
-                {genres.map((g) => <option key={g} value={g}>{g}</option>)}
-              </select>
-            </div>
-
-            {/* Rating filter */}
-            <div class="col-6 col-md-2">
-              <select class="form-select" value={filters.rating} onChange={(e) => setFilter('rating', e.target.value)}>
-                <option value="">Toutes les notes</option>
-                {[5, 4, 3, 2, 1].map((r) => (
-                  <option key={r} value={r}>{'★'.repeat(r)}{'☆'.repeat(5 - r)}</option>
-                ))}
-              </select>
-            </div>
-
-            {/* Sort */}
-            <div class="col-6 col-md-2">
-              <select class="form-select" value={`${filters.sort}_${filters.order}`}
-                onChange={(e) => {
-                  const [sort, order] = e.target.value.split('_');
-                  setFilters((f) => ({ ...f, sort, order }));
-                  setPage(1);
-                }}>
-                <option value="title_asc">Titre A→Z</option>
-                <option value="title_desc">Titre Z→A</option>
-                <option value="artist_asc">Artiste A→Z</option>
-                <option value="artist_desc">Artiste Z→A</option>
-                <option value="year_desc">Année ↓</option>
-                <option value="year_asc">Année ↑</option>
-                <option value="rating_desc">Note ↓</option>
-                <option value="rating_asc">Note ↑</option>
-              </select>
-            </div>
-
-            {/* View toggle */}
-            <div class="col-6 col-md-auto ms-md-auto">
-              <div class="btn-group">
-                <button class={`btn btn-sm ${viewMode === 'grid' ? 'btn-primary' : 'btn-outline-secondary'}`}
-                  onClick={() => setViewMode('grid')} title="Vue grille">
-                  <i class="ti ti-layout-grid"></i>
-                </button>
-                <button class={`btn btn-sm ${viewMode === 'list' ? 'btn-primary' : 'btn-outline-secondary'}`}
-                  onClick={() => setViewMode('list')} title="Vue liste">
-                  <i class="ti ti-list"></i>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Loading */}
-      {loading && (
-        <div class="text-center py-5">
-          <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Chargement…</span>
-          </div>
-        </div>
-      )}
-
-      {/* Empty state */}
-      {!loading && albums.length === 0 && (
-        <div class="empty py-5">
-          <div class="empty-img">
-            <i class="ti ti-disc-off" style="font-size:4rem;color:var(--tblr-muted)"></i>
-          </div>
-          <p class="empty-title">Aucun album trouvé</p>
-          <p class="empty-subtitle text-muted">
-            {filters.search || filters.genre || filters.rating
-              ? 'Essayez de modifier vos filtres.'
-              : 'Commencez par ajouter votre premier CD !'}
-          </p>
-          {!filters.search && !filters.genre && !filters.rating && (
-            <div class="empty-action">
-              <button class="btn btn-primary" onClick={() => navigate('add')}>
-                <i class="ti ti-plus me-1"></i>Ajouter un CD
-              </button>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Grid view */}
-      {!loading && viewMode === 'grid' && albums.length > 0 && (
-        <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 row-cols-xl-6 g-3 mb-3">
-          {albums.map((album) => (
-            <div class="col" key={album.id}>
-              <AlbumCard
-                album={album}
-                onClick={(a) => navigate('detail', { id: a.id })}
-                onEdit={(a) => navigate('edit', { id: a.id })}
-                onDelete={(a) => setDeleteTarget(a)}
-                onLend={(a) => { setLendTarget(a); setLentTo(a.lent_to || ''); }}
-              />
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* List view */}
-      {!loading && viewMode === 'list' && albums.length > 0 && (
-        <div class="card mb-3">
-          <div class="table-responsive">
-            <table class="table table-vcenter table-hover card-table">
-              <thead>
-                <tr>
-                  <th style="width:48px"></th>
-                  <th>Titre</th>
-                  <th>Artiste</th>
-                  <th>Année</th>
-                  <th>Genre</th>
-                  <th>Note</th>
-                  <th>Label</th>
-                  <th style="width:120px">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {albums.map((album) => (
-                  <AlbumRow
-                    key={album.id}
-                    album={album}
-                    onClick={(a) => navigate('detail', { id: a.id })}
-                    onEdit={(a) => navigate('edit', { id: a.id })}
-                    onDelete={(a) => setDeleteTarget(a)}
-                    onLend={(a) => { setLendTarget(a); setLentTo(a.lent_to || ''); }}
-                  />
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
-      {/* Pagination */}
-      {!loading && albums.length > 0 && (
-        <div class="mb-4">
-          <Pagination page={page} limit={LIMIT} total={total} onChange={(p) => setPage(p)} />
-        </div>
-      )}
-
-      {/* Delete Modal */}
-      {deleteTarget && (
-        <div class="modal modal-blur show d-block" style="background:rgba(0,0,0,.5)">
-          <div class="modal-dialog modal-sm modal-dialog-centered">
-            <div class="modal-content">
-              <div class="modal-body">
-                <div class="modal-title mb-1">Supprimer l'album ?</div>
-                <p class="text-muted">
-                  Voulez-vous vraiment supprimer <strong>"{deleteTarget.title}"</strong> ? Cette action est irréversible.
-                </p>
-              </div>
-              <div class="modal-footer">
-                <button class="btn btn-outline-secondary me-auto" onClick={() => setDeleteTarget(null)}>Annuler</button>
-                <button class="btn btn-danger" onClick={handleDelete}>
-                  <i class="ti ti-trash me-1"></i>Supprimer
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Lend Modal */}
-      {lendTarget && (
-        <div class="modal modal-blur show d-block" style="background:rgba(0,0,0,.5)">
-          <div class="modal-dialog modal-sm modal-dialog-centered">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title">
-                  {lendTarget.is_lent ? 'Marquer comme récupéré' : 'Prêter l\'album'}
-                </h5>
-                <button class="btn-close" onClick={() => setLendTarget(null)}></button>
-              </div>
-              <div class="modal-body">
-                <p class="text-muted mb-2">
-                  <strong>"{lendTarget.title}"</strong>
-                  {lendTarget.is_lent
-                    ? ' — Confirmer la récupération ?'
-                    : ' — À qui prêtez-vous cet album ?'}
-                </p>
-                {!lendTarget.is_lent && (
-                  <input
-                    type="text"
-                    class="form-control"
-                    placeholder="Nom de la personne (optionnel)"
-                    value={lentTo}
-                    onInput={(e) => setLentTo(e.target.value)}
-                  />
-                )}
-              </div>
-              <div class="modal-footer">
-                <button class="btn btn-outline-secondary me-auto" onClick={() => { setLendTarget(null); setLentTo(''); }}>Annuler</button>
-                <button class={`btn ${lendTarget.is_lent ? 'btn-success' : 'btn-warning'}`} onClick={handleLend}>
-                  <i class={`ti ${lendTarget.is_lent ? 'ti-user-check' : 'ti-user-share'} me-1`}></i>
-                  {lendTarget.is_lent ? 'Récupéré' : 'Prêter'}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-    </>
+    </div>
   );
 }

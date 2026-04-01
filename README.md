@@ -1,119 +1,111 @@
-# 💿 JewelBox Music Library
+<!-- markdownlint-disable MD033 MD041-->
+<div align="center">
+  <img src="client/public/icons/icon-192.png" width="80" alt="JewelBox icon" />
 
-> *Parce que vos albums méritent mieux qu'une simple étagère.*
+# JewelBox Music Library
 
-A Progressive Web App (PWA) for managing your physical CD collection, built with **Preact**, **Fastify**, and **SQLite**.
+_Parce que vos albums méritent mieux qu'une simple étagère._
+</div>
 
----
+<div align="center">
+  <img src="client/public/jewelbox-app.png" width="80%" alt="JewelBox Application" />
+</div>
+<!-- markdownlint-enable MD033 MD041 -->
 
-## ✨ Features
-
-- **CRUD complet** : Ajouter, modifier, supprimer des albums
-- **Prêt de CD** : Marquer un album comme prêté et noter à qui
-- **Vue Grille / Liste** : Basculez entre les deux modes d'affichage
-- **Filtres & Tri** : Par genre, note, titre, artiste, année
-- **Recherche** : Recherche full-text sur titre et artiste
-- **Recherche externe (MusicBrainz)** : Pré-remplissage automatique via titre, artiste ou EAN/code-barres
-- **Gestion des pistes** : Titre + durée par piste
-- **Upload de pochette** : Upload local ou URL distante
-- **PWA** : Installable sur mobile/desktop, fonctionne hors-ligne
-
----
-
-## 🗂️ Structure du projet
-
-```
-JewelBox-Music-Library/
-├── client/                  # Frontend Preact
-│   ├── public/
-│   │   ├── manifest.webmanifest
-│   │   └── icons/           # PWA icons (à fournir)
-│   ├── src/
-│   │   ├── api/client.js    # Client API REST
-│   │   ├── components/      # StarRating, CoverImage, AlbumCard, AlbumRow, Pagination, Layout
-│   │   ├── pages/           # Dashboard, AlbumForm, AlbumDetail
-│   │   ├── store/           # useLibrary hook
-│   │   ├── tests/           # Tests Vitest + Testing Library
-│   │   ├── App.jsx
-│   │   └── main.jsx
-│   ├── index.html
-│   ├── vite.config.js
-│   └── package.json
-├── server/                  # Backend Fastify
-│   ├── src/
-│   │   ├── db/
-│   │   │   ├── schema.js    # Schéma SQLite
-│   │   │   ├── database.js  # Connexion Better-SQLite3
-│   │   │   └── queries.js   # Toutes les requêtes SQL
-│   │   ├── routes/
-│   │   │   ├── albums.js    # CRUD albums + prêt
-│   │   │   ├── search.js    # Recherche MusicBrainz
-│   │   │   └── meta.js      # Artistes, labels
-│   │   ├── tests/
-│   │   │   └── queries.test.js
-│   │   └── index.js         # Point d'entrée Fastify
-│   ├── .env.example
-│   └── package.json
-├── data/                    # Créé automatiquement (DB + uploads)
-├── Dockerfile
-├── docker-compose.yml
-└── README.md
-```
-
----
-
-## 🗄️ Schéma de la base de données
-
-```sql
-artists    (id, name UNIQUE, created_at)
-labels     (id, name UNIQUE, created_at)
-albums     (id, title, artist_id→artists, label_id→labels,
-            year, genre, total_duration, ean UNIQUE,
-            rating 1-5, cover_url, notes, is_lent, lent_to,
-            created_at, updated_at)
-tracks     (id, album_id→albums CASCADE, position, title, duration)
-```
-
----
+- 🚀 [Démarrage rapide (développement)](#-démarrage-rapide-développement)
+- 🐳 [Deploy with Docker](#-docker)
+- 🧪 [Tests](#-tests)
+- 🌐 [API REST](#-api-rest)
+- 📄 [Licence](#-licence)
 
 ## 🚀 Démarrage rapide (développement)
 
 ### Prérequis
+
 - Node.js 20+
 - npm 9+
 
 ### Installation
 
 ```bash
-# Cloner et installer les dépendances
+git clone https://github.com/William-De71/jewelbox-music-library.git
 cd JewelBox-Music-Library
-npm install           # installe concurrently à la racine
-
-cd server && npm install
-cd ../client && npm install
+npm install
 ```
 
-### Configuration
+### Lancement
 
 ```bash
-cp server/.env.example server/.env
-```
-
-### Lancer en développement
-
-```bash
-# Depuis la racine (lance server + client simultanément)
+# Démarre le backend (port 3001) et le frontend (port 5173) simultanément
 npm run dev
-
-# Ou séparément :
-cd server && npm run dev   # http://localhost:3001
-cd client && npm run dev   # http://localhost:5173
 ```
 
-### Créer le dossier de données
+Ouvrir [http://localhost:5173](http://localhost:5173)
+
+---
+
+## 🐳 Docker
+
+### Lancement avec Docker Compose (recommandé)
 
 ```bash
-mkdir -p data/uploads
+cd docker
+docker compose up -d
+```
+
+L'application est accessible sur [http://localhost:3001](http://localhost:3001).
+Les bases de données et les pochettes sont persistées dans le volume `jewelbox_data`.
+
+### Sans Docker Compose (Docker seul)
+
+```bash
+# 1. Build de l'image depuis la racine du projet
+docker build -f docker/Dockerfile -t jewelbox .
+
+# 2. Créer le volume pour persister les données
+docker volume create jewelbox_data
+
+# 3. Lancer le conteneur
+docker run -d \
+  -p 3001:3001 \
+  -v jewelbox_data:/app/server/data \
+  -e NODE_ENV=production \
+  --name jewelbox-app \
+  --restart unless-stopped \
+  jewelbox
+```
+
+L'application est accessible sur [http://localhost:3001](http://localhost:3001).
+
+```bash
+# Arrêter / relancer
+docker stop jewelbox-app
+docker start jewelbox-app
+
+# Voir les logs
+docker logs -f jewelbox-app
+
+# Mettre à jour (rebuild)
+docker stop jewelbox-app && docker rm jewelbox-app
+docker build -f docker/Dockerfile -t jewelbox .
+docker run -d -p 3001:3001 -v jewelbox_data:/app/server/data \
+  -e NODE_ENV=production --name jewelbox-app --restart unless-stopped jewelbox
+```
+
+### Données persistantes
+
+Le volume Docker monte `/app/server/data` qui contient :
+
+- les bases SQLite (`.db`)
+- les pochettes téléchargées (`covers/`)
+
+```bash
+# Voir les données persistées
+docker volume inspect jewelbox_data
+
+# Sauvegarder les données
+docker run --rm -v jewelbox_data:/data -v $(pwd):/backup \
+  alpine tar czf /backup/jewelbox-backup.tar.gz /data
 ```
 
 ---
@@ -121,78 +113,64 @@ mkdir -p data/uploads
 ## 🧪 Tests
 
 ```bash
-# Tests serveur (Vitest)
-cd server && npm test
+# Run all tests (server + client)
+npm run test
 
-# Tests client (Vitest + Testing Library)
-cd client && npm test
+# Server tests only
+npm run test --workspace=server
+
+# Client tests only
+npm run test --workspace=client
+
+# Server tests with coverage report (≥ 98% statements, ≥ 85% branches)
+npm run test:coverage --workspace=server
 ```
-
----
-
-## 🐳 Docker
-
-### Build & Run
-
-```bash
-docker-compose up --build
-```
-
-L'application sera disponible sur **http://localhost:3001**
-
-### Variables d'environnement
-
-| Variable       | Default              | Description                     |
-|---------------|----------------------|---------------------------------|
-| `PORT`        | `3001`               | Port du serveur                 |
-| `HOST`        | `0.0.0.0`            | Interface d'écoute              |
-| `DB_PATH`     | `./data/jewelbox.db` | Chemin vers la base SQLite      |
-| `UPLOADS_DIR` | `./data/uploads`     | Dossier pour les pochettes      |
-| `CORS_ORIGIN` | `true`               | Origines CORS autorisées        |
 
 ---
 
 ## 🌐 API REST
 
-| Méthode  | Endpoint                  | Description                              |
-|----------|---------------------------|------------------------------------------|
-| `GET`    | `/api/albums`             | Liste paginée (filtres, tri, recherche)  |
-| `GET`    | `/api/albums/:id`         | Détail + pistes                          |
-| `POST`   | `/api/albums`             | Créer un album                           |
-| `PATCH`  | `/api/albums/:id`         | Modifier un album                        |
-| `DELETE` | `/api/albums/:id`         | Supprimer un album                       |
-| `PATCH`  | `/api/albums/:id/lend`    | Prêter / récupérer                       |
-| `GET`    | `/api/albums/genres`      | Liste des genres                         |
-| `GET`    | `/api/artists`            | Liste des artistes                       |
-| `GET`    | `/api/labels`             | Liste des labels                         |
-| `GET`    | `/api/search?q=`          | Recherche MusicBrainz par titre/artiste  |
-| `GET`    | `/api/search?ean=`        | Recherche par EAN/code-barres            |
-| `GET`    | `/api/search/:mbid`       | Détail complet d'une release MusicBrainz |
-| `POST`   | `/api/upload/cover`       | Upload d'une pochette                    |
-| `GET`    | `/api/health`             | Health check                             |
+| Méthode  | Endpoint                     | Description                              |
+|----------|------------------------------|------------------------------------------|
+| `GET`    | `/api/albums`                | Liste paginée (filtres, tri, recherche)  |
+| `GET`    | `/api/albums/:id`            | Détail + pistes                          |
+| `POST`   | `/api/albums`                | Créer un album                           |
+| `PATCH`  | `/api/albums/:id`            | Modifier un album                        |
+| `DELETE` | `/api/albums/:id`            | Supprimer un album                       |
+| `PATCH`  | `/api/albums/:id/lend`       | Prêter / récupérer                       |
+| `GET`    | `/api/albums/:id/loans`      | Historique des prêts                     |
+| `GET`    | `/api/albums/export`         | Exporter la collection (CSV ou JSON)     |
+| `POST`   | `/api/albums/import`         | Importer depuis un CSV                   |
+| `GET`    | `/api/albums/duplicate`      | Vérifier si un doublon existe            |
+| `GET`    | `/api/albums/genres`         | Liste des genres                         |
+| `GET`    | `/api/search?q=`             | Recherche MusicBrainz par titre/artiste  |
+| `GET`    | `/api/search?ean=`           | Recherche par EAN/code-barres            |
+| `GET`    | `/api/search/:mbid`          | Détail complet d'une release             |
+| `POST`   | `/api/upload/cover`          | Upload d'une pochette                    |
+| `GET`    | `/api/database`              | Liste des bases de données               |
+| `POST`   | `/api/database`              | Créer une nouvelle base                  |
+| `POST`   | `/api/database/:id/activate` | Activer une base                         |
+| `GET`    | `/api/database/active`       | Base de données active                   |
 
-### Query params pour `GET /api/albums`
+### Paramètres de `GET /api/albums`
 
-| Param    | Type    | Description                                    |
-|----------|---------|------------------------------------------------|
-| `page`   | integer | Numéro de page (défaut: 1)                     |
-| `limit`  | integer | Albums par page (défaut: 24, max: 100)         |
-| `genre`  | string  | Filtrer par genre                              |
-| `rating` | integer | Filtrer par note (1-5)                         |
-| `sort`   | string  | `title`, `artist`, `year`, `rating`            |
-| `order`  | string  | `asc` ou `desc`                                |
-| `search` | string  | Recherche sur titre et artiste                 |
+| Paramètre | Type    | Description                             |
+|-----------|---------|-----------------------------------------|
+| `page`    | entier  | Numéro de page (défaut : 1)             |
+| `limit`   | entier  | Albums par page (défaut : 24, max : 100)|
+| `genre`   | texte   | Filtrer par genre                       |
+| `rating`  | entier  | Filtrer par note (1-5)                  |
+| `sort`    | texte   | `title`, `artist`, `year`, `rating`     |
+| `order`   | texte   | `asc` ou `desc`                         |
+| `search`  | texte   | Recherche sur titre et artiste          |
+| `wanted`  | booléen | `true` = liste de souhaits uniquement   |
+| `lent`    | booléen | `true` = albums prêtés uniquement       |
 
 ---
 
-## 📱 PWA
+## 📄 Licence
 
-L'application inclut un **manifest** et un **Service Worker** (via Workbox/vite-plugin-pwa) permettant :
-- Installation sur l'écran d'accueil (mobile & desktop)
-- Mise en cache des assets statiques
-- Cache réseau pour les requêtes API albums
-- Cache des pochettes depuis Cover Art Archive
+Ce projet est distribué sous licence **MIT**.  
+Voir le fichier [LICENSE](LICENSE) pour le texte complet.
 
-Pour générer les icônes PWA, placez vos images dans `client/public/icons/` :
-- `icon-192.png` (192×192)
-- `icon-512.png` (512×512)
+---

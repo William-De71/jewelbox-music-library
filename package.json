@@ -16,5 +16,9 @@
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
+  },
+  "dependencies": {
+    "@tabler/core": "^1.4.0",
+    "lucide-preact": "^0.577.0"
   }
 }

@@ -1,0 +1,21 @@
+.star-button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.star-button.star-filled {
+  color: #f59f00;
+}
+
+.star-button.star-empty {
+  color: #6c757d;
+}
+
+.star-button.star-readonly {
+  cursor: default;
+  opacity: 0.7;
+}

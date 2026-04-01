@@ -1,0 +1,47 @@
+.header-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.header-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+[data-bs-theme="light"] .header-title {
+  color: #1e293b;
+}
+
+.header-subtitle {
+  font-size: 0.75rem;
+  font-style: italic;
+}
+
+.theme-toggle {
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+  transition: color 0.2s;
+}
+
+.theme-toggle:hover {
+  color: #e2e8f0;
+}
+
+/* Theme-aware header background */
+.header-top {
+  background-color: var(--jewelbox-bg-darker);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+}
+
+[data-bs-theme="light"] .header-top {
+  background-color: #ffffff;
+  border-bottom-color: rgba(0, 0, 0, 0.1);
+}
