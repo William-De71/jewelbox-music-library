@@ -8,6 +8,7 @@ import { WantList } from './pages/WantList.jsx';
 import { Lend } from './pages/Lend.jsx';
 import { Stats } from './pages/Stats.jsx';
 import { Settings } from './pages/Settings.jsx';
+import { About } from './pages/About.jsx';
 
 export function App() {
   const [route, setRoute] = useState({ page: 'dashboard', params: {} });
@@ -25,6 +26,7 @@ export function App() {
       {route.page === 'lend' && <Lend navigate={navigate} />}
       {route.page === 'stats' && <Stats />}
       {route.page === 'settings' && <Settings navigate={navigate} />}
+      {route.page === 'about' && <About />}
     </Layout>
   );
 }

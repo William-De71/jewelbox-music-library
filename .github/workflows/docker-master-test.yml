@@ -1,0 +1,44 @@
+name: Docker Main Test
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docker/**'
+      - 'server/**'
+      - 'client/**'
+      - 'package*.json'
+      - '.github/workflows/docker-master-test.yml'
+
+jobs:
+  test-build:
+    name: Test Docker build on main
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and test
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: docker/Dockerfile
+          push: false
+          tags: jewelbox:main-${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Run smoke test
+        run: |
+          docker run --rm -d --name jewelbox-test \
+            -p 3001:3001 \
+            jewelbox:main-${{ github.sha }}
+          
+          sleep 10
+          
+          curl -f http://localhost:3001/api/health || exit 1
+          
+          docker stop jewelbox-test

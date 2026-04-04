@@ -1,0 +1,139 @@
+name: Release Production Images
+run-name: Release JewelBox ${{ github.ref_name }} Production Image
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  test-server:
+    name: Server tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⬇️ Checkout code
+        uses: actions/checkout@v4
+
+      - name: 💽 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      - name: ✅ Run server tests
+        working-directory: ./server
+        run: node ../node_modules/vitest/vitest.mjs run
+
+      - name: 🔐 Dependencies security audit
+        working-directory: ./server
+        run: npm audit --production --audit-level=critical || true
+
+  test-client:
+    name: Client tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⬇️ Checkout code
+        uses: actions/checkout@v4
+
+      - name: 💽 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      - name: ✅ Run client tests
+        working-directory: ./client
+        run: node ../node_modules/vitest/vitest.mjs run
+
+  build-front:
+    name: Frontend build
+    needs:
+      - test-server
+      - test-client
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⬇️ Checkout code
+        uses: actions/checkout@v4
+
+      - name: 💽 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      - name: 🏗️ Build frontend
+        working-directory: ./client
+        run: node ../node_modules/vite/bin/vite.js build
+
+      - name: ↗️ Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: client-dist
+          path: client/dist
+
+  docker:
+    needs: build-front
+    name: Docker build and push
+    runs-on: ubuntu-latest
+    env:
+      DOCKERHUB_USER: ${{secrets.DOCKERHUB_USER}}
+      DOCKERHUB_PASSWORD: ${{secrets.DOCKERHUB_PASSWORD}}
+      DOCKERHUB_REPO: ${{secrets.DOCKERHUB_REPO}}
+
+    steps:
+      - name: ⬇️ Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🐳 Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ secrets.DOCKERHUB_REPO }}
+          labels: |
+            org.opencontainers.image.title=JewelBox Music Library Production Image
+          tags: |
+            type=semver,pattern=v{{version}}
+            type=semver,pattern=v{{major}}.{{minor}}
+            type=semver,pattern=v{{major}}
+            type=raw,value=latest
+            type=sha
+
+      - name: 💽 Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: 🐳 Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: ↙️ Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: client-dist
+          path: client/dist
+
+      - name: 🔑 Log in to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USER }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      - name: 🐳 Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: docker/Dockerfile.buildx
+          platforms: linux/amd64,linux/arm64
+          push: true
+          pull: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=registry,ref=${{ env.DOCKERHUB_REPO }}:latest
+          cache-to: type=inline

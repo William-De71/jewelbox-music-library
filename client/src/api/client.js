@@ -71,4 +71,7 @@ export const api = {
     if (!res.ok) throw new Error(json.error || 'Upload failed');
     return json;
   },
+
+  // Version
+  getVersion: () => request('GET', '/version'),
 };

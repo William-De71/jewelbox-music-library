@@ -1,0 +1,19 @@
+.version-info {
+  display: inline-flex;
+  align-items: center;
+}
+
+.version-badge {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  background: var(--tblr-secondary-bg);
+  color: var(--tblr-secondary);
+  border-radius: 0.25rem;
+  font-weight: 500;
+  font-family: var(--tblr-font-monospace);
+}
+
+.dark .version-badge {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.7);
+}

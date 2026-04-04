@@ -258,7 +258,19 @@
     "lentLabel": "Prêté",
     "lentLabelPlural": "Prêtés",
     "genresLabel": "Genres",
-    "ratedLabel": "Notés"
+    "ratedLabel": "Notés",
+    "totalOwned": "Albums possédés",
+    "totalWanted": "Souhaits",
+    "totalLent": "Albums prêtés",
+    "totalArtists": "Artistes",
+    "totalDuration": "Durée d'écoute",
+    "byGenre": "Par genre",
+    "byDecade": "Par décennie",
+    "topArtists": "Top artistes",
+    "topLabels": "Top labels",
+    "avgRating": "Note moyenne",
+    "noData": "Aucune donnée",
+    "noActiveDb": "Aucune base de données active."
   },
   "messages": {
     "albumDeleted": "\"{title}\" supprimé",
@@ -316,20 +328,6 @@
     "returnedOn": "Rendu le",
     "stillLent": "En cours"
   },
-  "stats": {
-    "totalOwned": "Albums possédés",
-    "totalWanted": "Souhaits",
-    "totalLent": "Albums prêtés",
-    "totalArtists": "Artistes",
-    "totalDuration": "Durée d'écoute",
-    "byGenre": "Par genre",
-    "byDecade": "Par décennie",
-    "topArtists": "Top artistes",
-    "topLabels": "Top labels",
-    "avgRating": "Note moyenne",
-    "noData": "Aucune donnée",
-    "noActiveDb": "Aucune base de données active."
-  },
   "discogs": {
     "title": "API Discogs",
     "description": "Discogs vous permet de rechercher des albums par titre ou code-barres. Sans clé, les requêtes sont limitées à 25/minute. Avec une clé d'authentification, vous bénéficiez de 60 requêtes/minute.",
@@ -356,5 +354,13 @@
     "importSuccess": "{n} album(s) importé(s), {s} ignoré(s)",
     "importing": "Import en cours…",
     "noActiveDb": "Aucune base de données active"
+  },
+  "about": {
+    "title": "À propos de JewelBox",
+    "appName": "JewelBox Music Library",
+    "subtitle": "Parce que vos albums méritent mieux qu'une simple étagère.",
+    "credits": "Développé avec",
+    "by": "par",
+    "githubTitle": "Voir sur GitHub"
   }
 }
