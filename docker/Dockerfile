@@ -16,10 +16,11 @@ FROM node:20-alpine3.21 AS server-builder
 
 RUN apk add --no-cache python3 make g++
 
-WORKDIR /app/server
+WORKDIR /app
 
-COPY server/package.json server/package-lock.json ./
-RUN npm ci --omit=dev
+COPY package.json package-lock.json ./
+COPY server/package.json ./server/
+RUN npm ci --omit=dev --workspace=server
 
 # ── Stage 3: Production image (no build tools) ────────────────────────────────
 FROM node:20-alpine3.21 AS production
