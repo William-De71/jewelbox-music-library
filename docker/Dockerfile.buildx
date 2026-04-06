@@ -18,14 +18,8 @@ WORKDIR /app/server
 # Copy compiled server dependencies
 COPY --from=server-builder /app/server/node_modules ./node_modules
 
-# Copy server source code
 COPY server/ ./
-
-# Copy pre-built frontend from GitHub Actions artifact
-# Le frontend est déjà compilé et disponible dans client/dist via download-artifact
 COPY client/dist /app/client/dist
-
-# Patch remaining CVEs and create data directory + non-root user
 RUN apk upgrade --no-cache && \
     mkdir -p /app/server/data && \
     addgroup -S jewelbox && adduser -S jewelbox -G jewelbox && \
