@@ -1,4 +1,4 @@
-import { Home, Disc, Heart, ArrowRightLeft, BarChart3, Settings } from 'lucide-preact';
+import { Home, Disc, Heart, ArrowRightLeft, BarChart3, Settings, Info } from 'lucide-preact';
 import { useI18n } from '../config/i18n/index.jsx';
 import '../styles/topmenu.css';
 
@@ -69,6 +69,16 @@ export function TopMenu({ currentPage, navigate }) {
             >
               <Settings size={20} class="me-2" />
               {t('menu.settings')}
+            </a>
+          </li>
+          <li class="nav-item">
+            <a 
+              class={`nav-link ${currentPage === 'about' ? 'active' : ''}`}
+              href="#"
+              onClick={(e) => { e.preventDefault(); navigate('about'); }}
+            >
+              <Info size={20} class="me-2" />
+              À propos
             </a>
           </li>
         </ul>

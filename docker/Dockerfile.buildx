@@ -1,0 +1,38 @@
+# ── Dockerfile optimisé pour GitHub Actions avec frontend pré-compilé ────────
+
+# ── Stage 1: Build server deps (compile native modules) ───────────────────────
+FROM node:20-alpine3.21 AS server-builder
+
+RUN apk add --no-cache python3 make g++
+
+WORKDIR /app/server
+
+COPY server/package.json server/package-lock.json ./
+RUN npm ci --omit=dev
+
+# ── Stage 2: Production image (no build tools) ────────────────────────────────
+FROM node:20-alpine3.21 AS production
+
+WORKDIR /app/server
+
+# Copy compiled server dependencies
+COPY --from=server-builder /app/server/node_modules ./node_modules
+
+COPY server/ ./
+COPY client/dist /app/client/dist
+RUN apk upgrade --no-cache && \
+    mkdir -p /app/server/data && \
+    addgroup -S jewelbox && adduser -S jewelbox -G jewelbox && \
+    chown -R jewelbox:jewelbox /app
+
+USER jewelbox
+
+ENV NODE_ENV=production
+ENV PORT=3001
+ENV HOST=0.0.0.0
+
+EXPOSE 3001
+
+VOLUME ["/app/server/data"]
+
+CMD ["node", "src/index.js"]
