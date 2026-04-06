@@ -27,7 +27,7 @@ FROM node:20-alpine3.21 AS production
 
 WORKDIR /app/server
 
-COPY --from=server-builder /app/server/node_modules ./node_modules
+COPY --from=server-builder /app/node_modules ./node_modules
 COPY server/ ./
 
 # Copy compiled frontend into server's expected location
