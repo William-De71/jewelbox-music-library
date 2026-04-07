@@ -270,7 +270,10 @@
     "topLabels": "Top labels",
     "avgRating": "Note moyenne",
     "noData": "Aucune donnée",
-    "noActiveDb": "Aucune base de données active."
+    "noActiveDb": "Aucune base de données active.",
+    "error": {
+      "loadFailed": "Impossible de charger les statistiques"
+    }
   },
   "messages": {
     "albumDeleted": "\"{title}\" supprimé",
