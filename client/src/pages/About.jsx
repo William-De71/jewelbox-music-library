@@ -23,9 +23,7 @@ export function About() {
 
   return (
     <div class="container py-4">
-      <div class="row justify-content-center">
-        <div class="col-lg-8">
-          <div class="card">
+      <div class="card">
             <div class="card-header d-flex align-items-center justify-content-between">
               <h2 class="card-title d-flex align-items-center gap-2 mb-0">
                 <Info size={24} />
@@ -74,8 +72,6 @@ export function About() {
               </div>
             </div>
           </div>
-        </div>
-      </div>
     </div>
   );
 }

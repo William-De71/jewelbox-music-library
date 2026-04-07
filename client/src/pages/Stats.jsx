@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'preact/hooks';
 import { api } from '../api/client.js';
 import { useI18n } from '../config/i18n/index.jsx';
-import { BarChart3, Music2, Heart, Clock, User, Star, ArrowRightLeft } from 'lucide-preact';
+import { BarChart3, Music2, Heart, Clock, User, Star, ArrowRightLeft, Settings, Database } from 'lucide-preact';
 
 const PALETTE = [
   '#7B93DB','#C47BA8','#9B7BDB','#6BBFCF','#C4895A',
@@ -85,16 +85,24 @@ function KpiCard({ icon, value, label, color }) {
   );
 }
 
-export function Stats() {
+export function Stats({ navigate }) {
   const { t } = useI18n();
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [toast, setToast] = useState(null);
+
+  const showToast = (msg, type = 'danger') => {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 3000);
+  };
 
   useEffect(() => {
     api.getStats()
       .then(setStats)
-      .catch(e => setError(e.message))
+      .catch(e => {
+        setError(e.message);
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -103,8 +111,53 @@ export function Stats() {
 
   const hasDuration = stats && (stats.total_duration_hours > 0 || stats.total_duration_mins > 0);
 
+  if (loading) {
+    return null;
+  }
+
+  if (!stats) {
+    return (
+      <div class="page-container">
+        {toast && (
+          <div class={`alert alert-${toast.type} alert-dismissible toast-notification top-0 end-0 m-3`}>
+            {toast.msg}
+            <button type="button" class="btn-close" onClick={() => setToast(null)} />
+          </div>
+        )}
+        <div class="container-fluid">
+          <div class="row">
+            <div class="col-12">
+              <div class="card">
+                <div class="card-header">
+                  <h2 class="card-title">
+                    <BarChart3 size={24} class="me-2 text-info" />
+                    {t('menu.stats')}
+                  </h2>
+                </div>
+                <div class="card-body text-center py-5">
+                  <Database size={48} class="text-muted mb-3" />
+                  <p class="text-muted mb-3">{t('home.noActiveDatabase')}</p>
+                  <button class="btn btn-primary" onClick={() => navigate('settings')}>
+                    <Settings size={16} class="me-2" />
+                    {t('home.goToSettings')}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div class="page-container">
+      {toast && (
+        <div class={`alert alert-${toast.type} alert-dismissible toast-notification top-0 end-0 m-3`}>
+          {toast.msg}
+          <button type="button" class="btn-close" onClick={() => setToast(null)} />
+        </div>
+      )}
       <div class="container-fluid">
         <div class="row">
           <div class="col-12">
@@ -116,20 +169,7 @@ export function Stats() {
                 </h2>
               </div>
               <div class="card-body">
-
-                {loading ? (
-                  <div class="text-center py-5">
-                    <div class="spinner-border" role="status">
-                      <span class="visually-hidden">{t('common.loading')}</span>
-                    </div>
-                  </div>
-                ) : error ? (
-                  <div class="alert alert-danger">{error}</div>
-                ) : !stats ? (
-                  <p class="text-muted">{t('stats.noActiveDb')}</p>
-                ) : (
-                  <>
-                    {/* ── KPIs ───────────────────────────────────────────── */}
+                {/* ── KPIs ───────────────────────────────────────────── */}
                     <div class="row g-3 mb-4">
                       <div class="col-6 col-sm-4 col-xl-2">
                         <KpiCard icon={<Music2 size={22} />} value={stats.total_owned} label={t('stats.totalOwned')} color="primary" />
@@ -218,8 +258,6 @@ export function Stats() {
                         </div>
                       )}
                     </div>
-                  </>
-                )}
               </div>
             </div>
           </div>

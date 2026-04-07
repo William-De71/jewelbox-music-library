@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'preact/hooks';
 import { albumsApi } from '../api/albums.js';
 import { useI18n } from '../config/i18n/index.jsx';
-import { Home, Search, Music2, Shuffle, Clock, BarChart3, Settings, Plus, Heart, PenLine, Disc, User } from 'lucide-preact';
+import { Home, Search, Music2, Shuffle, Clock, BarChart3, Settings, Plus, Heart, PenLine, Disc, User, Database } from 'lucide-preact';
 
 function daysAgo(dateStr) {
   if (!dateStr) return null;
@@ -79,6 +79,35 @@ export function Dashboard({ navigate }) {
     }
   };
 
+  if (!activeDb && !loading) {
+    return (
+      <div class="page-container">
+        <div class="container-fluid">
+          <div class="row">
+            <div class="col-12">
+              <div class="card">
+                <div class="card-header">
+                  <h2 class="card-title">
+                    <Home size={24} class="me-2 text-primary" />
+                    {t('common.home')}
+                  </h2>
+                </div>
+                <div class="card-body text-center py-5">
+                  <Database size={48} class="text-muted mb-3" />
+                  <p class="text-muted mb-3">{t('home.noActiveDatabase')}</p>
+                  <button class="btn btn-primary" onClick={() => navigate('settings')}>
+                    <Settings size={16} class="me-2" />
+                    {t('home.goToSettings')}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div class="page-container">
       <div class="container-fluid">
@@ -113,68 +142,57 @@ export function Dashboard({ navigate }) {
                 </form>
 
                 {/* Quick add */}
-                {activeDb && (
-                  <div class="card mb-4">
-                    <div class="card-header">
-                      <h3 class="card-title fs-5 mb-0">
-                        <Plus size={17} class="me-2 text-success" />
-                        {t('home.quickAdd')}
-                      </h3>
+                <div class="card mb-4">
+                  <div class="card-header">
+                    <h3 class="card-title fs-5 mb-0">
+                      <Plus size={17} class="me-2 text-success" />
+                      {t('home.quickAdd')}
+                    </h3>
+                  </div>
+                  <div class="card-body">
+                    <div class="row g-2 align-items-end">
+                      <div class="col-md-3">
+                        <select
+                          class="form-select"
+                          value={quickSource}
+                          onChange={(e) => setQuickSource(e.target.value)}
+                        >
+                          <option value="musicbrainz">{t('albumForm.musicbrainz')}</option>
+                          <option value="discogs">{t('albumForm.discogs')}</option>
+                        </select>
+                      </div>
+                      <div class="col-md-5">
+                        <input
+                          type="text"
+                          class="form-control"
+                          placeholder={t('home.quickAddPlaceholder')}
+                          value={quickSearch}
+                          onInput={(e) => setQuickSearch(e.target.value)}
+                          onKeyDown={(e) => e.key === 'Enter' && quickSearch.trim() && navigate('add', { initialSearch: quickSearch.trim(), initialSource: quickSource })}
+                        />
+                      </div>
+                      <div class="col-md-4 d-flex gap-2">
+                        <button
+                          class="btn btn-success flex-grow-1"
+                          disabled={!quickSearch.trim()}
+                          onClick={() => navigate('add', { initialSearch: quickSearch.trim(), initialSource: quickSource })}
+                        >
+                          <Search size={15} class="me-1" />{t('home.quickAddSearch')}
+                        </button>
+                      </div>
                     </div>
-                    <div class="card-body">
-                      <div class="row g-2 align-items-end">
-                        <div class="col-md-3">
-                          <select
-                            class="form-select"
-                            value={quickSource}
-                            onChange={(e) => setQuickSource(e.target.value)}
-                          >
-                            <option value="musicbrainz">{t('albumForm.musicbrainz')}</option>
-                            <option value="discogs">{t('albumForm.discogs')}</option>
-                          </select>
-                        </div>
-                        <div class="col-md-5">
-                          <input
-                            type="text"
-                            class="form-control"
-                            placeholder={t('home.quickAddPlaceholder')}
-                            value={quickSearch}
-                            onInput={(e) => setQuickSearch(e.target.value)}
-                            onKeyDown={(e) => e.key === 'Enter' && quickSearch.trim() && navigate('add', { initialSearch: quickSearch.trim(), initialSource: quickSource })}
-                          />
-                        </div>
-                        <div class="col-md-4 d-flex gap-2">
-                          <button
-                            class="btn btn-success flex-grow-1"
-                            disabled={!quickSearch.trim()}
-                            onClick={() => navigate('add', { initialSearch: quickSearch.trim(), initialSource: quickSource })}
-                          >
-                            <Search size={15} class="me-1" />{t('home.quickAddSearch')}
-                          </button>
-                        </div>
-                      </div>
-                      <div class="d-flex gap-2 mt-2">
-                        <button class="btn btn-outline-primary btn-sm" onClick={() => navigate('add', {})}>
-                          <PenLine size={14} class="me-1" />{t('home.addManually')}
-                        </button>
-                        <button class="btn btn-outline-danger btn-sm" onClick={() => navigate('add', { fromWantList: true })}>
-                          <Heart size={14} class="me-1" />{t('home.addToWishlist')}
-                        </button>
-                      </div>
+                    <div class="d-flex gap-2 mt-2">
+                      <button class="btn btn-outline-primary btn-sm" onClick={() => navigate('add', {})}>
+                        <PenLine size={14} class="me-1" />{t('home.addManually')}
+                      </button>
+                      <button class="btn btn-outline-danger btn-sm" onClick={() => navigate('add', { fromWantList: true })}>
+                        <Heart size={14} class="me-1" />{t('home.addToWishlist')}
+                      </button>
                     </div>
                   </div>
-                )}
+                </div>
 
-                {!activeDb ? (
-                  <div class="text-center py-5">
-                    <Music2 size={48} class="text-muted mb-3" />
-                    <p class="text-muted mb-3">{t('home.noActiveDatabase')}</p>
-                    <button class="btn btn-primary" onClick={() => navigate('settings')}>
-                      <Settings size={16} class="me-2" />
-                      {t('home.goToSettings')}
-                    </button>
-                  </div>
-                ) : loading ? (
+                {loading ? (
                   <div class="text-center py-5">
                     <div class="spinner-border" role="status">
                       <span class="visually-hidden">{t('common.loading')}</span>

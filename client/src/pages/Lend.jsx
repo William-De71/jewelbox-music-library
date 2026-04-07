@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'preact/hooks';
 import { albumsApi } from '../api/albums.js';
 import { api } from '../api/client.js';
 import { useI18n } from '../config/i18n/index.jsx';
-import { ArrowRightLeft, Music2, Search, User, Check, X, Database, RotateCcw, Clock } from 'lucide-preact';
+import { ArrowRightLeft, Music2, Search, User, Check, X, Database, RotateCcw, Clock, Settings } from 'lucide-preact';
 
 function daysAgo(dateStr) {
   if (!dateStr) return null;
@@ -14,7 +14,7 @@ export function Lend({ navigate }) {
   const { t } = useI18n();
   const [lentAlbums, setLentAlbums] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeDatabase, setActiveDatabase] = useState(null);
+  const [activeDatabase, setActiveDatabase] = useState(undefined);
   const [toast, setToast] = useState(null);
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -107,7 +107,11 @@ export function Lend({ navigate }) {
     }
   };
 
-  if (!activeDatabase) {
+  if (activeDatabase === undefined) {
+    return null;
+  }
+
+  if (activeDatabase === null) {
     return (
       <div class="page-container">
         <div class="container-fluid">
@@ -122,7 +126,11 @@ export function Lend({ navigate }) {
                 </div>
                 <div class="card-body text-center py-5">
                   <Database size={48} class="text-muted mb-3" />
-                  <h4 class="text-muted">{t('home.noActiveDatabase')}</h4>
+                  <p class="text-muted mb-3">{t('home.noActiveDatabase')}</p>
+                  <button class="btn btn-primary" onClick={() => navigate('settings')}>
+                    <Settings size={16} class="me-2" />
+                    {t('home.goToSettings')}
+                  </button>
                 </div>
               </div>
             </div>

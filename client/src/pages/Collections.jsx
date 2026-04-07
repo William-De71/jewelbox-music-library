@@ -5,7 +5,7 @@ import { AlbumCard } from '../components/AlbumCard.jsx';
 import { AlbumRow } from '../components/AlbumRow.jsx';
 import { Pagination } from '../components/Pagination.jsx';
 import { useI18n } from '../config/i18n/index.jsx';
-import { Search, Grid, List, X, Plus, Disc, Database, AlertCircle, Music, CheckSquare, Square, Trash2 } from 'lucide-preact';
+import { Search, Grid, List, X, Plus, Disc, Database, AlertCircle, Music, CheckSquare, Square, Trash2, Settings } from 'lucide-preact';
 
 const DEFAULT_LIMIT = 24;
 
@@ -13,8 +13,8 @@ export function Collections({ navigate, params = {} }) {
   const { t } = useI18n();
   const [albums, setAlbums] = useState([]);
   const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [activeDatabase, setActiveDatabase] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [activeDatabase, setActiveDatabase] = useState(undefined);
   const [viewMode, setViewMode] = useState(() => {
     const saved = localStorage.getItem('jewelbox-viewMode');
     return saved || 'grid';
@@ -188,15 +188,13 @@ export function Collections({ navigate, params = {} }) {
     }
   };
 
-  if (!activeDatabase) {
+  if (activeDatabase === undefined) {
+    return null;
+  }
+
+  if (activeDatabase === null) {
     return (
       <div class="page-container">
-        {toast && (
-          <div class={`alert alert-${toast.type} alert-dismissible toast-notification top-0 end-0 m-3`}>
-            {toast.msg}
-            <button type="button" class="btn-close" onClick={() => setToast(null)}></button>
-          </div>
-        )}
         <div class="container-fluid">
           <div class="row">
             <div class="col-12">
@@ -209,10 +207,11 @@ export function Collections({ navigate, params = {} }) {
                 </div>
                 <div class="card-body text-center py-5">
                   <Database size={48} class="text-muted mb-3" />
-                  <h4 class="text-muted">Aucune base de données active</h4>
-                  <p class="text-muted">
-                    Veuillez activer une base de données depuis le Dashboard pour voir les collections.
-                  </p>
+                  <p class="text-muted mb-3">{t('home.noActiveDatabase')}</p>
+                  <button class="btn btn-primary" onClick={() => navigate('settings')}>
+                    <Settings size={16} class="me-2" />
+                    {t('home.goToSettings')}
+                  </button>
                 </div>
               </div>
             </div>
