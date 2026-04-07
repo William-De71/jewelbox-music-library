@@ -7,7 +7,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // Read version from package.json
 let version = '1.0.0';
 try {
-  const packageJsonPath = path.resolve(__dirname, '../../package.json');
+  const packageJsonPath = path.resolve(__dirname, '../../../package.json');
   const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
   version = packageJson.version;
 } catch (err) {
