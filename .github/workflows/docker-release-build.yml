@@ -57,6 +57,7 @@ jobs:
       - test-client
     name: Docker build and push
     runs-on: ubuntu-latest
+    timeout-minutes: 180
     env:
       DOCKERHUB_USER: ${{secrets.DOCKERHUB_USER}}
       DOCKERHUB_PASSWORD: ${{secrets.DOCKERHUB_PASSWORD}}
@@ -97,7 +98,7 @@ jobs:
         with:
           context: .
           file: docker/Dockerfile
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
           push: true
           pull: true
           tags: ${{ steps.meta.outputs.tags }}
