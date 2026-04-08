@@ -91,6 +91,7 @@ export function Stats({ navigate }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [toast, setToast] = useState(null);
+  const [dbCheckComplete, setDbCheckComplete] = useState(false);
 
   const showToast = (msg, type = 'danger') => {
     setToast({ msg, type });
@@ -103,7 +104,10 @@ export function Stats({ navigate }) {
       .catch(e => {
         setError(e.message);
       })
-      .finally(() => setLoading(false));
+      .finally(() => {
+        setLoading(false);
+        setDbCheckComplete(true);
+      });
   }, []);
 
   const genreData  = stats?.by_genre?.map(g => ({ label: g.genre,   count: g.count })) || [];
@@ -111,7 +115,7 @@ export function Stats({ navigate }) {
 
   const hasDuration = stats && (stats.total_duration_hours > 0 || stats.total_duration_mins > 0);
 
-  if (loading) {
+  if (!dbCheckComplete) {
     return null;
   }
 

@@ -13,8 +13,9 @@ export function Collections({ navigate, params = {} }) {
   const { t } = useI18n();
   const [albums, setAlbums] = useState([]);
   const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [activeDatabase, setActiveDatabase] = useState(undefined);
+  const [loading, setLoading] = useState(false);
+  const [activeDatabase, setActiveDatabase] = useState(null);
+  const [dbCheckComplete, setDbCheckComplete] = useState(false);
   const [viewMode, setViewMode] = useState(() => {
     const saved = localStorage.getItem('jewelbox-viewMode');
     return saved || 'grid';
@@ -59,9 +60,11 @@ export function Collections({ navigate, params = {} }) {
           albumsApi.getActiveDatabase().catch(() => null)
         ]);
         setGenres(genresData);
-        setActiveDatabase(dbData?.database);
+        setActiveDatabase(dbData?.database || null);
       } catch (e) {
         console.error('Failed to load initial data:', e);
+      } finally {
+        setDbCheckComplete(true);
       }
     };
     loadData();
@@ -188,11 +191,11 @@ export function Collections({ navigate, params = {} }) {
     }
   };
 
-  if (activeDatabase === undefined) {
+  if (!dbCheckComplete) {
     return null;
   }
 
-  if (activeDatabase === null) {
+  if (!activeDatabase) {
     return (
       <div class="page-container">
         <div class="container-fluid">

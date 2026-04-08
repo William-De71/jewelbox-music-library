@@ -14,7 +14,8 @@ export function Lend({ navigate }) {
   const { t } = useI18n();
   const [lentAlbums, setLentAlbums] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeDatabase, setActiveDatabase] = useState(undefined);
+  const [activeDatabase, setActiveDatabase] = useState(null);
+  const [dbCheckComplete, setDbCheckComplete] = useState(false);
   const [toast, setToast] = useState(null);
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -44,12 +45,13 @@ export function Lend({ navigate }) {
   useEffect(() => {
     const init = async () => {
       const dbData = await albumsApi.getActiveDatabase().catch(() => null);
-      setActiveDatabase(dbData?.database);
+      setActiveDatabase(dbData?.database || null);
       if (dbData?.database) {
         await loadLent();
         api.getBorrowers().then(setBorrowers).catch(() => {});
       }
       setLoading(false);
+      setDbCheckComplete(true);
     };
     init();
   }, []);
@@ -107,11 +109,11 @@ export function Lend({ navigate }) {
     }
   };
 
-  if (activeDatabase === undefined) {
+  if (!dbCheckComplete) {
     return null;
   }
 
-  if (activeDatabase === null) {
+  if (!activeDatabase && !loading) {
     return (
       <div class="page-container">
         <div class="container-fluid">
