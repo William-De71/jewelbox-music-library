@@ -13,8 +13,9 @@ export function WantList({ navigate, params = {} }) {
   const { t } = useI18n();
   const [albums, setAlbums] = useState([]);
   const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [activeDatabase, setActiveDatabase] = useState(undefined);
+  const [loading, setLoading] = useState(false);
+  const [activeDatabase, setActiveDatabase] = useState(null);
+  const [dbCheckComplete, setDbCheckComplete] = useState(false);
   const [viewMode, setViewMode] = useState(() => localStorage.getItem('jewelbox-viewMode') || 'grid');
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(() => {
@@ -40,9 +41,11 @@ export function WantList({ navigate, params = {} }) {
     const loadData = async () => {
       try {
         const dbData = await albumsApi.getActiveDatabase().catch(() => null);
-        setActiveDatabase(dbData?.database);
+        setActiveDatabase(dbData?.database || null);
       } catch (e) {
         console.error('Failed to load initial data:', e);
+      } finally {
+        setDbCheckComplete(true);
       }
     };
     loadData();
@@ -110,11 +113,11 @@ export function WantList({ navigate, params = {} }) {
     }
   };
 
-  if (activeDatabase === undefined) {
+  if (!dbCheckComplete) {
     return null;
   }
 
-  if (activeDatabase === null) {
+  if (!activeDatabase) {
     return (
       <div class="page-container">
         {toast && (

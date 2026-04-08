@@ -19,6 +19,7 @@ export function Dashboard({ navigate }) {
   const [totalWanted, setTotalWanted] = useState(0);
   const [activeDb, setActiveDb] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [dbCheckComplete, setDbCheckComplete] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [quickSearch, setQuickSearch] = useState('');
   const [quickSource, setQuickSource] = useState('musicbrainz');
@@ -29,6 +30,7 @@ export function Dashboard({ navigate }) {
       const dbData = await albumsApi.getActiveDatabase().catch(() => null);
       const db = dbData?.database;
       setActiveDb(db);
+      setDbCheckComplete(true);
       if (!db) return;
 
       const [recentData, recentWantedData, countData, countWantedData, lentData] = await Promise.all([
@@ -78,6 +80,10 @@ export function Dashboard({ navigate }) {
       navigate('collections');
     }
   };
+
+  if (!dbCheckComplete) {
+    return null;
+  }
 
   if (!activeDb && !loading) {
     return (

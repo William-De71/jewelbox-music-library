@@ -111,18 +111,6 @@ fastify.get('/covers/:filename', async (req, reply) => {
   }
 });
 
-// Serve frontend
-const clientDist = path.resolve(__dirname, '../../client/dist');
-if (fs.existsSync(clientDist)) {
-  fastify.get('/*', async (req, reply) => {
-    const filePath = path.join(clientDist, req.url === '/' ? 'index.html' : req.url);
-    if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
-      return reply.sendFile(req.url === '/' ? 'index.html' : req.url, clientDist);
-    }
-    return reply.sendFile('index.html', clientDist);
-  });
-}
-
 // Real database routes
 fastify.get('/api/databases', async (req, reply) => {
   try {
@@ -380,6 +368,18 @@ fastify.get('/api/database/active', async (req, reply) => {
 fastify.get('/api/health', async (req, reply) => {
   return { status: 'ok' };
 });
+
+// Serve frontend static files (production)
+const clientDist = path.resolve(__dirname, '../../client/dist');
+if (fs.existsSync(clientDist)) {
+  fastify.get('/*', async (req, reply) => {
+    const filePath = path.join(clientDist, req.url === '/' ? 'index.html' : req.url);
+    if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
+      return reply.sendFile(req.url === '/' ? 'index.html' : req.url, clientDist);
+    }
+    return reply.sendFile('index.html', clientDist);
+  });
+}
 
 // Start server
 try {
