@@ -157,7 +157,7 @@ export function Dashboard({ navigate }) {
                   </div>
                   <div class="card-body">
                     <div class="row g-2 align-items-end">
-                      <div class="col-md-3">
+                      <div class="col-12 col-sm-6 col-md-3">
                         <select
                           class="form-select"
                           value={quickSource}
@@ -167,7 +167,7 @@ export function Dashboard({ navigate }) {
                           <option value="discogs">{t('albumForm.discogs')}</option>
                         </select>
                       </div>
-                      <div class="col-md-5">
+                      <div class="col-12 col-sm-6 col-md-5">
                         <input
                           type="text"
                           class="form-control"
@@ -177,9 +177,9 @@ export function Dashboard({ navigate }) {
                           onKeyDown={(e) => e.key === 'Enter' && quickSearch.trim() && navigate('add', { initialSearch: quickSearch.trim(), initialSource: quickSource })}
                         />
                       </div>
-                      <div class="col-md-4 d-flex gap-2">
+                      <div class="col-12 col-md-4">
                         <button
-                          class="btn btn-success flex-grow-1"
+                          class="btn btn-success w-100"
                           disabled={!quickSearch.trim()}
                           onClick={() => navigate('add', { initialSearch: quickSearch.trim(), initialSource: quickSource })}
                         >
@@ -187,13 +187,17 @@ export function Dashboard({ navigate }) {
                         </button>
                       </div>
                     </div>
-                    <div class="d-flex gap-2 mt-2">
-                      <button class="btn btn-outline-primary btn-sm" onClick={() => navigate('add', {})}>
-                        <PenLine size={14} class="me-1" />{t('home.addManually')}
-                      </button>
-                      <button class="btn btn-outline-danger btn-sm" onClick={() => navigate('add', { fromWantList: true })}>
-                        <Heart size={14} class="me-1" />{t('home.addToWishlist')}
-                      </button>
+                    <div class="row g-2 mt-2">
+                      <div class="col-12 col-sm-6">
+                        <button class="btn btn-outline-primary btn-sm w-100" onClick={() => navigate('add', {})}>
+                          <PenLine size={14} class="me-1" />{t('home.addManually')}
+                        </button>
+                      </div>
+                      <div class="col-12 col-sm-6">
+                        <button class="btn btn-outline-danger btn-sm w-100" onClick={() => navigate('add', { fromWantList: true })}>
+                          <Heart size={14} class="me-1" />{t('home.addToWishlist')}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -210,7 +214,7 @@ export function Dashboard({ navigate }) {
                     <div class="row mb-4 g-3">
 
                       {/* Colonne 1 : Collection */}
-                      <div class="col-12 col-md-4">
+                      <div class="col-12 col-lg-4">
                         <div class="card h-100">
                           <div class="card-header">
                             <h3 class="card-title fs-5 mb-0">
@@ -249,7 +253,7 @@ export function Dashboard({ navigate }) {
                       </div>
 
                       {/* Colonne 2 : Liste de souhaits */}
-                      <div class="col-12 col-md-4">
+                      <div class="col-12 col-lg-4">
                         <div class="card h-100">
                           <div class="card-header">
                             <h3 class="card-title fs-5 mb-0">
@@ -288,7 +292,7 @@ export function Dashboard({ navigate }) {
                       </div>
 
                       {/* Column 3: Listening suggestion */}
-                      <div class="col-12 col-md-4">
+                      <div class="col-12 col-lg-4">
                         <div class="card h-100">
                           <div class="card-header d-flex justify-content-between align-items-center">
                             <h3 class="card-title fs-5 mb-0">
@@ -314,12 +318,13 @@ export function Dashboard({ navigate }) {
                                   <img
                                     src={randomAlbum.cover_url}
                                     alt=""
-                                    style={{ width: 180, height: 180, objectFit: 'cover', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.25)' }}
+                                    class="random-album-cover"
+                                    style={{ maxWidth: '100%', width: 180, height: 180, objectFit: 'cover', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.25)' }}
                                   />
                                 ) : (
                                   <div
-                                    class="d-flex align-items-center justify-content-center bg-secondary-lt rounded"
-                                    style={{ width: 180, height: 180 }}
+                                    class="d-flex align-items-center justify-content-center bg-secondary-lt rounded random-album-cover"
+                                    style={{ maxWidth: '100%', width: 180, height: 180 }}
                                   >
                                     <Music2 size={56} class="text-muted" />
                                   </div>
@@ -383,7 +388,7 @@ export function Dashboard({ navigate }) {
                     )}
 
                     {/* Totals */}
-                    <div class="d-flex justify-content-center gap-4 text-muted small pt-2">
+                    <div class="d-flex flex-wrap justify-content-center gap-4 text-muted small pt-2">
                       <span>
                         <BarChart3 size={15} class="me-1" />
                         <strong>{total}</strong> {t('home.albumsTotal')}
