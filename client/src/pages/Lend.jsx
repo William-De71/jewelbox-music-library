@@ -156,7 +156,7 @@ export function Lend({ navigate }) {
         <div class="row g-3">
           <div class="col-12">
             <div class="card">
-              <div class="card-header d-flex justify-content-between align-items-center">
+              <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
                 <h2 class="card-title mb-0">
                   <ArrowRightLeft size={24} class="me-2 text-warning" />
                   {t('menu.lend')}
@@ -179,7 +179,7 @@ export function Lend({ navigate }) {
                   </div>
                   <div class="card-body">
                     <div class="row g-3 align-items-end">
-                      <div class="col-md-5">
+                      <div class="col-12 col-md-5">
                         <label class="form-label">{t('lend.searchAlbum')}</label>
                         <div class="input-group position-relative">
                           <span class="input-group-text"><Search size={16} /></span>
@@ -225,7 +225,7 @@ export function Lend({ navigate }) {
                           )}
                         </div>
                       </div>
-                      <div class="col-md-4">
+                      <div class="col-12 col-sm-6 col-md-4">
                         <label class="form-label">{t('lend.borrower')}</label>
                         <div class="position-relative">
                           <div class="input-group">
@@ -257,7 +257,7 @@ export function Lend({ navigate }) {
                           )}
                         </div>
                       </div>
-                      <div class="col-md-3">
+                      <div class="col-12 col-sm-6 col-md-3">
                         <button class="btn btn-warning w-100"
                           onClick={handleLend}
                           disabled={!selectedAlbum || !borrowerName.trim()}>
@@ -286,21 +286,22 @@ export function Lend({ navigate }) {
                   <div class="list-group list-group-flush rounded">
                     {lentAlbums.map(album => (
                       <div key={album.id}
-                        class="list-group-item lend-item d-flex align-items-center gap-3 py-3">
+                        class="list-group-item lend-item d-flex flex-wrap align-items-center gap-3 py-3">
                         {album.cover_url
                           ? <img src={album.cover_url} alt=""
+                              class="d-none d-sm-block"
                               style={{ width: 52, height: 52, objectFit: 'cover', borderRadius: 4, flexShrink: 0 }} />
-                          : <div class="bg-secondary-lt rounded d-flex align-items-center justify-content-center flex-shrink-0"
+                          : <div class="bg-secondary-lt rounded d-flex align-items-center justify-content-center flex-shrink-0 d-none d-sm-flex"
                               style={{ width: 52, height: 52 }}>
                               <Music2 size={22} class="text-muted" />
                             </div>
                         }
-                        <div class="flex-grow-1 overflow-hidden" style={{ cursor: 'pointer' }}
+                        <div class="flex-grow-1 overflow-hidden" style={{ cursor: 'pointer', minWidth: 0 }}
                           onClick={() => navigate('detail', { id: album.id })}>
                           <div class="fw-semibold text-truncate">{album.title}</div>
                           <div class="text-muted small">{album.artist?.name}</div>
                         </div>
-                        <div class="d-flex align-items-center gap-3 flex-shrink-0">
+                        <div class="d-flex flex-wrap align-items-center gap-2 gap-sm-3">
                           <div class="text-end">
                             <div class="d-flex align-items-center gap-1">
                               <User size={14} class="text-warning" />
@@ -309,14 +310,15 @@ export function Lend({ navigate }) {
                             {album.lent_at && (
                               <div class="d-flex align-items-center gap-1 text-muted" style={{ fontSize: '0.72rem' }}>
                                 <Clock size={11} />
-                                {t('lend.lentSince')} {daysAgo(album.lent_at)} {t('lend.days')}
+                                <span class="d-none d-sm-inline">{t('lend.lentSince')} </span>{daysAgo(album.lent_at)} {t('lend.days')}
                               </div>
                             )}
                           </div>
                           <button class="btn btn-sm btn-outline-success"
                             onClick={() => setReturnTarget(album)}>
                             <RotateCcw size={14} class="me-1" />
-                            {t('lend.return')}
+                            <span class="d-none d-sm-inline">{t('lend.return')}</span>
+                            <span class="d-sm-none"><RotateCcw size={14} /></span>
                           </button>
                         </div>
                       </div>
