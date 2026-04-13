@@ -278,15 +278,13 @@ export function Settings({ navigate }) {
                 </h3>
               </div>
               <div class="card-body">
-                <div class="alert alert-info d-flex gap-2 align-items-start mb-4">
-                  <div>
-                    <p class="mb-1">{t('discogs.description')}</p>
-                    <p class="mb-1 text-muted small">
-                      <ExternalLink size={13} class="me-1" />
-                      {t('discogs.howTo')}
-                    </p>
-                    <span class="badge bg-secondary-lt text-muted">{t('discogs.optional')}</span>
-                  </div>
+                <div class="alert alert-info mb-4" style={{ display: 'block', columns: 'unset', columnCount: 'unset' }}>
+                  <p class="mb-1">{t('discogs.description')}</p>
+                  <p class="mb-1 text-muted small">
+                    <ExternalLink size={13} class="me-1" />
+                    {t('discogs.howTo')}
+                  </p>
+                  <span class="badge bg-secondary-lt text-muted" style={{ whiteSpace: 'normal', textAlign: 'left' }}>{t('discogs.optional')}</span>
                 </div>
 
                 {(discogsForm.discogs_key && discogsForm.discogs_secret) ? (
