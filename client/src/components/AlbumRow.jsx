@@ -5,7 +5,7 @@ export function AlbumRow({ album, onClick }) {
 
   return (
     <tr class="hover:bg-light-lt cursor-pointer" onClick={() => onClick(album)}>
-      <td class="text-center">
+      <td class="text-center d-none d-sm-table-cell">
         <div class="d-flex align-items-center justify-content-center" 
           style={{width: '40px', height: '40px'}}>
           {album.cover_url ? (
@@ -26,14 +26,14 @@ export function AlbumRow({ album, onClick }) {
       </td>
       <td class="fw-medium">{album.title}</td>
       <td class="text-muted">{album.artist?.name || album.artist}</td>
-      <td class="text-muted">{album.year || '—'}</td>
-      <td>
+      <td class="text-muted d-none d-lg-table-cell">{album.year || '—'}</td>
+      <td class="d-none d-lg-table-cell">
         {album.genre ? <span class="badge bg-primary-lt">{album.genre}</span> : '—'}
       </td>
-      <td>
+      <td class="d-none d-md-table-cell">
         <StarRating value={album.rating} readOnly />
       </td>
-      <td class="text-muted small">{album.label?.name || album.label || '—'}</td>
+      <td class="text-muted small d-none d-md-table-cell">{album.label?.name || album.label || '—'}</td>
     </tr>
   );
 }

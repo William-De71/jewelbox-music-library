@@ -237,12 +237,12 @@ export function Collections({ navigate, params = {} }) {
         <div class="row">
           <div class="col-12">
             <div class="card">
-              <div class="card-header d-flex justify-content-between align-items-center">
+              <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
                 <h2 class="card-title mb-0">
                   <Disc size={24} class="me-2 text-primary" />
                   {t('menu.collections')}
                 </h2>
-                <div class="d-flex gap-2">
+                <div class="d-flex flex-wrap gap-2">
                   {selectionMode ? (
                     <>
                       <button class="btn btn-sm btn-outline-secondary" onClick={toggleSelectAll}>
@@ -282,7 +282,7 @@ export function Collections({ navigate, params = {} }) {
                   <>
                 {/* Top controls */}
                 <div class="row g-2 align-items-center mb-4">
-                  <div class="col-md-3">
+                  <div class="col-12 col-sm-6 col-md-3">
                     <div class="d-flex align-items-center gap-2">
                       <span class="text-muted me-2">{t('dashboard.pagination.itemsPerPage')}</span>
                       <select class="form-select form-select-sm" style="width: auto;" value={limit} onChange={(e) => handleLimitChange(e.target.value)}>
@@ -294,7 +294,7 @@ export function Collections({ navigate, params = {} }) {
                       </select>
                     </div>
                   </div>
-                  <div class="col-md-5">
+                  <div class="col-12 col-md-5">
                     <div class="input-group">
                       <input
                         type="text"
@@ -315,7 +315,7 @@ export function Collections({ navigate, params = {} }) {
                       )}
                     </div>
                   </div>
-                  <div class="col-md-2">
+                  <div class="col-12 col-sm-6 col-md-2">
                     <select class="form-select" value={`${filters.sort}_${filters.order}`} onChange={(e) => {
                       const [sort, order] = e.target.value.split('_');
                       setFilters({ ...filters, sort, order });
@@ -326,15 +326,17 @@ export function Collections({ navigate, params = {} }) {
                       <option value="artist_desc">{t('filters.sortArtistDesc')}</option>
                     </select>
                   </div>
-                  <div class="col-md-2">
+                  <div class="col-12 col-md-2">
                     <div class="btn-group w-100">
                       <button class={`btn ${viewMode === 'grid' ? 'btn-primary' : 'btn-outline-secondary'}`} onClick={() => setViewMode('grid')}>
-                        <Grid size={16} class="me-1" />
-                        {t('common.grid')}
+                        <Grid size={16} class="d-none d-sm-inline me-1" />
+                        <span class="d-none d-sm-inline">{t('common.grid')}</span>
+                        <Grid size={16} class="d-sm-none" />
                       </button>
                       <button class={`btn ${viewMode === 'list' ? 'btn-primary' : 'btn-outline-secondary'}`} onClick={() => setViewMode('list')}>
-                        <List size={16} class="me-1" />
-                        {t('common.list')}
+                        <List size={16} class="d-none d-sm-inline me-1" />
+                        <span class="d-none d-sm-inline">{t('common.list')}</span>
+                        <List size={16} class="d-sm-none" />
                       </button>
                     </div>
                   </div>
@@ -346,7 +348,7 @@ export function Collections({ navigate, params = {} }) {
                     {viewMode === 'grid' && (
                       <div class="row row-cards">
                         {albums.map(album => (
-                          <div class="col-sm-6 col-lg-2 album-grid-item" key={album.id}
+                          <div class="col-6 col-sm-4 col-md-3 col-lg-2 album-grid-item" key={album.id}
                             style={{ position: 'relative' }}>
                             {selectionMode && (
                               <div
@@ -380,13 +382,13 @@ export function Collections({ navigate, params = {} }) {
                             <thead>
                               <tr>
                                 {selectionMode && <th style={{ width: 40 }}></th>}
-                                <th>{t('table.cover')}</th>
+                                <th class="d-none d-sm-table-cell">{t('table.cover')}</th>
                                 <th>{t('table.title')}</th>
                                 <th>{t('table.artist')}</th>
-                                <th>{t('table.year')}</th>
-                                <th>{t('table.genre')}</th>
-                                <th>{t('table.rating')}</th>
-                                <th>{t('table.actions')}</th>
+                                <th class="d-none d-lg-table-cell">{t('table.year')}</th>
+                                <th class="d-none d-lg-table-cell">{t('table.genre')}</th>
+                                <th class="d-none d-md-table-cell">{t('table.rating')}</th>
+                                <th class="d-none d-md-table-cell">{t('table.label')}</th>
                               </tr>
                             </thead>
                             <tbody>

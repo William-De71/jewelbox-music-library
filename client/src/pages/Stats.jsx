@@ -230,30 +230,22 @@ export function Stats({ navigate }) {
                               <h3 class="card-title fs-5 mb-0">🎸 {t('stats.byGenre')}</h3>
                             </div>
                             <div class="card-body">
-                              <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: '1.5rem' }}>
-                                <div />
-                                <DonutChart data={genreData} />
-                                <div class="d-flex gap-2">
-                                  {[genreData.slice(0, Math.ceil(genreData.length / 2)), genreData.slice(Math.ceil(genreData.length / 2))].map((half, col) => (
-                                    <div key={col} class="d-flex flex-column gap-1">
-                                      {half.map((g, j) => {
-                                        const i = col === 0 ? j : Math.ceil(genreData.length / 2) + j;
-                                        return (
-                                          <span key={i} style={{
-                                            background: PALETTE[i % PALETTE.length] + '28',
-                                            color: PALETTE[i % PALETTE.length],
-                                            border: `1px solid ${PALETTE[i % PALETTE.length]}88`,
-                                            borderRadius: 5,
-                                            padding: '3px 8px',
-                                            fontSize: '0.72rem',
-                                            fontWeight: 600,
-                                            whiteSpace: 'nowrap',
-                                          }}>
-                                            {g.label}
-                                          </span>
-                                        );
-                                      })}
-                                    </div>
+                              <div class="d-flex flex-column align-items-center gap-3">
+                                <div class="flex-shrink-0">
+                                  <DonutChart data={genreData} />
+                                </div>
+                                <div class="d-flex flex-wrap gap-2 justify-content-center" style={{ maxWidth: '100%', padding: '0 1rem' }}>
+                                  {genreData.map((g, i) => (
+                                    <span key={i} class="badge" style={{
+                                      background: PALETTE[i % PALETTE.length] + '28',
+                                      color: PALETTE[i % PALETTE.length],
+                                      border: `1px solid ${PALETTE[i % PALETTE.length]}88`,
+                                      fontSize: '0.7rem',
+                                      fontWeight: 600,
+                                      padding: '0.35rem 0.65rem',
+                                    }}>
+                                      {g.label}
+                                    </span>
                                   ))}
                                 </div>
                               </div>

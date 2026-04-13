@@ -1,19 +1,36 @@
-import { Home, Disc, Heart, ArrowRightLeft, BarChart3, Settings, Info } from 'lucide-preact';
+import { useState } from 'preact/hooks';
+import { Home, Disc, Heart, ArrowRightLeft, BarChart3, Settings, Info, Menu, X } from 'lucide-preact';
 import { useI18n } from '../config/i18n/index.jsx';
 import '../styles/topmenu.css';
 
 export function TopMenu({ currentPage, navigate }) {
   const { t } = useI18n();
+  const [isOpen, setIsOpen] = useState(false);
+  
+  const handleNavigate = (page) => {
+    navigate(page);
+    setIsOpen(false);
+  };
   
   return (
-    <nav class="navbar navbar-expand">
+    <nav class="navbar navbar-expand-lg">
       <div class="container">
-        <ul class="navbar-nav me-auto">
+        <button 
+          class="navbar-toggler" 
+          type="button" 
+          onClick={() => setIsOpen(!isOpen)}
+          aria-label="Toggle navigation"
+        >
+          {isOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
+        
+        <div class={`collapse navbar-collapse ${isOpen ? 'show' : ''}`}>
+          <ul class="navbar-nav me-auto">
           <li class="nav-item">
             <a 
               class={`nav-link ${currentPage === 'dashboard' ? 'active' : ''}`}
               href="#"
-              onClick={(e) => { e.preventDefault(); navigate('dashboard'); }}
+              onClick={(e) => { e.preventDefault(); handleNavigate('dashboard'); }}
             >
               <Home size={20} class="me-2" />
               {t('common.home')}
@@ -23,7 +40,7 @@ export function TopMenu({ currentPage, navigate }) {
             <a 
               class={`nav-link ${currentPage === 'collections' ? 'active' : ''}`}
               href="#"
-              onClick={(e) => { e.preventDefault(); navigate('collections'); }}
+              onClick={(e) => { e.preventDefault(); handleNavigate('collections'); }}
             >
               <Disc size={20} class="me-2" />
               {t('menu.collections')}
@@ -33,7 +50,7 @@ export function TopMenu({ currentPage, navigate }) {
             <a 
               class={`nav-link ${currentPage === 'wantlist' ? 'active' : ''}`}
               href="#"
-              onClick={(e) => { e.preventDefault(); navigate('wantlist'); }}
+              onClick={(e) => { e.preventDefault(); handleNavigate('wantlist'); }}
             >
               <Heart size={20} class="me-2" />
               {t('menu.wantlist')}
@@ -43,7 +60,7 @@ export function TopMenu({ currentPage, navigate }) {
             <a 
               class={`nav-link ${currentPage === 'lend' ? 'active' : ''}`}
               href="#"
-              onClick={(e) => { e.preventDefault(); navigate('lend'); }}
+              onClick={(e) => { e.preventDefault(); handleNavigate('lend'); }}
             >
               <ArrowRightLeft size={20} class="me-2" />
               {t('menu.lend')}
@@ -53,7 +70,7 @@ export function TopMenu({ currentPage, navigate }) {
             <a 
               class={`nav-link ${currentPage === 'stats' ? 'active' : ''}`}
               href="#"
-              onClick={(e) => { e.preventDefault(); navigate('stats'); }}
+              onClick={(e) => { e.preventDefault(); handleNavigate('stats'); }}
             >
               <BarChart3 size={20} class="me-2" />
               {t('menu.stats')}
@@ -65,7 +82,7 @@ export function TopMenu({ currentPage, navigate }) {
             <a 
               class={`nav-link ${currentPage === 'settings' ? 'active' : ''}`}
               href="#"
-              onClick={(e) => { e.preventDefault(); navigate('settings'); }}
+              onClick={(e) => { e.preventDefault(); handleNavigate('settings'); }}
             >
               <Settings size={20} class="me-2" />
               {t('menu.settings')}
@@ -75,13 +92,14 @@ export function TopMenu({ currentPage, navigate }) {
             <a 
               class={`nav-link ${currentPage === 'about' ? 'active' : ''}`}
               href="#"
-              onClick={(e) => { e.preventDefault(); navigate('about'); }}
+              onClick={(e) => { e.preventDefault(); handleNavigate('about'); }}
             >
               <Info size={20} class="me-2" />
               À propos
             </a>
           </li>
         </ul>
+        </div>
       </div>
     </nav>
   );

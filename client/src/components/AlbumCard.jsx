@@ -17,7 +17,7 @@ export function AlbumCard({ album, onClick, onEdit, onDelete, onLend, onRate }) 
               <img 
                 src={album.cover_url} 
                 alt={album.title}
-                class="img-fluid w-100 h-100 object-fit-cover p-3"
+                class="img-fluid w-100 h-100 object-fit-cover p-2"
                 onError={(e) => {
                   e.target.style.display = 'none';
                   // Show placeholder by replacing the img
