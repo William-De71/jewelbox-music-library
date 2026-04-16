@@ -17,16 +17,21 @@ export function Collections({ navigate, params = {} }) {
   const [activeDatabase, setActiveDatabase] = useState(null);
   const [dbCheckComplete, setDbCheckComplete] = useState(false);
   const [viewMode, setViewMode] = useState(() => {
-    const saved = localStorage.getItem('jewelbox-viewMode');
+    const saved = localStorage.getItem('jewelbox-collections-viewMode');
     return saved || 'grid';
   });
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 576);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(() => {
-    const saved = localStorage.getItem('jewelbox-limit');
+    const saved = localStorage.getItem('jewelbox-collections-limit');
     return saved ? Number(saved) : DEFAULT_LIMIT;
   });
   const [genres, setGenres] = useState([]);
-  const [filters, setFilters] = useState({ genre: '', rating: '', search: params.search || '', sort: 'artist', order: 'asc' });
+  const [filters, setFilters] = useState(() => {
+    const savedSort = localStorage.getItem('jewelbox-collections-sort') || 'artist';
+    const savedOrder = localStorage.getItem('jewelbox-collections-order') || 'asc';
+    return { genre: '', rating: '', search: params.search || '', sort: savedSort, order: savedOrder };
+  });
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [lendTarget, setLendTarget] = useState(null);
   const [selectionMode, setSelectionMode] = useState(false);
@@ -49,8 +54,18 @@ export function Collections({ navigate, params = {} }) {
 
   // Save viewMode to localStorage when it changes
   useEffect(() => {
-    localStorage.setItem('jewelbox-viewMode', viewMode);
+    localStorage.setItem('jewelbox-collections-viewMode', viewMode);
   }, [viewMode]);
+
+  // Listen for window resize to detect mobile
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 576);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Effective view mode: force list on mobile
+  const effectiveViewMode = isMobile ? 'list' : viewMode;
 
   useEffect(() => {
     const loadData = async () => {
@@ -90,8 +105,14 @@ export function Collections({ navigate, params = {} }) {
   }, [page, limit, filters, activeDatabase]);
 
   useEffect(() => {
-    localStorage.setItem('jewelbox-limit', limit);
+    localStorage.setItem('jewelbox-collections-limit', limit);
   }, [limit]);
+
+  // Save sort preferences to localStorage
+  useEffect(() => {
+    localStorage.setItem('jewelbox-collections-sort', filters.sort);
+    localStorage.setItem('jewelbox-collections-order', filters.order);
+  }, [filters.sort, filters.order]);
 
   const setFilter = (key, value) => {
     const next = { ...filters, [key]: value };
@@ -102,7 +123,7 @@ export function Collections({ navigate, params = {} }) {
   const handleLimitChange = (newLimit) => {
     setLimit(Number(newLimit));
     setPage(1);
-    localStorage.setItem('jewelbox-limit', newLimit);
+    localStorage.setItem('jewelbox-collections-limit', newLimit);
   };
 
   const handleSearch = (e) => {
@@ -326,17 +347,15 @@ export function Collections({ navigate, params = {} }) {
                       <option value="artist_desc">{t('filters.sortArtistDesc')}</option>
                     </select>
                   </div>
-                  <div class="col-12 col-md-2">
+                  <div class="col-12 col-md-2 d-none d-sm-block">
                     <div class="btn-group w-100">
                       <button class={`btn ${viewMode === 'grid' ? 'btn-primary' : 'btn-outline-secondary'}`} onClick={() => setViewMode('grid')}>
-                        <Grid size={16} class="d-none d-sm-inline me-1" />
-                        <span class="d-none d-sm-inline">{t('common.grid')}</span>
-                        <Grid size={16} class="d-sm-none" />
+                        <Grid size={16} class="me-1" />
+                        {t('common.grid')}
                       </button>
                       <button class={`btn ${viewMode === 'list' ? 'btn-primary' : 'btn-outline-secondary'}`} onClick={() => setViewMode('list')}>
-                        <List size={16} class="d-none d-sm-inline me-1" />
-                        <span class="d-none d-sm-inline">{t('common.list')}</span>
-                        <List size={16} class="d-sm-none" />
+                        <List size={16} class="me-1" />
+                        {t('common.list')}
                       </button>
                     </div>
                   </div>
@@ -345,7 +364,7 @@ export function Collections({ navigate, params = {} }) {
                 {/* Grid/List content */}
                 {albums.length > 0 ? (
                   <>
-                    {viewMode === 'grid' && (
+                    {effectiveViewMode === 'grid' && (
                       <div class="row row-cards">
                         {albums.map(album => (
                           <div class="col-6 col-sm-4 col-md-3 col-lg-2 album-grid-item" key={album.id}
@@ -375,7 +394,7 @@ export function Collections({ navigate, params = {} }) {
                       </div>
                     )}
 
-                    {viewMode === 'list' && (
+                    {effectiveViewMode === 'list' && (
                       <div class="card">
                         <div class="table-responsive">
                           <table class="table table-vcenter card-table">
