@@ -157,7 +157,7 @@ npm run test:coverage --workspace=server
 | Paramètre | Type    | Description                             |
 |-----------|---------|-----------------------------------------|
 | `page`    | entier  | Numéro de page (défaut : 1)             |
-| `limit`   | entier  | Albums par page (défaut : 24, max : 100)|
+| `limit`   | entier  | Albums par page (défaut : 24)           |
 | `genre`   | texte   | Filtrer par genre                       |
 | `rating`  | entier  | Filtrer par note (1-5)                  |
 | `sort`    | texte   | `title`, `artist`, `year`, `rating`     |

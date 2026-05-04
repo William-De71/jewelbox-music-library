@@ -12,7 +12,7 @@ export async function albumRoutes(fastify) {
       const { page, limit, genre, rating, sort, order, search, lent, wanted } = req.query;
       const result = getAlbums({
         page: page ? Number(page) : 1,
-        limit: limit ? Math.min(Number(limit), 100) : 24,
+        limit: limit ? Number(limit) : 24,
         genre, rating, sort, order, search, lent, wanted,
       });
       return result;
