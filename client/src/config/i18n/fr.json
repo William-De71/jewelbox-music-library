@@ -36,7 +36,11 @@
     "albums": "Albums",
     "lent": "Prêtés",
     "genres": "Genres",
-    "rated": "Notés"
+    "rated": "Notés",
+    "scrollToTop": "Remonter en haut",
+    "addSuccess": "Album ajouté avec succès",
+    "addWishSuccess": "Souhait ajouté avec succès",
+    "updateSuccess": "Album modifié avec succès"
   },
   "home": {
     "searchPlaceholder": "Rechercher un album, un artiste...",
@@ -165,6 +169,7 @@
     },
     "actions": {
       "save": "Enregistrer",
+      "saveAndAdd": "Enregistrer et ajouter",
       "cancel": "Annuler",
       "delete": "Supprimer",
       "confirmDelete": "Êtes-vous sûr de vouloir supprimer cet album ?",

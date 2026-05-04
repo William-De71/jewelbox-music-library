@@ -189,7 +189,7 @@ export function WantList({ navigate, params = {} }) {
                   <Heart size={24} class="me-2 text-danger" />
                   {t('menu.wantlist')}
                 </h2>
-                <button class="btn btn-danger btn-sm" onClick={() => navigate('add', { fromWantList: true })}>
+                <button class="btn btn-danger btn-sm" onClick={() => navigate('add', { fromWantList: true, returnPage: page })}>
                   <Plus size={16} class="me-1" />
                   {t('wantlist.addToWishlist')}
                 </button>
@@ -335,7 +335,7 @@ export function WantList({ navigate, params = {} }) {
                         </p>
                         {!filters.search && (
                           <div class="mt-3">
-                            <button class="btn btn-danger" onClick={() => navigate('add', { fromWantList: true })}>
+                            <button class="btn btn-danger" onClick={() => navigate('add', { fromWantList: true, returnPage: page })}>
                               <Plus size={16} class="me-1" />
                               {t('wantlist.addToWishlist')}
                             </button>

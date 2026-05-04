@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'preact/hooks';
 import { api } from '../api/client.js';
 import { StarRating } from '../components/StarRating.jsx';
-import { Plus, ArrowLeft, Pencil, AlertCircle, Search, ChevronRight, Upload, Info, ListOrdered, X, Music2, Save, ImageIcon, CopyX } from 'lucide-preact';
+import { Plus, ArrowLeft, Pencil, AlertCircle, Search, ChevronRight, Upload, Info, ListOrdered, X, Music2, Save, ImageIcon, CopyX, FastForward } from 'lucide-preact';
 import { useI18n } from '../config/i18n/index.jsx';
 
 function Combobox({ value, onChange, options = [], placeholder, required, id }) {
@@ -75,6 +75,7 @@ export function AlbumForm({ navigate, albumId, params = {} }) {
   const { t } = useI18n();
   const isEdit = Boolean(albumId);
   const fromWantList = Boolean(params.fromWantList);
+  const returnPage = params.returnPage || 1;
   const [form, setForm] = useState({ ...EMPTY_FORM, is_wanted: fromWantList });
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -93,6 +94,7 @@ export function AlbumForm({ navigate, albumId, params = {} }) {
   const [toast, setToast] = useState(null);
   const [duplicateWarning, setDuplicateWarning] = useState(null);
   const coverInputRef = useRef();
+  const searchInputRef = useRef();
 
   // Load known artists, labels, genres for datalists
   useEffect(() => {
@@ -106,6 +108,13 @@ export function AlbumForm({ navigate, albumId, params = {} }) {
       setKnownGenres(genres);
     });
   }, []);
+
+  // Auto-focus search input when adding a new album
+  useEffect(() => {
+    if (!isEdit && searchInputRef.current && !params.initialSearch) {
+      searchInputRef.current.focus();
+    }
+  }, [isEdit, params.initialSearch]);
 
   // Auto-trigger search if launched from quick add
   useEffect(() => {
@@ -169,7 +178,7 @@ export function AlbumForm({ navigate, albumId, params = {} }) {
     } catch { setDuplicateWarning(null); }
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e, saveAndAddAnother = false) => {
     e.preventDefault();
     setSaving(true);
     setError(null);
@@ -182,10 +191,30 @@ export function AlbumForm({ navigate, albumId, params = {} }) {
       };
       if (isEdit) {
         await api.updateAlbum(albumId, payload);
+        showToast(t('albumForm.updateSuccess'), 'success');
       } else {
         await api.createAlbum(payload);
+        if (fromWantList) {
+          showToast(t('albumForm.addWishSuccess'), 'success');
+          if (saveAndAddAnother) {
+            setForm({ ...EMPTY_FORM, is_wanted: true });
+            setSearchQuery('');
+            searchInputRef.current?.focus();
+          } else {
+            setForm({ ...EMPTY_FORM, is_wanted: true });
+            setSearchQuery('');
+          }
+        } else {
+          if (saveAndAddAnother) {
+            showToast(t('albumForm.addSuccess'), 'success');
+            setForm({ ...EMPTY_FORM, is_wanted: false });
+            setSearchQuery('');
+            searchInputRef.current?.focus();
+          } else {
+            navigate('collections', { page: returnPage, successMessage: t('albumForm.addSuccess') });
+          }
+        }
       }
-      navigate(fromWantList ? 'wantlist' : 'collections');
     } catch (e) {
       showToast(e.message, 'danger');
     } finally {
@@ -314,7 +343,13 @@ export function AlbumForm({ navigate, albumId, params = {} }) {
       <div class="page-header d-print-none mb-3">
         <div class="row align-items-center">
           <div class="col-auto">
-            <button class="btn btn-outline-secondary" onClick={() => navigate(fromWantList ? 'wantlist' : 'collections')}>
+            <button class="btn btn-outline-secondary" onClick={() => {
+              if (fromWantList) {
+                navigate('wantlist', { page: returnPage });
+              } else {
+                navigate('collections', { page: returnPage });
+              }
+            }}>
               <ArrowLeft size={16} class="me-1" />{t('common.back')}
             </button>
           </div>
@@ -376,6 +411,7 @@ export function AlbumForm({ navigate, albumId, params = {} }) {
               <label class="form-label small">{t('albumForm.externalSearchPlaceholder')}</label>
               <div class="input-group">
                 <input
+                  ref={searchInputRef}
                   type="text"
                   class="form-control"
                   placeholder={t('albumForm.externalSearchPlaceholder')}
@@ -711,16 +747,31 @@ export function AlbumForm({ navigate, albumId, params = {} }) {
           </div>
 
           {/* Form actions */}
-          <div class="col-12 d-flex gap-2 justify-content-end mb-4">
-            <button type="button" class="btn" onClick={() => navigate(fromWantList ? 'wantlist' : 'collections')}>
-              {t('albumForm.actions.cancel')}
-            </button>
-            <button type="submit" class="btn btn-primary btn-fixed-height" disabled={saving}>
+          <div class="col-12 d-flex flex-column flex-sm-row gap-2 justify-content-end mb-4">
+            <button type="submit" class="btn btn-primary" disabled={saving}>
               {saving ? (
                 <><span class="spinner-border spinner-border-xs me-1"></span><span>{t('common.loading')}</span></>
               ) : (
                 <>{isEdit ? <Save size={16} class="me-1" /> : <Plus size={16} class="me-1" />}<span>{t('albumForm.actions.save')}</span></>
               )}
+            </button>
+            {!isEdit && (
+              <button type="button" class="btn btn-outline-secondary" disabled={saving} onClick={(e) => handleSubmit(e, true)}>
+                {saving ? (
+                  <><span class="spinner-border spinner-border-xs me-1"></span><span>{t('common.loading')}</span></>
+                ) : (
+                  <span>{t('albumForm.actions.saveAndAdd')}</span>
+                )}
+              </button>
+            )}
+            <button type="button" class="btn btn-outline-secondary" onClick={() => {
+              if (fromWantList) {
+                navigate('wantlist', { page: returnPage });
+              } else {
+                navigate('collections', { page: returnPage });
+              }
+            }}>
+              {t('albumForm.actions.cancel')}
             </button>
           </div>
         </div>

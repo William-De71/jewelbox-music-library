@@ -285,7 +285,7 @@ export function Collections({ navigate, params = {} }) {
                       <button class="btn btn-outline-secondary btn-sm" onClick={() => setSelectionMode(true)}>
                         <CheckSquare size={16} class="me-1" />{t('common.select')}
                       </button>
-                      <button class="btn btn-primary btn-sm" onClick={() => navigate('add')}>
+                      <button class="btn btn-primary btn-sm" onClick={() => navigate('add', { returnPage: page })}>
                         <Plus size={16} class="me-1" />{t('common.addAlbum')}
                       </button>
                     </>
@@ -471,7 +471,7 @@ export function Collections({ navigate, params = {} }) {
                     </p>
                     <div class="mt-3">
                       {total === 0 && !filters.search ? (
-                        <button class="btn btn-primary" onClick={() => navigate('add')}>
+                        <button class="btn btn-primary" onClick={() => navigate('add', { returnPage: page })}>
                           <Plus size={16} class="me-1" />
                           {t('common.addAlbum')}
                         </button>
