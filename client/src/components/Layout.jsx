@@ -39,7 +39,7 @@ export function Layout({ children, navigate, currentPage }) {
 
   return (
     <div class="layout-horizontal">
-      <Header onThemeToggle={toggleTheme} isDark={isDark} />
+      <Header onThemeToggle={toggleTheme} isDark={isDark} navigate={navigate} />
       <TopMenu currentPage={currentPage} navigate={navigate} />
       <main class="main-content">
         {children}

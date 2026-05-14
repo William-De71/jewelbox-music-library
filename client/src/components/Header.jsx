@@ -1,14 +1,20 @@
 import { useI18n } from '../config/i18n/index.jsx';
 import { Sun, Moon } from 'lucide-preact';
 
-export function Header({ onThemeToggle, isDark }) {
+export function Header({ onThemeToggle, isDark, navigate }) {
   const { t } = useI18n();
-  
+
+  const handleBrandClick = () => {
+    if (navigate) {
+      navigate('dashboard');
+    }
+  };
+
   return (
     <header class="header-top">
       <div class="container">
         <div class="d-flex align-items-center justify-content-between py-3">
-          <div class="header-brand">
+          <div class="header-brand" style={{ cursor: navigate ? 'pointer' : 'default' }} onClick={handleBrandClick}>
             <div class="d-flex align-items-center gap-2">
               <img src="/icons/icon-192.png" width="36" height="36" alt="JewelBox" style={{ borderRadius: '8px' }} />
               <div>
@@ -18,8 +24,8 @@ export function Header({ onThemeToggle, isDark }) {
             </div>
           </div>
           <div class="header-actions">
-            <button 
-              class="theme-toggle" 
+            <button
+              class="theme-toggle"
               onClick={onThemeToggle}
               title={isDark ? t('common.lightMode') : t('common.darkMode')}
             >
