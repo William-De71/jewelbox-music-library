@@ -153,6 +153,26 @@ export async function albumRoutes(fastify) {
       if ('ean' in data && (!data.ean || String(data.ean).trim() === '')) {
         delete data.ean;
       }
+
+      // If cover_url is from external sources, download it locally
+      if (data.cover_url && (
+        data.cover_url.includes('coverartarchive.org') ||
+        data.cover_url.includes('discogs.com') ||
+        data.cover_url.includes('i.discogs.com')
+      )) {
+        const source = data.cover_url.includes('discogs.com') ? 'Discogs' : 'MusicBrainz';
+        console.log(`[UpdateAlbum] Downloading cover from ${source}: ${data.cover_url}`);
+        const localCoverUrl = await downloadCover(data.cover_url);
+        if (localCoverUrl) {
+          data.cover_url = localCoverUrl;
+          console.log(`[UpdateAlbum] Cover downloaded successfully: ${localCoverUrl}`);
+        } else {
+          console.log(`[UpdateAlbum] Cover download failed, keeping original URL: ${data.cover_url}`);
+        }
+      } else if (data.cover_url) {
+        console.log(`[UpdateAlbum] No external cover URL detected: ${data.cover_url}`);
+      }
+
       const album = updateAlbum(Number(req.params.id), data);
       if (!album) return reply.code(404).send({ error: 'Album not found' });
       return album;

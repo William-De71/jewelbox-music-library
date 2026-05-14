@@ -527,11 +527,16 @@ export function AlbumForm({ navigate, albumId, params = {} }) {
               <div class="card-body d-flex flex-column align-items-center gap-3">
                 <div class="position-relative cover-preview">
                   {form.cover_url ? (
-                    <img 
-                      src={form.cover_url} 
-                      alt={form.title || 'Album cover'} 
+                    <img
+                      src={form.cover_url}
+                      alt={form.title || 'Album cover'}
                       class="w-100 h-100 rounded object-fit-cover"
-                      onError={(e) => { e.target.style.display = 'none'; }}
+                      onError={(e) => {
+                        // If image fails to load and it's a remote URL, try to show a placeholder
+                        if (e.target.src.includes('http')) {
+                          e.target.style.display = 'none';
+                        }
+                      }}
                     />
                   ) : (
                     <div class="w-100 h-100 d-flex align-items-center justify-content-center bg-secondary-subtle rounded">
