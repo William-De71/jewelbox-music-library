@@ -92,7 +92,7 @@ export function getAlbums({ page = 1, limit = 24, genre, rating, sort = 'title',
   const sortCol = validSorts[sort] || 'a.title';
   const sortDir = order === 'desc' ? 'DESC' : 'ASC';
 
-  const rows = db.prepare(`${ALBUM_SELECT} ${where} ORDER BY ${sortCol} COLLATE NOCASE ${sortDir} LIMIT ? OFFSET ?`)
+  const rows = db.prepare(`${ALBUM_SELECT} ${where} ORDER BY ${sortCol} COLLATE NOCASE ${sortDir}, a.year ASC LIMIT ? OFFSET ?`)
     .all(...params, limit, offset);
 
   const { total } = db.prepare(`
