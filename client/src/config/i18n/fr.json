@@ -133,6 +133,10 @@
     "duplicateWarning": "Cet album existe peut-être déjà dans votre collection.",
     "viewExisting": "Voir l'album existant →",
     "clear": "Effacer",
+    "updateSuccess": "Album modifié avec succès",
+    "addSuccess": "Album ajouté avec succès",
+    "addWishSuccess": "Souhait ajouté avec succès",
+    "loadError": "Erreur lors du chargement de l'album",
     "infoTitle": "Informations",
     "tracksTitle": "Pistes",
     "form": {
