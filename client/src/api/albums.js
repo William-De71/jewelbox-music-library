@@ -31,6 +31,14 @@ export const albumsApi = {
     return response.json();
   },
 
+  // Get available first letters of artist names
+  async getArtistLetters(wanted) {
+    const query = wanted !== undefined ? `?wanted=${wanted}` : '';
+    const response = await fetch(`${API_BASE}/albums/artist-letters${query}`);
+    if (!response.ok) return [];
+    return response.json();
+  },
+
   // Get labels from active database
   async getLabels() {
     const response = await fetch(`${API_BASE}/albums/labels`);

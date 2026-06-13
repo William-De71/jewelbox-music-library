@@ -255,7 +255,9 @@
     "sortTitleAsc": "Titre A→Z",
     "sortTitleDesc": "Titre Z→A",
     "sortArtistAsc": "Artiste A→Z",
-    "sortArtistDesc": "Artiste Z→A"
+    "sortArtistDesc": "Artiste Z→A",
+    "allArtists": "Tous les artistes",
+    "allArtistsShort": "Tous"
   },
   "stats": {
     "albums": "{count} album",

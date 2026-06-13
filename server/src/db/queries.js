@@ -71,7 +71,7 @@ function mapAlbum(row) {
   };
 }
 
-export function getAlbums({ page = 1, limit = 24, genre, rating, sort = 'title', order = 'asc', search, lent, wanted } = {}) {
+export function getAlbums({ page = 1, limit = 24, genre, rating, sort = 'title', order = 'asc', search, lent, wanted, letter } = {}) {
   const db = getDb();
   const offset = (page - 1) * limit;
   const conditions = [];
@@ -86,6 +86,7 @@ export function getAlbums({ page = 1, limit = 24, genre, rating, sort = 'title',
   if (lent === 'true' || lent === true) { conditions.push('a.is_lent = 1'); }
   if (wanted === 'true' || wanted === true) { conditions.push('a.is_wanted = 1'); }
   if (wanted === 'false' || wanted === false) { conditions.push('a.is_wanted = 0'); }
+  if (letter) { conditions.push("UPPER(SUBSTR(ar.name, 1, 1)) = ?"); params.push(letter.toUpperCase()); }
 
   const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
   const validSorts = { title: 'a.title', artist: 'ar.name', year: 'a.year', rating: 'a.rating', created_at: 'a.created_at' };
@@ -208,6 +209,21 @@ export function deleteAlbum(id) {
 
 export function getGenres() {
   return getDb().prepare('SELECT DISTINCT genre FROM albums WHERE genre IS NOT NULL ORDER BY genre COLLATE NOCASE').all().map(r => r.genre);
+}
+
+export function getArtistLetters({ wanted } = {}) {
+  const db = getDb();
+  const conditions = [];
+  if (wanted === 'true' || wanted === true) conditions.push('a.is_wanted = 1');
+  if (wanted === 'false' || wanted === false) conditions.push('a.is_wanted = 0');
+  const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
+  return db.prepare(`
+    SELECT DISTINCT UPPER(SUBSTR(ar.name, 1, 1)) AS letter
+    FROM albums a
+    JOIN artists ar ON ar.id = a.artist_id
+    ${where}
+    ORDER BY letter
+  `).all().map(r => r.letter);
 }
 
 export function getStats() {

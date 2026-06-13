@@ -1,4 +1,16 @@
 /* Collections page styles */
+
+.alphabet-filter {
+  row-gap: 2px;
+}
+
+.alphabet-filter .alphabet-letter {
+  min-width: 28px;
+  padding: 2px 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  line-height: 1.4;
+}
 .page-container {
   padding: 20px;
 }
