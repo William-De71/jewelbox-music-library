@@ -7,6 +7,7 @@ import { AlbumRowMobile } from '../components/AlbumRowMobile.jsx';
 import { Pagination } from '../components/Pagination.jsx';
 import { useI18n } from '../config/i18n/index.jsx';
 import { Search, Grid, List, X, Plus, Heart, Database, Music, CheckCheck, Settings } from 'lucide-preact';
+import { AlphabetFilter } from '../components/AlphabetFilter.jsx';
 
 const DEFAULT_LIMIT = 24;
 
@@ -24,10 +25,11 @@ const [isMobile, setIsMobile] = useState(() => window.innerWidth < 576);
     const saved = localStorage.getItem('jewelbox-wantlist-limit');
     return saved ? Number(saved) : DEFAULT_LIMIT;
   });
+  const [availableLetters, setAvailableLetters] = useState([]);
   const [filters, setFilters] = useState(() => {
     const savedSort = localStorage.getItem('jewelbox-wantlist-sort') || 'artist';
     const savedOrder = localStorage.getItem('jewelbox-wantlist-order') || 'asc';
-    return { genre: '', rating: '', search: '', sort: savedSort, order: savedOrder };
+    return { genre: '', rating: '', search: '', sort: savedSort, order: savedOrder, letter: '' };
   });
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [acquireTarget, setAcquireTarget] = useState(null);
@@ -62,6 +64,11 @@ const [isMobile, setIsMobile] = useState(() => window.innerWidth < 576);
     };
     loadData();
   }, []);
+
+  useEffect(() => {
+    if (!activeDatabase) return;
+    albumsApi.getArtistLetters('true').then(setAvailableLetters).catch(() => {});
+  }, [activeDatabase]);
 
   useEffect(() => {
     const loadAlbums = async () => {
@@ -181,7 +188,7 @@ const [isMobile, setIsMobile] = useState(() => window.innerWidth < 576);
         <div class="row">
           <div class="col-12">
             <div class="card">
-              <div class="card-header d-flex justify-content-between align-items-center">
+              <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
                 <h2 class="card-title mb-0">
                   <Heart size={24} class="me-2 text-danger" />
                   {t('menu.wantlist')}
@@ -201,7 +208,7 @@ const [isMobile, setIsMobile] = useState(() => window.innerWidth < 576);
                 {!loading && (
                   <>
                     {/* Top controls */}
-                    <div class="row g-2 align-items-center mb-4">
+                    <div class="row g-2 align-items-center mb-3">
                       <div class="col-12 col-sm-6 col-md-3">
                         <div class="d-flex align-items-center gap-2">
                           <span class="text-muted me-2">{t('dashboard.pagination.itemsPerPage')}</span>
@@ -258,6 +265,15 @@ const [isMobile, setIsMobile] = useState(() => window.innerWidth < 576);
                           </button>
                         </div>
                       </div>
+                    </div>
+
+                    {/* Alphabet filter */}
+                    <div class="mb-4 d-flex justify-content-center">
+                      <AlphabetFilter
+                        activeLetter={filters.letter}
+                        availableLetters={availableLetters}
+                        onChange={(letter) => { setFilter('letter', letter || ''); }}
+                      />
                     </div>
 
                     {albums.length > 0 ? (

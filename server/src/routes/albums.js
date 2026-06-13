@@ -1,23 +1,32 @@
 import {
   getAlbums, getAlbumById, createAlbum, updateAlbum, deleteAlbum, getGenres, getAllArtists, getAllLabels, getStats, getBorrowers,
-  getLoanHistory, addLoanHistory, closeLoan,
+  getLoanHistory, addLoanHistory, closeLoan, getArtistLetters,
 } from '../db/queries.js';
 import { downloadCover } from '../utils/downloadCover.js';
 import { getDb } from '../db/database.js';
 
 export async function albumRoutes(fastify) {
-  // GET /api/albums?page=1&limit=24&genre=Rock&rating=5&sort=title&order=asc&search=
+  // GET /api/albums?page=1&limit=24&genre=Rock&rating=5&sort=title&order=asc&search=&letter=A
   fastify.get('/albums', async (req, reply) => {
     try {
-      const { page, limit, genre, rating, sort, order, search, lent, wanted } = req.query;
+      const { page, limit, genre, rating, sort, order, search, lent, wanted, letter } = req.query;
       const result = getAlbums({
         page: page ? Number(page) : 1,
         limit: limit ? Number(limit) : 24,
-        genre, rating, sort, order, search, lent, wanted,
+        genre, rating, sort, order, search, lent, wanted, letter,
       });
       return result;
     } catch (err) {
       console.error('[GetAlbums] Error:', err);
+      return reply.code(500).send({ error: err.message });
+    }
+  });
+
+  // GET /api/albums/artist-letters?wanted=false
+  fastify.get('/albums/artist-letters', async (req, reply) => {
+    try {
+      return getArtistLetters({ wanted: req.query.wanted });
+    } catch (err) {
       return reply.code(500).send({ error: err.message });
     }
   });

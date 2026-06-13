@@ -7,6 +7,7 @@ import { AlbumRowMobile } from '../components/AlbumRowMobile.jsx';
 import { Pagination } from '../components/Pagination.jsx';
 import { useI18n } from '../config/i18n/index.jsx';
 import { Search, Grid, List, X, Plus, Disc, Database, AlertCircle, Music, CheckSquare, Square, Trash2, Settings } from 'lucide-preact';
+import { AlphabetFilter } from '../components/AlphabetFilter.jsx';
 
 const DEFAULT_LIMIT = 24;
 
@@ -28,10 +29,11 @@ export function Collections({ navigate, params = {} }) {
     return saved ? Number(saved) : DEFAULT_LIMIT;
   });
   const [genres, setGenres] = useState([]);
+  const [availableLetters, setAvailableLetters] = useState([]);
   const [filters, setFilters] = useState(() => {
     const savedSort = localStorage.getItem('jewelbox-collections-sort') || 'artist';
     const savedOrder = localStorage.getItem('jewelbox-collections-order') || 'asc';
-    return { genre: '', rating: '', search: params.search || '', sort: savedSort, order: savedOrder };
+    return { genre: '', rating: '', search: params.search || '', sort: savedSort, order: savedOrder, letter: '' };
   });
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [lendTarget, setLendTarget] = useState(null);
@@ -79,6 +81,11 @@ export function Collections({ navigate, params = {} }) {
     };
     loadData();
   }, []);
+
+  useEffect(() => {
+    if (!activeDatabase) return;
+    albumsApi.getArtistLetters('false').then(setAvailableLetters).catch(() => {});
+  }, [activeDatabase]);
 
   useEffect(() => {
     const loadAlbums = async () => {
@@ -297,7 +304,7 @@ export function Collections({ navigate, params = {} }) {
                 {!loading && (
                   <>
                 {/* Top controls */}
-                <div class="row g-2 align-items-center mb-4">
+                <div class="row g-2 align-items-center mb-3">
                   <div class="col-12 col-sm-6 col-md-3">
                     <div class="d-flex align-items-center gap-2">
                       <span class="text-muted me-2">{t('dashboard.pagination.itemsPerPage')}</span>
@@ -354,6 +361,15 @@ export function Collections({ navigate, params = {} }) {
                       </button>
                     </div>
                   </div>
+                </div>
+
+                {/* Alphabet filter */}
+                <div class="mb-4 d-flex justify-content-center">
+                  <AlphabetFilter
+                    activeLetter={filters.letter}
+                    availableLetters={availableLetters}
+                    onChange={(letter) => { setFilter('letter', letter || ''); }}
+                  />
                 </div>
 
                 {/* Grid/List content */}
