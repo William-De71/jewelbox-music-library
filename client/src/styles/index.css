@@ -186,3 +186,15 @@
 [data-bs-theme="dark"] .table tbody tr:hover {
   background: rgba(30, 41, 59, 0.3) !important;
 }
+
+/* Modal backdrop — override d-block so modal-dialog-centered flex centering works */
+.modal.modal-backdrop-dark.d-block {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal.modal-backdrop-dark .modal-dialog {
+  min-height: unset;
+}

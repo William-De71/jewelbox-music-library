@@ -6,7 +6,7 @@ import { AlbumRow } from '../components/AlbumRow.jsx';
 import { AlbumRowMobile } from '../components/AlbumRowMobile.jsx';
 import { Pagination } from '../components/Pagination.jsx';
 import { useI18n } from '../config/i18n/index.jsx';
-import { Search, Grid, List, X, Plus, Heart, Database, Music, CheckCheck, Settings } from 'lucide-preact';
+import { Search, Grid, List, X, Plus, Heart, Database, Music, CheckCheck, Settings, CheckSquare, Square, Trash2 } from 'lucide-preact';
 import { AlphabetFilter } from '../components/AlphabetFilter.jsx';
 
 const DEFAULT_LIMIT = 24;
@@ -19,7 +19,7 @@ export function WantList({ navigate, params = {} }) {
   const [activeDatabase, setActiveDatabase] = useState(null);
   const [dbCheckComplete, setDbCheckComplete] = useState(false);
   const [viewMode, setViewMode] = useState(() => localStorage.getItem('jewelbox-wantlist-viewMode') || 'grid');
-const [isMobile, setIsMobile] = useState(() => window.innerWidth < 576);
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 576);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(() => {
     const saved = localStorage.getItem('jewelbox-wantlist-limit');
@@ -33,6 +33,9 @@ const [isMobile, setIsMobile] = useState(() => window.innerWidth < 576);
   });
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [acquireTarget, setAcquireTarget] = useState(null);
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState(new Set());
+  const [bulkDeleteConfirm, setBulkDeleteConfirm] = useState(false);
   const [toast, setToast] = useState(params.successMessage ? { msg: params.successMessage, type: 'success' } : null);
   const searchRef = useRef();
 
@@ -136,6 +139,41 @@ const [isMobile, setIsMobile] = useState(() => window.innerWidth < 576);
     }
   };
 
+  const toggleSelect = (id) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === albums.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(albums.map(a => a.id)));
+    }
+  };
+
+  const exitSelectionMode = () => {
+    setSelectionMode(false);
+    setSelectedIds(new Set());
+  };
+
+  const handleBulkDelete = async () => {
+    try {
+      await Promise.all([...selectedIds].map(id => api.deleteAlbum(id)));
+      setAlbums(prev => prev.filter(a => !selectedIds.has(a.id)));
+      setTotal(prev => prev - selectedIds.size);
+      showToast(`${selectedIds.size} album(s) supprimé(s)`, 'success');
+      exitSelectionMode();
+    } catch (e) {
+      showToast(e.message, 'danger');
+    } finally {
+      setBulkDeleteConfirm(false);
+    }
+  };
+
   if (!dbCheckComplete) {
     return null;
   }
@@ -193,10 +231,35 @@ const [isMobile, setIsMobile] = useState(() => window.innerWidth < 576);
                   <Heart size={24} class="me-2 text-danger" />
                   {t('menu.wantlist')}
                 </h2>
-                <button class="btn btn-danger btn-sm" onClick={() => navigate('add', { fromWantList: true, returnPage: page })}>
-                  <Plus size={16} class="me-1" />
-                  {t('wantlist.addToWishlist')}
-                </button>
+                <div class="d-flex flex-wrap gap-2">
+                  {selectionMode ? (
+                    <>
+                      <button class="btn btn-sm btn-outline-secondary" onClick={toggleSelectAll}>
+                        {selectedIds.size === albums.length
+                          ? <><Square size={14} class="me-1" />{t('common.deselectAll')}</>
+                          : <><CheckSquare size={14} class="me-1" />{t('common.selectAll')}</>}
+                      </button>
+                      {selectedIds.size > 0 && (
+                        <button class="btn btn-sm btn-danger" onClick={() => setBulkDeleteConfirm(true)}>
+                          <Trash2 size={14} class="me-1" />{t('common.deleteSelected')} ({selectedIds.size})
+                        </button>
+                      )}
+                      <button class="btn btn-sm btn-outline-secondary" onClick={exitSelectionMode}>
+                        <X size={14} class="me-1" />{t('common.cancel')}
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button class="btn btn-outline-secondary btn-sm" onClick={() => setSelectionMode(true)}>
+                        <CheckSquare size={16} class="me-1" />{t('common.select')}
+                      </button>
+                      <button class="btn btn-danger btn-sm" onClick={() => navigate('add', { fromWantList: true, returnPage: page })}>
+                        <Plus size={16} class="me-1" />
+                        {t('wantlist.addToWishlist')}
+                      </button>
+                    </>
+                  )}
+                </div>
               </div>
               <div class="card-body">
                 {loading && (
@@ -281,15 +344,28 @@ const [isMobile, setIsMobile] = useState(() => window.innerWidth < 576);
                         {effectiveViewMode === 'grid' && (
                           <div class="row row-cards">
                             {albums.map(album => (
-                              <div class="col-6 col-sm-4 col-md-3 col-lg-2 album-grid-item" key={album.id}>
-                                <AlbumCard
-                                  album={album}
-                                  onClick={(a) => navigate('detail', { id: a.id })}
-                                  onEdit={(a) => navigate('edit', { id: a.id })}
-                                  onDelete={(a) => setDeleteTarget(a)}
-                                  onAcquire={(a) => setAcquireTarget(a)}
-                                  onRate={handleRate}
-                                />
+                              <div class="col-6 col-sm-4 col-md-3 col-lg-2 album-grid-item" key={album.id}
+                                style={{ position: 'relative' }}>
+                                {selectionMode && (
+                                  <div
+                                    style={{ position: 'absolute', top: 8, left: 20, zIndex: 10, cursor: 'pointer' }}
+                                    onClick={() => toggleSelect(album.id)}>
+                                    {selectedIds.has(album.id)
+                                      ? <CheckSquare size={22} class="text-primary" style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.5))' }} />
+                                      : <Square size={22} class="text-white" style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.5))' }} />}
+                                  </div>
+                                )}
+                                <div style={selectionMode ? { opacity: selectedIds.has(album.id) ? 1 : 0.6, cursor: 'pointer' } : {}}
+                                  onClick={selectionMode ? () => toggleSelect(album.id) : undefined}>
+                                  <AlbumCard
+                                    album={album}
+                                    onClick={selectionMode ? () => toggleSelect(album.id) : (a) => navigate('detail', { id: a.id })}
+                                    onEdit={selectionMode ? undefined : (a) => navigate('edit', { id: a.id })}
+                                    onDelete={selectionMode ? undefined : (a) => setDeleteTarget(a)}
+                                    onAcquire={selectionMode ? undefined : (a) => setAcquireTarget(a)}
+                                    onRate={selectionMode ? undefined : handleRate}
+                                  />
+                                </div>
                               </div>
                             ))}
                           </div>
@@ -305,7 +381,10 @@ const [isMobile, setIsMobile] = useState(() => window.innerWidth < 576);
                                     <AlbumRowMobile
                                       key={album.id}
                                       album={album}
-                                      onClick={(a) => navigate('detail', { id: a.id })}
+                                      onClick={selectionMode ? undefined : (a) => navigate('detail', { id: a.id })}
+                                      selectionMode={selectionMode}
+                                      selected={selectedIds.has(album.id)}
+                                      onSelect={toggleSelect}
                                     />
                                   ))}
                                 </div>
@@ -319,6 +398,7 @@ const [isMobile, setIsMobile] = useState(() => window.innerWidth < 576);
                                   <table class="table table-vcenter card-table">
                                     <thead>
                                       <tr>
+                                        {selectionMode && <th style={{ width: 40 }}></th>}
                                         <th class="d-none d-sm-table-cell">{t('table.cover')}</th>
                                         <th>{t('table.title')}</th>
                                         <th>{t('table.artist')}</th>
@@ -330,15 +410,24 @@ const [isMobile, setIsMobile] = useState(() => window.innerWidth < 576);
                                     </thead>
                                     <tbody>
                                       {albums.map(album => (
-                                        <AlbumRow
-                                          key={album.id}
-                                          album={album}
-                                          onClick={(a) => navigate('detail', { id: a.id })}
-                                          onEdit={(a) => navigate('edit', { id: a.id })}
-                                          onDelete={(a) => setDeleteTarget(a)}
-                                          onAcquire={(a) => setAcquireTarget(a)}
-                                          onRate={handleRate}
-                                        />
+                                        <>
+                                          {selectionMode && (
+                                            <td style={{ cursor: 'pointer' }} onClick={() => toggleSelect(album.id)}>
+                                              {selectedIds.has(album.id)
+                                                ? <CheckSquare size={18} class="text-primary" />
+                                                : <Square size={18} class="text-muted" />}
+                                            </td>
+                                          )}
+                                          <AlbumRow
+                                            key={album.id}
+                                            album={album}
+                                            onClick={selectionMode ? () => toggleSelect(album.id) : (a) => navigate('detail', { id: a.id })}
+                                            onEdit={selectionMode ? undefined : (a) => navigate('edit', { id: a.id })}
+                                            onDelete={selectionMode ? undefined : (a) => setDeleteTarget(a)}
+                                            onAcquire={selectionMode ? undefined : (a) => setAcquireTarget(a)}
+                                            onRate={selectionMode ? undefined : handleRate}
+                                          />
+                                        </>
                                       ))}
                                     </tbody>
                                   </table>
@@ -383,6 +472,25 @@ const [isMobile, setIsMobile] = useState(() => window.innerWidth < 576);
           </div>
         </div>
       </div>
+
+      {bulkDeleteConfirm && (
+        <div class="modal modal-blur show d-block modal-backdrop-dark">
+          <div class="modal-dialog modal-sm modal-dialog-centered">
+            <div class="modal-content">
+              <div class="modal-body">
+                <div class="modal-title">{t('common.deleteSelected')} ({selectedIds.size})</div>
+                <div class="mt-2 text-muted small">{t('modals.bulkDeleteMessage', { n: selectedIds.size })}</div>
+              </div>
+              <div class="modal-footer">
+                <button class="btn me-auto" onClick={() => setBulkDeleteConfirm(false)}>{t('modals.cancel')}</button>
+                <button class="btn btn-danger" onClick={handleBulkDelete}>
+                  <Trash2 size={14} class="me-1" />{t('common.deleteSelected')}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Delete modal */}
       {deleteTarget && (
