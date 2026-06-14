@@ -203,14 +203,13 @@ export function AlbumForm({ navigate, albumId, params = {} }) {
       } else {
         await api.createAlbum(payload);
         if (fromWantList) {
-          showToast(t('albumForm.addWishSuccess'), 'success');
           if (saveAndAddAnother) {
+            showToast(t('albumForm.addWishSuccess'), 'success');
             setForm({ ...EMPTY_FORM, is_wanted: true });
             setSearchQuery('');
             searchInputRef.current?.focus();
           } else {
-            setForm({ ...EMPTY_FORM, is_wanted: true });
-            setSearchQuery('');
+            navigate('wantlist', { page: returnPage, successMessage: t('albumForm.addWishSuccess') });
           }
         } else {
           if (saveAndAddAnother) {
