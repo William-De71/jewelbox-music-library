@@ -58,6 +58,13 @@ export const api = {
 
   // External search
   search: (q, source = 'musicbrainz') => request('GET', `/search?q=${encodeURIComponent(q)}&source=${source}`),
+  searchAdvanced: ({ artist, title, year }, source = 'musicbrainz') => {
+    const params = new URLSearchParams({ source });
+    if (artist) params.set('artist', artist);
+    if (title) params.set('title', title);
+    if (year) params.set('year', year);
+    return request('GET', `/search?${params.toString()}`);
+  },
   searchByEan: (ean, source = 'musicbrainz') => request('GET', `/search?ean=${encodeURIComponent(ean)}&source=${source}`),
   getRelease: (mbid) => request('GET', `/search/${mbid}`),
   getDiscogsRelease: (id) => request('GET', `/search/discogs/${id}`),

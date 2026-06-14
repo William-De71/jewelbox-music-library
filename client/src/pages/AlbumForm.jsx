@@ -85,6 +85,10 @@ export function AlbumForm({ navigate, albumId, params = {} }) {
   const [searching, setSearching] = useState(false);
   const [searchError, setSearchError] = useState(null);
   const [searchSource, setSearchSource] = useState(params.initialSource || 'musicbrainz');
+  const [advancedSearch, setAdvancedSearch] = useState(false);
+  const [searchArtist, setSearchArtist] = useState('');
+  const [searchTitle, setSearchTitle] = useState('');
+  const [searchYear, setSearchYear] = useState('');
   const [uploadingCover, setUploadingCover] = useState(false);
   const [knownArtists, setKnownArtists] = useState([]);
   const [knownLabels, setKnownLabels] = useState([]);
@@ -228,6 +232,27 @@ export function AlbumForm({ navigate, albumId, params = {} }) {
 
   // External search
   const handleSearch = async () => {
+    if (advancedSearch) {
+      const artist = searchArtist.trim();
+      const title = searchTitle.trim();
+      const year = searchYear.trim();
+      if (!artist && !title && !year) return;
+      setSearching(true);
+      setSearchError(null);
+      setSearchResults([]);
+      setSearchPage(1);
+      try {
+        const results = await api.searchAdvanced({ artist, title, year }, searchSource);
+        setSearchResults(results);
+        if (!results || results.length === 0) showToast(t('albumForm.searchNoResults'));
+      } catch (e) {
+        setSearchError(e.message);
+      } finally {
+        setSearching(false);
+      }
+      return;
+    }
+
     if (!searchQuery.trim()) return;
     setSearching(true);
     setSearchError(null);
@@ -397,14 +422,71 @@ export function AlbumForm({ navigate, albumId, params = {} }) {
         </div>
         <div class="card-body">
           <p class="text-muted small mb-2">
-            {t('albumForm.externalSearchHelp')}
+            {advancedSearch ? t('albumForm.advancedSearchHelp') : t('albumForm.externalSearchHelp')}
           </p>
+          {advancedSearch ? (
+            <div class="row g-2 mb-3">
+              <div class="col-md-2">
+                <label class="form-label small">{t('albumForm.searchSource')}</label>
+                <select
+                  class="form-select"
+                  value={searchSource}
+                  onChange={(e) => setSearchSource(e.target.value)}
+                >
+                  <option value="musicbrainz">{t('albumForm.musicbrainz')}</option>
+                  <option value="discogs">{t('albumForm.discogs')}</option>
+                </select>
+              </div>
+              <div class="col-md-3">
+                <label class="form-label small">{t('albumForm.searchArtist')}</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  placeholder={t('albumForm.searchArtistPlaceholder')}
+                  value={searchArtist}
+                  onInput={(e) => setSearchArtist(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                />
+              </div>
+              <div class="col-md-3">
+                <label class="form-label small">{t('albumForm.searchAlbumTitle')}</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  placeholder={t('albumForm.searchAlbumTitlePlaceholder')}
+                  value={searchTitle}
+                  onInput={(e) => setSearchTitle(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                />
+              </div>
+              <div class="col-md-4">
+                <label class="form-label small">{t('albumForm.searchYear')}</label>
+                <div class="input-group">
+                  <input
+                    type="number"
+                    class="form-control"
+                    placeholder={t('albumForm.searchYearPlaceholder')}
+                    value={searchYear}
+                    onInput={(e) => setSearchYear(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                  />
+                  <button class="btn btn-primary btn-fixed-height" type="button" onClick={handleSearch} disabled={searching}>
+                    {searching ? (
+                      <><span class="spinner-border spinner-border-xs me-1"></span><span>{t('common.loading')}</span></>
+                    ) : (
+                      <><Search size={16} class="me-1" /><span>{t('albumForm.search')}</span></>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : (
           <div class="row g-2 mb-3">
             <div class="col-md-4">
               <label class="form-label small">{t('albumForm.searchSource')}</label>
-              <select 
-                class="form-select" 
-                value={searchSource} 
+              <select
+                class="form-select"
+                value={searchSource}
                 onChange={(e) => setSearchSource(e.target.value)}
               >
                 <option value="musicbrainz">{t('albumForm.musicbrainz')}</option>
@@ -432,6 +514,16 @@ export function AlbumForm({ navigate, albumId, params = {} }) {
                 </button>
               </div>
             </div>
+          </div>
+          )}
+          <div class="text-end">
+            <button
+              type="button"
+              class="btn btn-link btn-sm p-0"
+              onClick={() => setAdvancedSearch((v) => !v)}
+            >
+              {advancedSearch ? t('albumForm.simpleSearch') : t('albumForm.advancedSearch')}
+            </button>
           </div>
           {searchError && <div class="text-danger small mt-1"><AlertCircle size={14} class="me-1" />{searchError}</div>}
 
