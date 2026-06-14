@@ -90,19 +90,38 @@ async function searchByEAN(ean) {
   return result;
 }
 
-async function searchByQuery(query) {
+// Escapes special Lucene characters for MusicBrainz queries
+function escapeLucene(value) {
+  return value.replace(/([+\-&|!(){}[\]^"~*?:\\/])/g, '\\$1');
+}
+
+// Builds a MusicBrainz query string. When artist and/or title are provided,
+// builds a structured Lucene query (artist:"X" AND release:"Y" AND date:Z) for precise matching.
+// Otherwise falls back to a plain free-text query.
+function buildMBQuery({ q, artist, title, year }) {
+  const clauses = [];
+  if (artist) clauses.push(`artist:"${escapeLucene(artist)}"`);
+  if (title) clauses.push(`release:"${escapeLucene(title)}"`);
+  if (year) clauses.push(`date:${escapeLucene(String(year))}*`);
+
+  if (clauses.length) return clauses.join(' AND ');
+  return q;
+}
+
+async function searchByQuery(params) {
+  const query = buildMBQuery(params);
   const cacheKey = getCacheKey(query, 'search');
   console.log(`[Search] Query: "${query}" -> Cache key: "${cacheKey}"`);
-  
+
   // Check cache first
   const cached = getFromCache(cacheKey);
   if (cached) {
     console.log(`[Search] Cache HIT for "${query}"`);
     return cached;
   }
-  
+
   console.log(`[Search] Cache MISS for "${query}", fetching from MusicBrainz...`);
-  
+
   const data = await fetchJson(
     `${MB_BASE}/release?query=${encodeURIComponent(query)}&fmt=json&limit=50&inc=artist-credits+labels+recordings`
   );
@@ -111,7 +130,7 @@ async function searchByQuery(query) {
     setCache(cacheKey, []);
     return [];
   }
-  
+
   const results = data.releases.map(normalizeMBRelease);
   console.log(`[Search] Caching ${results.length} results for "${query}"`);
   setCache(cacheKey, results);
@@ -193,10 +212,10 @@ export async function searchRoutes(fastify) {
   // GET /api/search?q=<query>   →  search by title/artist
   // GET /api/search?ean=<ean>   →  lookup by barcode
   fastify.get('/search', async (req, reply) => {
-    const { q, ean, source = 'musicbrainz' } = req.query;
+    const { q, ean, artist, title, year, source = 'musicbrainz' } = req.query;
 
-    if (!q && !ean) {
-      return reply.code(400).send({ error: 'Provide q or ean parameter' });
+    if (!q && !ean && !artist && !title && !year) {
+      return reply.code(400).send({ error: 'Provide q, ean, artist, title or year parameter' });
     }
 
     if (!['musicbrainz', 'discogs'].includes(source)) {
@@ -218,10 +237,10 @@ export async function searchRoutes(fastify) {
       }
 
       if (source === 'discogs') {
-        const results = await searchDiscogsByQuery(q);
+        const results = await searchDiscogsByQuery({ q, artist, title, year });
         return results;
       } else {
-        const results = await searchByQuery(q);
+        const results = await searchByQuery({ q, artist, title, year });
         return results;
       }
     } catch (err) {

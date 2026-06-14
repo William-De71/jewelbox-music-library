@@ -79,15 +79,21 @@ async function fetchDiscogsJson(url, retries = 3) {
   }
 }
 
-export async function searchDiscogsByQuery(query) {
-  if (!query) {
+export async function searchDiscogsByQuery({ q, artist, title, year } = {}) {
+  if (!q && !artist && !title && !year) {
     throw new Error('Query parameter is required');
   }
 
+  const params = new URLSearchParams({ type: 'release', per_page: '50' });
+  if (artist) params.set('artist', artist);
+  if (title) params.set('release_title', title);
+  if (year) params.set('year', year);
+  if (!artist && !title && !year && q) params.set('q', q);
+
   const data = await fetchDiscogsJson(
-    `${DISCOGS_BASE}/database/search?q=${encodeURIComponent(query)}&type=release&per_page=50`
+    `${DISCOGS_BASE}/database/search?${params.toString()}`
   );
-  
+
   return normalizeDiscogsSearch(data);
 }
 
